@@ -256,7 +256,7 @@ function ModelMap() : AssetMap() constructor {
 				var _ymax = -infinity
 				
 				if is_array(_get_triangles) {
-					var i = 0
+					i = 0
 					
 					repeat array_length(_get_triangles) {
 						var _batch = force_type(_get_triangles[i++], "struct")
@@ -318,7 +318,7 @@ function ModelMap() : AssetMap() constructor {
 								show_error($"!!! ModelMap.load: '{_name}' batch '{_batch_name}' has invalid layer '{_batch_layer}', expected real or array", true)
 						}
 						
-						var _buffer = buffer_load(_batch_filename)
+						_buffer = buffer_load(_batch_filename)
 						
 						if buffer_read(_buffer, buffer_string) != "PNECOL" {
 							show_error($"!!! ModelMap.load: '{_name}' batch '{_batch_name}' has no PNECOL header", true)
@@ -399,8 +399,7 @@ function ModelMap() : AssetMap() constructor {
 					var _triangles_n = ds_list_size(triangles)
 					
 					ds_grid_resize(grid, _width, _height)
-					
-					var i = 0
+					i = 0
 					
 					repeat _width {
 						var j = 0
@@ -473,7 +472,8 @@ function ModelMap() : AssetMap() constructor {
 			
 			if _points != undefined {
 				var _names = struct_get_names(_points)
-				var i = 0
+				
+				i = 0
 				
 				repeat struct_names_count(_points) {
 					var _point = force_type(_points[$ _names[i++]], "array")

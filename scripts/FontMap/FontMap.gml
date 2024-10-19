@@ -14,6 +14,8 @@ function FontMap() : AssetMap() constructor {
 		if _font_file == "" {
 			print("! FontMap.load: '{0}' not found", _name)
 		} else {
+			var _font
+			
 			if filename_ext(_font_file) == ".ttf" {
 				// True Typeface Font (unstable)
 				var _size = 8
@@ -36,7 +38,8 @@ function FontMap() : AssetMap() constructor {
 					_sdf_spread = force_type_fallback(_json[$ "sdf_spread"], "number", 8)
 				}
 				
-				var _font = new Font()
+				_font = new Font()
+				
 				var _font_id = font_add(_font_file, _size, _bold, _italics, _first, _last)
 				var _font_name = font_get_name(_font_id)
 				
@@ -76,8 +79,8 @@ function FontMap() : AssetMap() constructor {
 				
 				_sprite = sprite_add(_font_file, _frames, false, false, 0, 0)
 				sprite_collision_mask(_sprite, true, 0, 0, 0, 0, 0, bboxkind_precise, 255)
+				_font = new Font()
 				
-				var _font = new Font()
 				var _font_id = _map != undefined ? font_add_sprite_ext(_sprite, _map, _proportional, _space) : font_add_sprite(_sprite, _first, _proportional, _space)
 				var _font_name = font_get_name(_font_id)
 				

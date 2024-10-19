@@ -1,6 +1,6 @@
 /// @func ui_load(type)
 /// @desc Loads a type of UI for use in the current level.
-/// @param {UI or string} type The type of UI to load.
+/// @param {(UI|string)} type The type of UI to load.
 function ui_load(_type, _special = undefined) {
 	if is_string(_type) {
 		var _scripts = global.scripts

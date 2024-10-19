@@ -48,7 +48,7 @@ if menu != undefined and not locked {
 			var _exit = false
 			
 			switch _function {
-				case TitleOptions.NEW_FILE:
+				case TitleOptions.NEW_FILE: {
 					if global.title_delete_state {
 						break
 					}
@@ -72,8 +72,9 @@ if menu != undefined and not locked {
 					_exit = true
 					
 					break
+				}
 				
-				case TitleOptions.LOAD_FILE:
+				case TitleOptions.LOAD_FILE: {
 					if global.title_delete_state >= 1 {
 						var _title_delete_state = -~global.title_delete_state
 						
@@ -160,18 +161,21 @@ if menu != undefined and not locked {
 					_exit = true
 					
 					break
+				}
 				
-				case TitleOptions.DELETE_FILE:
+				case TitleOptions.DELETE_FILE: {
 					catspeak_execute(change_delete_state, 1)
 					global.title_delete_state = 1
 					
 					break
+				}
 				
-				case TitleOptions.OPTIONS:
+				case TitleOptions.OPTIONS: {
 					ui_create(proOptionsUI)
 					_exit = true
 					
 					break
+				}
 			}
 			
 			if _exit {

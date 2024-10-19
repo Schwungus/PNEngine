@@ -44,7 +44,8 @@ function Save(_filename) constructor {
 		
 		repeat buffer_read(_buffer, buffer_u32) {
 			var _key = buffer_read(_buffer, buffer_string)
-			var _version = buffer_read(_buffer, buffer_string)
+			
+			_version = buffer_read(_buffer, buffer_string)
 			
 			if not ds_map_exists(_mods, _key) {
 				code = "SAVE_MODS"

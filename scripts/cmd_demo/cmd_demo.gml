@@ -48,7 +48,8 @@ function cmd_demo(_args) {
 	
 	// Mods
 	var _mods = global.mods
-	var n = ds_map_size(_mods)
+	
+	n = ds_map_size(_mods)
 	
 	var _demo_mods = buffer_read(_demo_buffer, buffer_u32)
 	

@@ -1,8 +1,9 @@
 /// @description Draw
 var _draw_model = false
+var _model
 
 if not instance_exists(holder) or not f_holdable_in_hand {
-	var _model = model
+	_model = model
 	
 	if _model != undefined {
 		_draw_model = true

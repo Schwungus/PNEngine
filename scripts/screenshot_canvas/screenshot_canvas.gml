@@ -33,7 +33,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 						}
 					}
 				} else switch global.players_active {
-					case 1:
+					case 1: {
 						var i = 0
 						
 						repeat INPUT_MAX_PLAYERS {
@@ -47,8 +47,9 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 						}
 						
 						break
+					}
 					
-					case 2:
+					case 2: {
 						_height *= 0.5
 						
 						var _y = 0
@@ -66,9 +67,10 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 						}
 						
 						break
+					}
 					
 					case 3:
-					case 4:
+					case 4: {
 						_width *= 0.5
 						_height *= 0.5
 						
@@ -94,6 +96,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 						}
 						
 						break
+					}
 				}
 			}
 		}

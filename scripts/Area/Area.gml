@@ -147,7 +147,7 @@ function Area() constructor {
 			ds_list_add(active_things, _thing)
 		}
 		
-		var i = ds_list_size(active_things)
+		i = ds_list_size(active_things)
 		
 		while i {
 			with active_things[| --i] {
@@ -458,8 +458,7 @@ function Area() constructor {
 		ds_list_destroy(players)
 		sounds.destroy()
 		ds_grid_destroy(bump_grid)
-		
-		var i = 0
+		i = 0
 		
 		repeat ds_grid_width(bump_lists) {
 			var j = 0

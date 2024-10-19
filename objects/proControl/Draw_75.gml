@@ -59,7 +59,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 						}
 					}
 				} else switch global.players_active {
-					case 1:
+					case 1: {
 						var i = 0
 						
 						repeat INPUT_MAX_PLAYERS {
@@ -73,8 +73,9 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 						}
 						
 						break
+					}
 					
-					case 2:
+					case 2: {
 						_height *= 0.5
 						
 						var _y = 0
@@ -92,9 +93,10 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 						}
 						
 						break
+					}
 					
 					case 3:
-					case 4:
+					case 4: {
 						_width *= 0.5
 						_height *= 0.5
 						
@@ -120,6 +122,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 						}
 						
 						break
+					}
 				}
 			}
 		}
@@ -173,8 +176,8 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 				p[ParticleData.Y_SPEED] *= power(p[ParticleData.Y_FRICTION], d)
 				p[ParticleData.Z_SPEED] = clamp(_z_speed + (p[ParticleData.GRAVITY] * d), p[ParticleData.MAX_FALL_SPEED] * d, p[ParticleData.MAX_FLY_SPEED] * d) * power(p[ParticleData.Z_FRICTION], d)
 				
-				var _width = p[ParticleData.WIDTH] - p[ParticleData.WIDTH_SPEED] * d
-				var _height = p[ParticleData.HEIGHT] - p[ParticleData.HEIGHT_SPEED] * d
+				_width = p[ParticleData.WIDTH] - p[ParticleData.WIDTH_SPEED] * d
+				_height = p[ParticleData.HEIGHT] - p[ParticleData.HEIGHT_SPEED] * d
 				
 				p[ParticleData.WIDTH] = _width
 				p[ParticleData.HEIGHT] = _height

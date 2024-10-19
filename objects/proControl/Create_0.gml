@@ -804,7 +804,7 @@ repeat _loaded {
 var _key = ds_map_find_first(_mods)
 
 repeat ds_map_size(_mods) {
-	var _mod = _mods[? _key]
+	_mod = _mods[? _key]
 	
 	// Failsafe for Linux
 	if _mod == undefined {
@@ -852,11 +852,11 @@ repeat ds_map_size(_mods) {
 		if is_struct(_states) {
 			var _default_states = global.default_states
 			var _names = struct_get_names(_states)
-			var i = 0
+			
+			i = 0
 			
 			repeat struct_names_count(_states) {
-				var _key = _names[i]
-				
+				_key = _names[i]
 				_default_states[? _key] = _states[$ _key];
 				++i
 			}
@@ -870,11 +870,11 @@ repeat ds_map_size(_mods) {
 			if is_struct(_global) {
 				var _default_flags = global.default_flags
 				var _names = struct_get_names(_global)
-				var i = 0
+				
+				i = 0
 				
 				repeat struct_names_count(_global) {
-					var _key = _names[i]
-					
+					_key = _names[i]
 					_default_flags[? _key] = _global[$ _key];
 					++i
 				}
@@ -945,7 +945,8 @@ global.oui_values[OUIValues.LANGUAGE] = _languages2
 config_update()
 
 var _players = global.players
-var i = 0
+
+i = 0
 
 repeat INPUT_MAX_PLAYERS {
 	_players[i++].clear_states()

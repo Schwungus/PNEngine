@@ -319,7 +319,6 @@ switch load_state {
 				var _thing_slot = 0
 				
 				var _areas = _level.areas
-				var _images = global.images
 				var _models = global.models
 				var _scripts = global.scripts
 				
@@ -536,7 +535,7 @@ switch load_state {
 		var _mipmap_queue = global.mipmap_queue
 		
 		repeat ds_map_size(_mipmap_queue) {
-			var _key = ds_map_find_first(_mipmap_queue)
+			_key = ds_map_find_first(_mipmap_queue)
 			
 			if CollageImageExists(_key) {
 				var _base = CollageImageGetInfo(_key)
@@ -699,9 +698,7 @@ switch load_state {
 			
 			// States
 			buffer_write(_demo_buffer, buffer_u8, INPUT_MAX_PLAYERS)
-			
-			var _players = global.players
-			var i = 0
+			i = 0
 			
 			repeat INPUT_MAX_PLAYERS {
 				buffer_write(_demo_buffer, buffer_u8, i)
@@ -1059,8 +1056,7 @@ if _tick >= 1 {
 				if ack_count >= player_count {
 					ack_count = 1
 					stall_time = 0
-					
-					var i = 0
+					i = 0
 					
 					repeat ds_list_size(players) {
 						var _player = players[| i]
@@ -1076,7 +1072,8 @@ if _tick >= 1 {
 					
 					if stall_time >= STALL_RATE + TICKRATE {
 						var _text = "[c_yellow]Waiting for: "
-						var i = 0
+						
+						i = 0
 						
 						repeat ds_list_size(players) {
 							var _player = players[| i++]
@@ -1247,8 +1244,7 @@ if _tick >= 1 {
 				
 				if input_check_pressed("pause") {
 					_paused = true
-					
-					var i = INPUT_MAX_PLAYERS
+					i = INPUT_MAX_PLAYERS
 					
 					repeat INPUT_MAX_PLAYERS {
 						with _players[--i] {
@@ -1333,26 +1329,29 @@ if _tick >= 1 {
 				
 				while true {
 					switch buffer_read(_demo_buffer, buffer_u8) {
-						case DemoPackets.TERMINATE:
+						case DemoPackets.TERMINATE: {
 							_break = true
 							
 							break
+						}
 						
-						case DemoPackets.PLAYER_ACTIVATE:
+						case DemoPackets.PLAYER_ACTIVATE: {
 							var _slot = buffer_read(_demo_buffer, buffer_u8)
 							
 							_players[_slot].activate()
 							
 							break
+						}
 						
-						case DemoPackets.PLAYER_DEACTIVATE:
+						case DemoPackets.PLAYER_DEACTIVATE: {
 							var _slot = buffer_read(_demo_buffer, buffer_u8)
 							
 							_players[_slot].deactivate()
 							
 							break
+						}
 						
-						case DemoPackets.PLAYER_INPUT:
+						case DemoPackets.PLAYER_INPUT: {
 							var _slot = buffer_read(_demo_buffer, buffer_u8)
 							var _input = global.demo_input[_slot]
 							
@@ -1373,8 +1372,9 @@ if _tick >= 1 {
 							_input[PlayerInputs.AIM_LEFT_RIGHT] = buffer_read(_demo_buffer, buffer_s16)
 							
 							break
+						}
 						
-						case DemoPackets.END:
+						case DemoPackets.END: {
 							cmd_dend("")
 							_demo_buffer = undefined
 							_has_demo = false
@@ -1382,6 +1382,7 @@ if _tick >= 1 {
 							_break = true
 							
 							break
+						}
 					}
 					
 					if _break {
@@ -1405,7 +1406,6 @@ if _tick >= 1 {
 #region Players
 		var _mouse_dx = mouse_dx
 		var _mouse_dy = mouse_dy
-		var i
 		
 #region Input
 		if _ticks_queued {
@@ -1473,8 +1473,10 @@ if _tick >= 1 {
 			}
 			
 			var _input = _players[_local_slot].input
-			var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-			var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+			
+			_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+			_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+			
 			var b = net_buffer_create(false, NetHeaders.CLIENT_INPUT)
 			
 			buffer_write(b, buffer_s8, _input_up_down)

@@ -19,7 +19,7 @@ if _color != undefined {
 	// vec2, vec3 or vec4
 	if is_array(_color) {
 		switch array_length(_color) {
-			case 2:
+			case 2: {
 				color = _color[0]
 				alpha = _color[1]
 				
@@ -28,8 +28,9 @@ if _color != undefined {
 				}
 				
 				break
+			}
 			
-			case 3:
+			case 3: {
 				var _r = _color[0]
 				var _g = _color[1]
 				var _b = _color[2]
@@ -41,8 +42,9 @@ if _color != undefined {
 				color = make_color_rgb(_r * 255, _g * 255, _b * 255)
 				
 				break
-				
-			case 4:
+			}
+			
+			case 4: {
 				var _r = _color[0]
 				var _g = _color[1]
 				var _b = _color[2]
@@ -56,6 +58,7 @@ if _color != undefined {
 				color = make_color_rgb(_r * 255, _g * 255, _b * 255)
 				
 				break
+			}
 		}
 	}
 }

@@ -66,7 +66,8 @@ function Level() constructor {
 					
 					// States
 					var _players = global.players
-					var i = 0
+					
+					i = 0
 					
 					repeat INPUT_MAX_PLAYERS {
 						buffer_write(b, buffer_u8, i)

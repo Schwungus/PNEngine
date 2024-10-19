@@ -410,7 +410,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	var _z = sz
 	
 	var _area = area
-	var _config = global.config
 	
 	output.Start()
 	

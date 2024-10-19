@@ -585,7 +585,7 @@ function proOptionsUI() : UI(undefined) constructor {
 		var _font = font
 		
 		draw_set_font(_font)
-		draw_set_valign(fa_center)
+		draw_set_valign(fa_middle)
 		
 		var _focus = focus
 		

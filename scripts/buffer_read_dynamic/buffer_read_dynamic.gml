@@ -7,7 +7,7 @@ function buffer_read_dynamic(_buffer) {
 		case NetDataTypes.INFINITY: return buffer_read(_buffer, buffer_bool) ? -infinity : infinity
 		case NetDataTypes.STRING: return buffer_read(_buffer, buffer_string)
 		
-		case NetDataTypes.ARRAY:
+		case NetDataTypes.ARRAY: {
 			var n = buffer_read(_buffer, buffer_u32)
 			var _array = array_create(n)
 			var i = 0
@@ -19,11 +19,12 @@ function buffer_read_dynamic(_buffer) {
 			}
 			
 			return _array
+		}
 		
 		case NetDataTypes.BOOL: return buffer_read(_buffer, buffer_bool)
 		case NetDataTypes.INT32: return buffer_read(_buffer, buffer_s32)
 		
-		case NetDataTypes.STRUCT:
+		case NetDataTypes.STRUCT: {
 			var _struct = {}
 			var n = buffer_read(_buffer, buffer_u32)
 			
@@ -35,5 +36,6 @@ function buffer_read_dynamic(_buffer) {
 			}
 			
 			return _struct
+		}
 	}
 }

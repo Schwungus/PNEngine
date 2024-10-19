@@ -46,7 +46,7 @@ function ScriptMap() : AssetMap() constructor {
 		
 		try {
 			while not file_text_eof(_script_file) {
-				var _omit_line = false
+				_omit_line = false
 				
 				_line = string_trim(file_text_read_string(_script_file))
 				file_text_readln(_script_file);
@@ -374,7 +374,8 @@ function ScriptMap() : AssetMap() constructor {
 		var _globals = catspeak_globals(_main)
 		
 		var _imports = _script.imports
-		var i = 0
+		
+		i = 0
 		
 		repeat array_length(_imports) {
 			var _import = _imports[i++]
@@ -387,7 +388,8 @@ function ScriptMap() : AssetMap() constructor {
 		if _parent != undefined {
 			var _parent_globals = catspeak_globals(_parent.main)
 			var _parent_globals_names = struct_get_names(_parent_globals)
-			var i = 0
+			
+			i = 0
 			
 			repeat struct_names_count(_parent_globals) {
 				var _key = _parent_globals_names[i++]

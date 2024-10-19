@@ -114,9 +114,7 @@ with _netgame {
 				
 				// Send other clients' info to new client.
 				var _new_player = add_player(undefined, _ip, _port)
-				
-				b = net_buffer_create(false, NetHeaders.HOST_ADD_CLIENT, buffer_u8, _new_player.slot, buffer_u8, player_count - 1)
-				
+				var b = net_buffer_create(false, NetHeaders.HOST_ADD_CLIENT, buffer_u8, _new_player.slot, buffer_u8, player_count - 1)
 				var _players = global.players
 				var j = 0
 					

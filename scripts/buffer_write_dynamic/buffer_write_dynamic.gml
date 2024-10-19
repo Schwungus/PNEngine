@@ -8,7 +8,7 @@ function buffer_write_dynamic(_buffer, _value) {
 		case NetDataTypes.INFINITY: buffer_write(_buffer, buffer_bool, _value < 0) break
 		case NetDataTypes.STRING: buffer_write(_buffer, buffer_string, _value) break
 		
-		case NetDataTypes.ARRAY:
+		case NetDataTypes.ARRAY: {
 			var n = array_length(_value)
 			
 			buffer_write(_buffer, buffer_u32, n)
@@ -22,11 +22,12 @@ function buffer_write_dynamic(_buffer, _value) {
 			}
 			
 			break
+		}
 		
 		case NetDataTypes.BOOL: buffer_write(_buffer, buffer_bool, _value) break
 		case NetDataTypes.INT32: buffer_write(_buffer, buffer_s32, _value) break
 		
-		case NetDataTypes.STRUCT:
+		case NetDataTypes.STRUCT: {
 			var _keys = struct_get_names(_value)
 			var n = struct_names_count(_value)
 			
@@ -43,5 +44,6 @@ function buffer_write_dynamic(_buffer, _value) {
 			}
 			
 			break
+		}
 	}
 }
