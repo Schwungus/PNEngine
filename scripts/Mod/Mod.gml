@@ -52,5 +52,5 @@ function Mod(_name) constructor {
 	
 	md5 = create_md5()
 	print($"Mod: Added '{_name}' ({md5})")
-	ds_map_add(global.mods, _name, self)
+	ds_map_add(global.mods, name, self)
 }
