@@ -1,4 +1,6 @@
 function ModelMap() : AssetMap() constructor {
+	queue = ds_map_create()
+	
 	static load = function (_name) {
 		if ds_map_exists(assets, _name) {
 			exit
@@ -489,8 +491,12 @@ function ModelMap() : AssetMap() constructor {
 			var _lightmap = force_type_fallback(_json[$ "lightmap"], "string")
 			
 			if _lightmap != undefined {
-				global.images.load(_lightmap)
 				_model.lightmap = _lightmap
+				ds_map_add(queue, _name, _model)
+				
+				if global.images.load(_lightmap) == undefined {
+					_model.lightmap = undefined
+				}
 			}
 #endregion
 		}

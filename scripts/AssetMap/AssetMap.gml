@@ -28,6 +28,17 @@ function AssetMap() constructor {
 	static clear = function () {
 		static keep_assets = []
 		
+		var _queue = self[$ "queue"]
+		
+		if _queue != undefined {
+			repeat ds_map_size(_queue) {
+				var _key = ds_map_find_first(_queue)
+				
+				_queue[? _key].destroy()
+				ds_map_delete(_queue, _key)
+			}
+		}
+		
 		var _kept = 0
 		
 		repeat ds_map_size(assets) {

@@ -17,9 +17,20 @@ function transition_load(_type) {
 	}
 	
 	if object_exists(_type) {
+		var _images = global.images
+		var _batch = _images.batch
+		
+		if not _batch {
+			_images.start_batch()
+		}
+		
 		with instance_create_depth(0, 0, 0, _type) {
 			event_user(ThingEvents.LOAD)
 			instance_destroy(self, false)
+		}
+		
+		if not _batch {
+			_images.end_batch()
 		}
 		
 		return true

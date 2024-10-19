@@ -17,11 +17,23 @@ function ui_load(_type, _special = undefined) {
 	}
 	
 	if is_instanceof(_type, UI) {
+		var _images = global.images
+		var _batch = _images.batch
+		
+		if not _batch {
+			_images.start_batch()
+		}
+		
 		var _ui = new _type()
 		
 		_ui.load(_special)
 		
 		delete _ui
+		
+		if not _batch {
+			_images.end_batch()
+		}
+		
 		return true
 	}
 	

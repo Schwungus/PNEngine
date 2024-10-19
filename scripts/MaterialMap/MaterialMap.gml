@@ -1,6 +1,8 @@
 function MaterialMap() : AssetMap() constructor {
+	queue = ds_map_create()
+	
 	static load = function (_name, _strict = false) {
-		if ds_map_exists(assets, _name) {
+		if ds_map_exists(assets, _name) or ds_map_exists(queue, _name) {
 			exit
 		}
 		
@@ -26,20 +28,8 @@ function MaterialMap() : AssetMap() constructor {
 		var _json = json_load(mod_find_file(_path + ".*"))
 		
 		if is_struct(_json) {
-			var _images = global.images
-			
 			_image = _json[$ "image"] ?? -1
-			
-			if is_string(_image) {
-				_images.load(_image)
-			}
-			
 			_image2 = _json[$ "image2"]
-			
-			if is_string(_image2) {
-				_images.load(_image2)
-			}
-			
 			_alpha_test = force_type_fallback(_json[$ "alpha_test"], "number", 0.5)
 			_speed = force_type_fallback(_json[$ "speed"], "number", 0)
 			_bright = force_type_fallback(_json[$ "bright"], "number", 0)
@@ -89,7 +79,34 @@ function MaterialMap() : AssetMap() constructor {
 		}
 		
 		ds_map_add(assets, _name, _material)
-		print($"MaterialMap.load: Added '{_name}' ({_material})")
+		print($"MaterialMap.load: Added '{_name}'")
+		
+		var _valid_image = is_string(_image)
+		var _valid_image2 = is_string(_image2)
+		
+		if _valid_image or _valid_image2 {
+			ds_map_add(queue, _name, _material)
+			
+			with global.images {
+				var _batch = batch
+			
+				if not _batch {
+					start_batch()
+				}
+			
+				if _valid_image {
+					load(_image)
+				}
+			
+				if _valid_image2 {
+					load(_image2)
+				}
+			
+				if not _batch {
+					finish_batch()
+				}
+			}
+		}
 	}
 }
 

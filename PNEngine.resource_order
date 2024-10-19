@@ -423,6 +423,7 @@
     {"name":"force_type","order":6,"path":"scripts/force_type/force_type.yy",},
     {"name":"game_update_status","order":6,"path":"scripts/game_update_status/game_update_status.yy",},
     {"name":"image_get_uvs","order":9,"path":"scripts/image_get_uvs/image_get_uvs.yy",},
+    {"name":"Image","order":8,"path":"scripts/Image/Image.yy",},
     {"name":"ImageMap","order":1,"path":"scripts/ImageMap/ImageMap.yy",},
     {"name":"input_accessibility_global_cooldown_set","order":1,"path":"scripts/input_accessibility_global_cooldown_set/input_accessibility_global_cooldown_set.yy",},
     {"name":"input_accessibility_global_toggle_get","order":2,"path":"scripts/input_accessibility_global_toggle_get/input_accessibility_global_toggle_get.yy",},
