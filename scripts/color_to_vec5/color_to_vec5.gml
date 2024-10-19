@@ -1,6 +1,11 @@
 function color_to_vec5(_value, _default_color = c_white, _default_alpha = 1) {
 	var _r, _g, _b, _a, _color
 	
+	// hex
+	if is_string(_value) {
+		_value = real(_value)
+	}
+	
 	// integer
 	if is_real(_value) {
 		_r = color_get_red(_value) * COLOR_INVERSE
@@ -16,11 +21,11 @@ function color_to_vec5(_value, _default_color = c_white, _default_alpha = 1) {
 	if is_array(_value) {
 		switch array_length(_value) {
 			case 2:
-				_color = _value[0]
+				_color = real(_value[0])
 				_a = _value[1]
 				
-				if not is_real(_color) or not is_real(_a) {
-					show_error("!!! color_to_vec5: Invalid vec2 array, elements must be real", true)
+				if is_real(_a) {
+					show_error("!!! color_to_vec5: Invalid vec2 array, alpha must be real", true)
 				}
 				
 				_r = color_get_red(_color) * COLOR_INVERSE
