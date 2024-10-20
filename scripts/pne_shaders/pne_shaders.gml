@@ -11,6 +11,7 @@ global.curve_shader = new Shader(shCurve)
 global.depth_shader = new Shader(shDepth)
 global.dither_shader = new Shader(shDither)
 global.bleed_shader = new Shader(shBleed)
+global.palette_shader = new Shader(shPalette)
 
 global.u_ambient_color = new Uniform("u_ambient_color", UniformTypes.FLOAT)
 global.u_animated = new Uniform("u_animated", UniformTypes.INTEGER)
@@ -50,3 +51,5 @@ global.u_lightmap_enable_vertex = new Uniform("u_lightmap_enable_vertex", Unifor
 global.u_lightmap_enable_pixel = new Uniform("u_lightmap_enable_pixel", UniformTypes.INTEGER)
 global.u_lightmap = new Uniform("u_lightmap", UniformTypes.TEXTURE)
 global.u_lightmap_uvs = new Uniform("u_lightmap_uvs", UniformTypes.FLOAT)
+global.u_old = new Uniform("u_old", UniformTypes.FLOAT_ARRAY)
+global.u_new = new Uniform("u_new", UniformTypes.FLOAT_ARRAY)

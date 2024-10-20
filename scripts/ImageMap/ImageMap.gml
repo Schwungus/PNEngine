@@ -51,6 +51,80 @@ function ImageMap() : AssetMap() constructor {
 		collage.FinishBatch()
 		
 		// 2. Palettes
+		collage.StartBatch()
+		_key = ds_map_find_first(queue)
+		
+		repeat ds_map_size(queue) {
+			var _image = queue[? _key]
+			var _name, _frames, _x_offset, _y_offset, _x_repeat, _y_repeat
+			
+			with _image {
+				_name = name
+				_frames = frames
+				_x_offset = x_offset
+				_y_offset = y_offset
+				_x_repeat = x_repeat
+				_y_repeat = y_repeat
+			}
+			
+			var _variants = _image.variants
+			var _vkey = ds_map_find_first(_variants)
+			
+			repeat ds_map_size(_variants) {
+				var _pal = _variants[? _vkey]
+				
+				if is_array(_pal) {
+					var _base = CollageImageGetInfo(_key + ":default")
+					var _depth_disable = surface_get_depth_disable()
+					
+					surface_depth_disable(true)
+					
+					var _width = _base.GetWidth()
+					var _height = _base.GetHeight()
+					var _surface = surface_create(_width, _height)
+					
+					surface_set_target(_surface)
+					//CollageSterlizeGPUState()
+					draw_clear_alpha(c_black, 0)
+					global.palette_shader.set()
+					global.u_old.set(_pal[0])
+					global.u_new.set(_pal[1])
+					CollageDrawImageStretched(_base, 0, 0, 0, _width, _height)
+					shader_reset()
+					//CollageRestoreGPUState()
+					surface_reset_target()
+					
+					collage.AddSurface(
+						_surface,
+						_key + ":" + _vkey,
+						0,
+						0,
+						_width,
+						_height,
+						false,
+						false,
+						_x_offset,
+						_y_offset
+					).SetPremultiplyAlpha(
+						false
+					).SetTiling(
+						_x_repeat,
+						_y_repeat
+					).SetClump(
+						true
+					)
+					
+					surface_free(_surface)
+					surface_depth_disable(_depth_disable)
+				}
+				
+				_vkey = ds_map_find_next(_variants, _vkey)
+			}
+			
+			_key = ds_map_find_next(queue, _key)
+		}
+		
+		collage.FinishBatch()
 		
 		// 3. Dequeue to assets
 		repeat ds_map_size(queue) {
@@ -62,38 +136,40 @@ function ImageMap() : AssetMap() constructor {
 			
 			var _variants = _image.variants
 			var _vkey = ds_map_find_first(_variants)
+			var _frames = _image.frames
 			
 			repeat ds_map_size(_variants) {
-				_variants[? _vkey] = CollageImageGetInfo(_key + ":" + _vkey)
+				var _ikey = _key + ":" + _vkey
+				var _variant = CollageImageGetInfo(_ikey)
+				var _mipmaps = []
+				var j = 0
+				
+				repeat _frames {
+					var _submips
+					
+					if array_length(_mipmaps) <= j {
+						_submips = array_create(4, 0)
+						_mipmaps[j] = _submips
+					} else {
+						_submips = _mipmaps[j]
+					}
+					
+					with _variant.GetUVs(j) {
+						_submips[0] = normLeft
+						_submips[1] = normTop
+						_submips[2] = normRight
+						_submips[3] = normBottom
+					}
+					
+					++j
+				}
+				
+				_variant.__mipmaps = _mipmaps
+				_variant.__maxLOD = 0
+				_variants[? _vkey] = _variant
 				_vkey = ds_map_find_next(_variants, _vkey)
 			}
 			
-			var _base = CollageImageGetInfo(_key + ":default")
-			var _mipmaps = []
-			var j = 0
-			
-			repeat _image.frames {
-				var _submips
-				
-				if array_length(_mipmaps) <= j {
-					_submips = array_create(4, 0)
-					_mipmaps[j] = _submips
-				} else {
-					_submips = _mipmaps[j]
-				}
-				
-				with _base.GetUVs(j) {
-					_submips[0] = normLeft
-					_submips[1] = normTop
-					_submips[2] = normRight
-					_submips[3] = normBottom
-				}
-				
-				++j
-			}
-			
-			_base.__mipmaps = _mipmaps
-			_base.__maxLOD = 0
 			ds_map_add(assets, _key, _image)
 			ds_map_delete(queue, _key)
 		}
@@ -202,28 +278,60 @@ function ImageMap() : AssetMap() constructor {
 			}*/
 		}
 		
-		var _pal = undefined
+		var _variants = _image.variants
 		
-		if _palette != "default" {
-			var _pal_file = mod_find_file("palettes/" + _palette + ".json")
+		if not ds_map_exists(_variants, _palette) {
+			var _pal = undefined
 			
-			if _pal_file != "" {
-				// Always load default palette first so we can get the
-				// original image.
-				load(_name)
-				_pal = json_load(_pal_file)
-			} else {
-				print($"! ImageMap.load: Palette '{_palette}' not found")
-				_palette = "default"
+			if _palette != "default" {
+				var _pal_file = mod_find_file("palettes/" + _palette + ".json")
+				
+				if _pal_file != "" {
+					// Always load default palette first so we can get the
+					// original image.
+					load(_name)
+					_pal = force_type(json_load(_pal_file), "array")
+					
+					var _old = _pal[0]
+					var _new = _pal[1]
+					var n = array_length(_old)
+					var _n_vecs = n * 3
+					
+					var _old2 = array_create(_n_vecs, 0)
+					var _new2 = array_create(_n_vecs, 0)
+					var i = 0
+					var j = 0
+					
+					repeat n {
+						var j1 = -~j
+						var j2 = j + 2
+						var _bgr = real(_old[i])
+						
+						_old2[j] = color_get_red(_bgr) * COLOR_INVERSE
+						_old2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+						_old2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+						_bgr = real(_new[i])
+						_new2[j] = color_get_red(_bgr) * COLOR_INVERSE
+						_new2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+						_new2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+						j += 3;
+						++i
+					}
+					
+					_pal[0] = _old2
+					_pal[1] = _new2
+				} else {
+					print($"! ImageMap.load: Palette '{_palette}' not found")
+					_palette = "default"
+				}
 			}
-		}
-		
-		if ds_map_add(_image.variants, _palette, _pal) {
+			
+			ds_map_add(_image.variants, _palette, _pal)
 			print($"ImageMap.load: Added palette '{_palette}' to '{_name}'")
-		}
-		
-		if not batch {
-			post_batch()
+			
+			if not batch {
+				post_batch()
+			}
 		}
 		
 		return _image

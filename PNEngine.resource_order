@@ -810,6 +810,7 @@
     {"name":"shCurve","order":2,"path":"shaders/shCurve/shCurve.yy",},
     {"name":"shDepth","order":5,"path":"shaders/shDepth/shDepth.yy",},
     {"name":"shDither","order":9,"path":"shaders/shDither/shDither.yy",},
+    {"name":"shPalette","order":12,"path":"shaders/shPalette/shPalette.yy",},
     {"name":"shSky","order":1,"path":"shaders/shSky/shSky.yy",},
     {"name":"shWorldPixel","order":10,"path":"shaders/shWorldPixel/shWorldPixel.yy",},
     {"name":"scribble_fallback_bulletpoint","order":11,"path":"sprites/scribble_fallback_bulletpoint/scribble_fallback_bulletpoint.yy",},
