@@ -12,6 +12,7 @@ global.depth_shader = new Shader(shDepth)
 global.dither_shader = new Shader(shDither)
 global.bleed_shader = new Shader(shBleed)
 global.palette_shader = new Shader(shPalette)
+global.palette_ext_shader = new Shader(shPaletteExt)
 
 global.u_ambient_color = new Uniform("u_ambient_color", UniformTypes.FLOAT)
 global.u_animated = new Uniform("u_animated", UniformTypes.INTEGER)

@@ -74,48 +74,65 @@ function ImageMap() : AssetMap() constructor {
 				var _pal = _variants[? _vkey]
 				
 				if is_array(_pal) {
-					var _base = CollageImageGetInfo(_key + ":default")
+					var _base = collage.GetImageInfo(_key + ":default")
 					var _depth_disable = surface_get_depth_disable()
 					
 					surface_depth_disable(true)
+					gpu_set_blendenable(false)
 					
+					var _sprite = undefined
 					var _width = _base.GetWidth()
 					var _height = _base.GetHeight()
-					var _surface = surface_create(_width, _height)
 					
-					surface_set_target(_surface)
-					//CollageSterlizeGPUState()
-					draw_clear_alpha(c_black, 0)
-					global.palette_shader.set()
-					global.u_old.set(_pal[0])
-					global.u_new.set(_pal[1])
-					CollageDrawImageStretched(_base, 0, 0, 0, _width, _height)
+					var _old = _pal[0]
+					var _new = _pal[1]
+					
+					if _old[0] {
+						global.palette_ext_shader.set()
+					} else {
+						global.palette_shader.set()
+					}
+					
+					array_delete(_old, 0, 1)
+					array_delete(_new, 0, 1)
+					global.u_old.set(_old)
+					global.u_new.set(_new)
+					
+					var i = 0
+					
+					repeat _frames {
+						var _surface = surface_create(_width, _height)
+						
+						surface_set_target(_surface)
+						draw_clear_alpha(c_black, 0)
+						CollageDrawImageStretched(_base, i++, 0, 0, _width, _height)
+						surface_reset_target()
+						
+						if _sprite == undefined {
+							_sprite = sprite_create_from_surface(_surface, 0, 0, _width, _height, false, false, _x_offset, _y_offset)
+						} else {
+							sprite_add_from_surface(_sprite, _surface, 0, 0, _width, _height, false, false)
+						}
+						
+						surface_free(_surface)
+					}
+					
+					gpu_set_blendenable(true)
 					shader_reset()
-					//CollageRestoreGPUState()
-					surface_reset_target()
+					surface_depth_disable(_depth_disable)
 					
-					collage.AddSurface(
-						_surface,
+					collage.AddSprite(
+						_sprite,
 						_key + ":" + _vkey,
-						0,
-						0,
-						_width,
-						_height,
-						false,
-						false,
-						_x_offset,
-						_y_offset
+						true
 					).SetPremultiplyAlpha(
 						false
 					).SetTiling(
-						_x_repeat,
-						_y_repeat
+						_image.x_repeat,
+						_image.y_repeat
 					).SetClump(
 						true
 					)
-					
-					surface_free(_surface)
-					surface_depth_disable(_depth_disable)
 				}
 				
 				_vkey = ds_map_find_next(_variants, _vkey)
@@ -140,7 +157,7 @@ function ImageMap() : AssetMap() constructor {
 			
 			repeat ds_map_size(_variants) {
 				var _ikey = _key + ":" + _vkey
-				var _variant = CollageImageGetInfo(_ikey)
+				var _variant = collage.GetImageInfo(_ikey)
 				var _mipmaps = []
 				var j = 0
 				
@@ -295,27 +312,50 @@ function ImageMap() : AssetMap() constructor {
 					var _old = _pal[0]
 					var _new = _pal[1]
 					var n = array_length(_old)
-					var _n_vecs = n * 3
-					
-					var _old2 = array_create(_n_vecs, 0)
-					var _new2 = array_create(_n_vecs, 0)
+					var _ext = is_array(_old[0])
+					var _n_vecs = (n * (_ext ? 4 : 3)) + 1
+					var _old2 = array_create(_n_vecs, _ext)
+					var _new2 = array_create(_n_vecs, _ext)
 					var i = 0
-					var j = 0
+					var j = 1
 					
-					repeat n {
-						var j1 = -~j
-						var j2 = j + 2
-						var _bgr = real(_old[i])
-						
-						_old2[j] = color_get_red(_bgr) * COLOR_INVERSE
-						_old2[j1] = color_get_green(_bgr) * COLOR_INVERSE
-						_old2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
-						_bgr = real(_new[i])
-						_new2[j] = color_get_red(_bgr) * COLOR_INVERSE
-						_new2[j1] = color_get_green(_bgr) * COLOR_INVERSE
-						_new2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
-						j += 3;
-						++i
+					if _ext {
+						repeat n {
+							var j1 = -~j
+							var j2 = j + 2
+							var j3 = j + 3
+							var _vec2 = _old[i]
+							var _bgr = real(_vec2[0])
+							
+							_old2[j] = color_get_red(_bgr) * COLOR_INVERSE
+							_old2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+							_old2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+							_old2[j3] = real(_vec2[1]) * COLOR_INVERSE
+							_vec2 = _new[i]
+							_bgr = real(_vec2[0])
+							_new2[j] = color_get_red(_bgr) * COLOR_INVERSE
+							_new2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+							_new2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+							_new2[j3] = real(_vec2[1]) * COLOR_INVERSE
+							j += 4;
+							++i
+						}
+					} else {
+						repeat n {
+							var j1 = -~j
+							var j2 = j + 2
+							var _bgr = real(_old[i])
+							
+							_old2[j] = color_get_red(_bgr) * COLOR_INVERSE
+							_old2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+							_old2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+							_bgr = real(_new[i])
+							_new2[j] = color_get_red(_bgr) * COLOR_INVERSE
+							_new2[j1] = color_get_green(_bgr) * COLOR_INVERSE
+							_new2[j2] = color_get_blue(_bgr) * COLOR_INVERSE
+							j += 3;
+							++i
+						}
 					}
 					
 					_pal[0] = _old2
@@ -344,8 +384,15 @@ function ImageMap() : AssetMap() constructor {
 		
 		if _image != undefined {
 			var _variants = _image.variants
+			var _img = _variants[? _palette]
 			
-			return _variants[? _palette] ?? _variants[? "default"]
+			if _img == undefined {
+				print($"! ImageMap.get: Image '{_name}' variant '{_palette}' not found")
+				
+				return _variants[? "default"]
+			}
+			
+			return _img
 		}
 		
 		return undefined
