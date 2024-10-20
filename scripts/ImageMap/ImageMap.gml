@@ -24,8 +24,9 @@ function ImageMap() : AssetMap() constructor {
 		collage.StartBatch()
 		
 		var _key = ds_map_find_first(queue)
+		var n = ds_map_size(queue)
 		
-		repeat ds_map_size(queue) {
+		repeat n {
 			var _image = queue[? _key]
 			
 			_image.original = collage.AddFile(
@@ -54,7 +55,7 @@ function ImageMap() : AssetMap() constructor {
 		collage.StartBatch()
 		_key = ds_map_find_first(queue)
 		
-		repeat ds_map_size(queue) {
+		repeat n {
 			var _image = queue[? _key]
 			var _name, _frames, _x_offset, _y_offset, _x_repeat, _y_repeat
 			
@@ -76,6 +77,7 @@ function ImageMap() : AssetMap() constructor {
 				if is_array(_pal) {
 					var _base = collage.GetImageInfo(_key + ":default")
 					var _depth_disable = surface_get_depth_disable()
+					var _blendenable = gpu_get_blendenable()
 					
 					surface_depth_disable(true)
 					gpu_set_blendenable(false)
@@ -117,7 +119,7 @@ function ImageMap() : AssetMap() constructor {
 						surface_free(_surface)
 					}
 					
-					gpu_set_blendenable(true)
+					gpu_set_blendenable(_blendenable)
 					shader_reset()
 					surface_depth_disable(_depth_disable)
 					
@@ -142,47 +144,76 @@ function ImageMap() : AssetMap() constructor {
 		}
 		
 		collage.FinishBatch()
+		collage.PrefetchPages()
 		
-		// 3. Dequeue to assets
-		repeat ds_map_size(queue) {
+		// 3. Prepare for dequeueing
+		_key = ds_map_find_first(queue)
+		
+		repeat n {
+			queue[? _key].name = _key
+			_key = ds_map_find_next(queue, _key)
+		}
+		
+		// 4. Dequeue to assets
+		repeat n {
 			_key = ds_map_find_first(queue)
 			
 			var _image = queue[? _key]
-			
-			_image.name = _key
-			
 			var _variants = _image.variants
 			var _vkey = ds_map_find_first(_variants)
 			var _frames = _image.frames
+			var _mipdefs = _image.mipmaps
+			var _n_lods = _mipdefs == undefined ? 0 : array_length(_mipdefs)
+			var _n_vecs = 4 + (_n_lods * 4)
 			
 			repeat ds_map_size(_variants) {
 				var _ikey = _key + ":" + _vkey
 				var _variant = collage.GetImageInfo(_ikey)
 				var _mipmaps = []
-				var j = 0
+				
+				// Highest LOD (the texture itself)
+				var i = 0
 				
 				repeat _frames {
 					var _submips
 					
-					if array_length(_mipmaps) <= j {
-						_submips = array_create(4, 0)
-						_mipmaps[j] = _submips
+					if array_length(_mipmaps) <= i {
+						_submips = array_create(_n_vecs, 0)
+						_mipmaps[i] = _submips
 					} else {
-						_submips = _mipmaps[j]
+						_submips = _mipmaps[i]
 					}
 					
-					with _variant.GetUVs(j) {
+					with _variant.GetUVs(i++) {
 						_submips[0] = normLeft
 						_submips[1] = normTop
 						_submips[2] = normRight
 						_submips[3] = normBottom
 					}
+				}
+				
+				// The rest
+				i = 0
+				
+				repeat _n_lods {
+					var _lod = collage.GetImageInfo(_mipdefs[i++].name + ":" + _vkey)
+					var j = 0
 					
-					++j
+					repeat _frames {
+						var _submips = _mipmaps[j]
+						var k = i * 4
+						
+						with _lod.GetUVs(j++) {
+							_submips[k] = normLeft
+							_submips[-~k] = normTop
+							_submips[k + 2] = normRight
+							_submips[k + 3] = normBottom
+						}
+					}
 				}
 				
 				_variant.__mipmaps = _mipmaps
-				_variant.__maxLOD = 0
+				_variant.__maxLOD = _n_lods
 				_variants[? _vkey] = _variant
 				_vkey = ds_map_find_next(_variants, _vkey)
 			}
@@ -274,11 +305,11 @@ function ImageMap() : AssetMap() constructor {
 			ds_map_add(queue, _name, _image)
 			print($"ImageMap.load: Added '{_name}' to queue")
 			
-			/*if _mipmaps != undefined {
+			if _mipmaps != undefined {
 				var i = 0
 				
 				repeat array_length(_mipmaps) {
-					var _mname = _mipmaps[i]
+					var _mname = force_type(_mipmaps[i], "string")
 					
 					if _mname == _name {
 						show_error("!!! ImageMap.load: YOU THOUGHT YOU COULD GET AWAY WITH THIS DIDN'T YOU", true)
@@ -292,7 +323,7 @@ function ImageMap() : AssetMap() constructor {
 					
 					_mipmaps[i++] = _mip
 				}
-			}*/
+			}
 		}
 		
 		var _variants = _image.variants
