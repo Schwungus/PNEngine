@@ -747,9 +747,10 @@ if _mouse_focused {
 
 var _tick = global.tick
 var _tick_inc = delta_time * TICKRATE_DELTA
+var _tick_scale = global.tick_scale
 
 global.delta = _tick_inc
-_tick += _tick_inc * global.tick_scale
+_tick += _tick_inc * _tick_scale
 
 var _interps = global.interps
 var _config = global.config
@@ -1801,7 +1802,7 @@ global.tick = _tick
 #region End Interpolation
 var i = ds_list_size(_interps)
 
-if _tick_inc >= 1 or _config.vid_max_fps <= TICKRATE {
+if _tick_inc >= 1 or _config.vid_max_fps <= (TICKRATE * _tick_scale) {
 #region Interpolation OFF (FPS <= TICKRATE)
 	while i {
 		var _scope = _interps[| --i]
