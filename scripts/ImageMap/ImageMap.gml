@@ -233,11 +233,11 @@ function ImageMap() : AssetMap() constructor {
 			var _image2 = _material.image2
 			
 			if is_string(_image) {
-				_material.image = get(_image)
+				_material.image = get(_image, _material.palette)
 			}
 			
 			if is_string(_image2) {
-				_material.image2 = get(_image2)
+				_material.image2 = get(_image2, _material.palette2)
 			}
 			
 			ds_map_delete(_mtlq, _key)

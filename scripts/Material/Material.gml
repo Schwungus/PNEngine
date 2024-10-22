@@ -1,6 +1,8 @@
 function Material() : Asset() constructor {
 	image = -1
+	palette = "default"
 	image2 = undefined
+	palette2 = "default"
 	frame_speed = 1
 	
 	alpha_test = 0.5

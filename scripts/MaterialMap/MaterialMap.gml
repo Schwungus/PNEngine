@@ -10,7 +10,9 @@ function MaterialMap() : AssetMap() constructor {
 		
 		// All material properties (and default values)
 		var _image = -1
+		var _palette = "default"
 		var _image2 = undefined
+		var _palette2 = "default"
 		var _alpha_test = 0.5
 		var _speed = 0
 		var _bright = 0
@@ -29,7 +31,9 @@ function MaterialMap() : AssetMap() constructor {
 		
 		if is_struct(_json) {
 			_image = _json[$ "image"] ?? -1
+			_palette = force_type_fallback(_json[$ "palette"], "string", "default")
 			_image2 = _json[$ "image2"]
+			_palette2 = force_type_fallback(_json[$ "palette2"], "string", "default")
 			_alpha_test = force_type_fallback(_json[$ "alpha_test"], "number", 0.5)
 			_speed = force_type_fallback(_json[$ "speed"], "number", 0)
 			_bright = force_type_fallback(_json[$ "bright"], "number", 0)
@@ -62,7 +66,9 @@ function MaterialMap() : AssetMap() constructor {
 		with _material {
 			name = _name
 			image = _image
+			palette = _palette
 			image2 = _image2
+			palette2 = _palette2
 			frame_speed = _speed
 			alpha_test = _alpha_test
 			bright = _bright
@@ -95,11 +101,11 @@ function MaterialMap() : AssetMap() constructor {
 				}
 			
 				if _valid_image {
-					load(_image)
+					load(_image, _palette)
 				}
 			
 				if _valid_image2 {
-					load(_image2)
+					load(_image2, _palette2)
 				}
 			
 				if not _batch {
