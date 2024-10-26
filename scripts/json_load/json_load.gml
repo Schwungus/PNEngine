@@ -11,5 +11,13 @@ function json_load(_filename) {
 	
 	buffer_delete(_buffer)
 	
-	return json_parse(_text)
+	var _json
+	
+	try {
+		_json = json_parse(_text)
+	} catch (e) {
+		throw $"!!! json_load: Error in '{_filename}': {e.longMessage}"
+	}
+	
+	return _json
 }
