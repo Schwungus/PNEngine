@@ -151,9 +151,9 @@ function Netgame() constructor {
 		}
 		
 		if master {
-			send(SEND_OTHERS, net_buffer_create(false, NetHeaders.HOST_DISCONNECT))
+			send_others(net_buffer_create(false, NetHeaders.HOST_DISCONNECT))
 		} else {
-			send(SEND_HOST, net_buffer_create(false, NetHeaders.CLIENT_DISCONNECT))
+			send_host(net_buffer_create(false, NetHeaders.CLIENT_DISCONNECT))
 		}
 		
 		var i = ds_list_size(players)
@@ -189,9 +189,27 @@ function Netgame() constructor {
 	}
 	
 #region Sending Packets
-	/// @desc Sends a packet directly to the specified IP address and port.
-	static send_direct = function (_ip, _port, _buffer, _size = undefined, _dispose = true) {
+	/// @desc Sends a packet directly to the specified IP address and port. (HOST AND CLIENT)
+	static send_direct = function (_ip, _port, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
 		_size ??= buffer_get_size(_buffer)
+		
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+			var _player = clients[? $"{_ip}:{_port}"]
+			
+			if _player != undefined {
+				with _player {
+					++reliable_index
+					buffer_poke(_buffer, 0, buffer_u32, reliable_index)
+					
+					var b = buffer_create(_size, buffer_fixed, 1)
+					
+					buffer_copy(_buffer, 0, _size, b, 0)
+					ds_list_add(reliable, b)
+					time_source_start(reliable_time_source)
+				}
+			}
+		}
+		
 		network_send_udp_raw(socket, _ip, _port, _buffer, _size)
 		
 		if _dispose {
@@ -199,90 +217,93 @@ function Netgame() constructor {
 		}
 	}
 	
-	/// @desc Sends a packet to a specific player or group.
-	static send = function (_to, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		if not active {
-			exit
-		}
-		
+	/// @desc Sends a packet to a NetPlayer mapped to a client key. (HOST ONLY)
+	static send_client = function (_key, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
 		_size ??= buffer_get_size(_buffer)
 		
-		switch _to {
-			case SEND_HOST: send(0, _buffer, _size, false, _overwrite) break
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+			var _player = clients[? _key]
 			
-			case SEND_ALL: {
-				var i = 0
-				
-				repeat ds_list_size(players) {
-					if players[| i] != undefined {
-						send(i, _buffer, _size, false, _overwrite)
-					}
+			if _player != undefined {
+				with _player {
+					++reliable_index
+					buffer_poke(_buffer, 0, buffer_u32, reliable_index)
 					
-					++i
+					var b = buffer_create(_size, buffer_fixed, 1)
+					
+					buffer_copy(_buffer, 0, _size, b, 0)
+					ds_list_add(reliable, b)
+					time_source_start(reliable_time_source)
 				}
 				
-				break
+				network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
 			}
-			
-			case SEND_OTHERS: {
-				var i = 0
+		}
+		
+		if _dispose {
+			buffer_delete(_buffer)
+		}
+	}
+	
+	/// @desc Sends a packet directly to a NetPlayer. (HOST ONLY)
+	static send_player = function (_player, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
+		_size ??= buffer_get_size(_buffer)
+		
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+			with _player {
+				++reliable_index
+				buffer_poke(_buffer, 0, buffer_u32, reliable_index)
 				
-				repeat ds_list_size(players) {
-					var _player = players[| i]
-					
-					if _player != undefined and not _player.local {
-						send(i, _buffer, _size, false, _overwrite)
-					}
-					
-					++i
-				}
+				var b = buffer_create(_size, buffer_fixed, 1)
 				
-				break
+				buffer_copy(_buffer, 0, _size, b, 0)
+				ds_list_add(reliable, b)
+				time_source_start(reliable_time_source)
 			}
+		}
+		
+		network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
+		
+		if _dispose {
+			buffer_delete(_buffer)
+		}
+	}
+	
+	/// @desc Sends a packet to the host. (HOST AND CLIENT)
+	static send_host = function (_buffer, _size = undefined, _dispose = true, _overwrite = true) {
+		_size ??= buffer_get_size(_buffer)
+		
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+			with players[| 0] {
+				++reliable_index
+				buffer_poke(_buffer, 0, buffer_u32, reliable_index)
+				
+				var b = buffer_create(_size, buffer_fixed, 1)
+				
+				buffer_copy(_buffer, 0, _size, b, 0)
+				ds_list_add(reliable, b)
+				time_source_start(reliable_time_source)
+			}
+		}
+		
+		network_send_udp_raw(socket, ip, port, _buffer, _size)
+		
+		if _dispose {
+			buffer_delete(_buffer)
+		}
+	}
+	
+	/// @desc Sends a packet to other clients. (HOST ONLY)
+	static send_others = function (_buffer, _size = undefined, _dispose = true, _overwrite = true) {
+		_size ??= buffer_get_size(_buffer)
+		
+		var i = 0
+		
+		repeat ds_list_size(players) {
+			var _player = players[| i++]
 			
-			default: {
-				var _player = players[| _to]
-				
-				if _player == undefined {
-					break
-				}
-				
-				var _ip = _player.ip
-				var _port = _player.port
-				
-				if _port <= 0 and not master {
-					_ip = ip
-					_port = port
-				}
-				
-				if _overwrite {
-					var _pos = buffer_tell(_buffer)
-					
-					buffer_seek(_buffer, buffer_seek_start, 0)
-					
-					var _reliable = buffer_read(_buffer, buffer_u32)
-					
-					buffer_write(_buffer, buffer_u8, local_slot)
-					buffer_write(_buffer, buffer_u8, _to)
-					buffer_seek(_buffer, buffer_seek_start, _pos)
-					
-					if _reliable {
-						with _player {
-							++reliable_index
-							buffer_poke(_buffer, 0, buffer_u32, reliable_index)
-							
-							var b = buffer_create(_size, buffer_fixed, 1)
-							
-							buffer_copy(_buffer, 0, _size, b, 0)
-							ds_list_add(reliable, b)
-							time_source_start(reliable_time_source)
-						}
-					}
-				}
-				
-				network_send_udp_raw(socket, _ip, _port, _buffer, _size)
-				
-				break
+			if _player != undefined and _player.slot != local_slot {
+				send_player(_player, _buffer, _size, false)
 			}
 		}
 		
@@ -331,7 +352,7 @@ function Netgame() constructor {
 				if _player.ping >= 30 {
 					print($"! Netgame.ping_time_source: Player {-~i} timed out")
 					_player.destroy()
-					send(SEND_OTHERS, net_buffer_create(true, NetHeaders.PLAYER_LEFT, buffer_u8, _player.slot))
+					send_others(net_buffer_create(true, NetHeaders.PLAYER_LEFT, buffer_u8, _player.slot))
 					
 					continue
 				}
@@ -339,7 +360,7 @@ function Netgame() constructor {
 				++_player.ping
 			}
 			
-			send(SEND_OTHERS, net_buffer_create(false, NetHeaders.HOST_PING))
+			send_others(net_buffer_create(false, NetHeaders.HOST_PING))
 		}
 	}, [], -1)
 	

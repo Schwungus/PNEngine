@@ -651,7 +651,7 @@ switch load_state {
 			if _netgame.master {
 				load_state = LoadStates.HOST_READY
 			} else {
-				_netgame.send(SEND_HOST, net_buffer_create(true, NetHeaders.CLIENT_LEVEL_READY))
+				_netgame.send_host(net_buffer_create(true, NetHeaders.CLIENT_LEVEL_READY))
 				load_state = LoadStates.CLIENT_READY
 			}
 		}
@@ -699,7 +699,7 @@ switch load_state {
 		}
 		
 		if _ready {
-			_netgame.send(SEND_OTHERS, net_buffer_create(true, NetHeaders.HOST_LEVEL_READY))
+			_netgame.send_others(net_buffer_create(true, NetHeaders.HOST_LEVEL_READY))
 			load_state = LoadStates.NONE
 		}
 		
@@ -1389,7 +1389,7 @@ if _tick >= 1 {
 			buffer_write(b, buffer_u8, _input_flags)
 			buffer_write(b, buffer_s16, _dy)
 			buffer_write(b, buffer_s16, _dx)
-			_netgame.send(SEND_HOST, b)
+			_netgame.send_host(b)
 		} else {
 			i = 0
 			
@@ -1606,7 +1606,7 @@ if _tick >= 1 {
 						}
 					}
 					
-					send(SEND_OTHERS, b)
+					send_others(b)
 				}
 			}
 		}

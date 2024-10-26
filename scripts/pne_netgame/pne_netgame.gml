@@ -1,10 +1,6 @@
 #macro DEFAULT_PORT 7788
 #macro STALL_RATE 15
 
-#macro SEND_HOST -1
-#macro SEND_ALL -2
-#macro SEND_OTHERS -3
-
 enum NetHeaders {
 	// Internal
 	ACK,

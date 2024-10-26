@@ -1,7 +1,3 @@
-#macro CLIENT_CHECK_HOST if _ip != ip or _port != port or _from != 0 { break }
-#macro CLIENT_CHECK_DIRECT if _ip != ip or _port != port { break }
-#macro CLIENT_CHECK_SENDER if _ip != ip or _port != port or _from != 0 or _from == _to { break }
-
 if async_load[? "type"] != network_type_data {
 	exit
 }
@@ -22,8 +18,6 @@ var _buffer = async_load[? "buffer"]
 buffer_seek(_buffer, buffer_seek_start, 0) // ???
 
 var _reliable = buffer_read(_buffer, buffer_u32)
-var _from = buffer_read(_buffer, buffer_u8)
-var _to = buffer_read(_buffer, buffer_u8)
 var _header = buffer_read(_buffer, buffer_u8)
 var _netgame = global.netgame
 
@@ -133,14 +127,14 @@ with _netgame {
 					++j
 				}
 				
-				send_direct(_ip, _port, b)
+				send_player(_new_player, b)
 				
 				// Send new client info to everyone
 				var _slot = _new_player.slot
 				var _name = buffer_read(_buffer, buffer_string)
 				
 				_new_player.name = _name
-				send(SEND_OTHERS, net_buffer_create(true, NetHeaders.PLAYER_JOINED, buffer_u8, _slot, buffer_string, _name))
+				send_others(net_buffer_create(true, NetHeaders.PLAYER_JOINED, buffer_u8, _slot, buffer_string, _name))
 				game_update_status()
 				print($"proControl: Assigned client '{_name}' to player {-~_slot}")
 				
@@ -171,7 +165,7 @@ with _netgame {
 					destroy()
 				}
 				
-				send(SEND_OTHERS, b)
+				send_others(b)
 				game_update_status()
 				
 				exit
@@ -202,41 +196,34 @@ with _netgame {
 		}
 	}
 	
-	if _to == local_slot {
-		if _reliable > 0 {
-			var _net = players[| _from]
+	if _reliable > 0 {
+		var _key = $"{_ip}:{_port}"
+		var _net = master ? clients[? _key] : players[| 0]
+		
+		if _net == undefined {
+			print($"! proControl: Got invalid ROM from client {_key} (index {_reliable})")
 			
-			if _net == undefined {
-				print($"! proControl: Got invalid ROM from player {-~_from} (index {_reliable})")
-				
-				exit
-			} else {
-				var _skip = false
-				
-				if _reliable <= _net.reliable_received {
-					_skip = true
-				} else {
-					_net.reliable_received = _reliable
-				}
-				
-				send(_from, net_buffer_create(false, NetHeaders.ACK, buffer_u32, _reliable))
-				
-				if _skip {
-					exit
-				}
-			}
-		}
-	} else {
-		if master {
-			send(_to, _buffer, undefined, true, false)
+			exit
 		}
 		
-		exit
+		var _skip = false
+		
+		if _reliable <= _net.reliable_received {
+			_skip = true
+		} else {
+			_net.reliable_received = _reliable
+		}
+		
+		send_player(_net, net_buffer_create(false, NetHeaders.ACK, buffer_u32, _reliable))
+		
+		if _skip {
+			exit
+		}
 	}
 	
 	switch _header {
 		case NetHeaders.ACK: {
-			var _net = players[| _from]
+			var _net = clients[? $"{_ip}:{_port}"]
 			
 			if _net == undefined {
 				break
@@ -254,10 +241,6 @@ with _netgame {
 					
 					if _compare == _index {
 						if _netgame.master {
-							// Skip from and to
-							buffer_read(b, buffer_u8)
-							buffer_read(b, buffer_u8)
-							
 							var _compare_header = buffer_read(b, buffer_u8)
 							
 							if _compare_header == NetHeaders.HOST_TICK and not tick_acked {
@@ -276,19 +259,17 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_CHECK_CLIENT: {
-			CLIENT_CHECK_HOST
+			send_direct(_ip, _port, net_buffer_create(false, NetHeaders.CLIENT_VERIFY,
+				buffer_string, GM_version,
+				buffer_string, cmd_md15("", false)
+			))
 			
-			var b = net_buffer_create(false, NetHeaders.CLIENT_VERIFY, buffer_string, GM_version, buffer_string, cmd_md15("", false))
-			
-			send_direct(_ip, _port, b)
 			print("proControl: Found connection from server")
 			
 			break
 		}
 		
 		case NetHeaders.HOST_BLOCK_CLIENT: {
-			CLIENT_CHECK_HOST
-			
 			disconnect()
 			code = buffer_read(_buffer, buffer_string)
 			
@@ -302,8 +283,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_ALLOW_CLIENT: {
-			CLIENT_CHECK_HOST
-			
 			time_source_stop(connect_time_source)
 			time_source_start(timeout_time_source)
 			send_direct(_ip, _port, net_buffer_create(false, NetHeaders.CLIENT_SEND_INFO, buffer_string, global.config.name))
@@ -312,8 +291,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_ADD_CLIENT: {
-			CLIENT_CHECK_HOST
-			
 			time_source_stop(connect_time_source)
 			active = true
 			local_slot = buffer_read(_buffer, buffer_u8)
@@ -366,8 +343,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.PLAYER_JOINED: {
-			CLIENT_CHECK_SENDER
-			
 			var _slot = buffer_read(_buffer, buffer_u8)
 			
 			if _slot == local_slot {
@@ -385,7 +360,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_DISCONNECT: {
-			CLIENT_CHECK_SENDER
 			cmd_disconnect("")
 			show_caption($"[c_red]Host disconnected")
 			
@@ -393,8 +367,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.PLAYER_LEFT: {
-			CLIENT_CHECK_SENDER
-			
 			var _slot = buffer_read(_buffer, buffer_u8)
 			
 			if _slot == local_slot {
@@ -425,7 +397,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_PING: {
-			CLIENT_CHECK_SENDER
 			time_source_reset(timeout_time_source)
 			time_source_start(timeout_time_source)
 			send_direct(_ip, _port, net_buffer_create(false, NetHeaders.CLIENT_PONG))
@@ -434,8 +405,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_LEVEL: {
-			CLIENT_CHECK_SENDER
-			
 			load_level = buffer_read(_buffer, buffer_string)
 			load_area = buffer_read(_buffer, buffer_u32)
 			load_tag = buffer_read(_buffer, buffer_s32)
@@ -449,7 +418,7 @@ with _netgame {
 				break
 			}
 			
-			var _player = players[| _from]
+			var _player = clients[? $"{_ip}:{_port}"]
 			
 			if _player != undefined {
 				_player.ready = true
@@ -459,8 +428,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_LEVEL_READY: {
-			CLIENT_CHECK_SENDER
-			
 			if proControl.load_state == LoadStates.CLIENT_READY {
 				proControl.load_state = LoadStates.NONE
 			}
@@ -469,8 +436,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_STATES_FLAGS: {
-			CLIENT_CHECK_SENDER
-			
 			var _players = global.players
 			var n = buffer_read(_buffer, buffer_u8)
 			
@@ -490,7 +455,7 @@ with _netgame {
 				break
 			}
 			
-			var _player = players[| _from]
+			var _player = clients[? $"{_ip}:{_port}"]
 			
 			if _player != undefined {
 				var _input_up_down = buffer_read(_buffer, buffer_s8)
@@ -527,8 +492,6 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_TICK: {
-			CLIENT_CHECK_SENDER
-			
 			var n = buffer_read(_buffer, buffer_u8)
 			
 			ds_queue_enqueue(tick_queue, n)

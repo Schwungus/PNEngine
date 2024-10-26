@@ -76,11 +76,10 @@ function Level() constructor {
 					
 					// Flags
 					global.flags[FlagGroups.GLOBAL].write(b)
-					
-					send(SEND_OTHERS, b)
+					send_others(b)
 				}
 				
-				send(SEND_OTHERS, net_buffer_create(true, NetHeaders.HOST_LEVEL, buffer_string, _level, buffer_u32, _area, buffer_s32, _tag))
+				send_others(net_buffer_create(true, NetHeaders.HOST_LEVEL, buffer_string, _level, buffer_u32, _area, buffer_s32, _tag))
 			}
 		} else {
 			with proTransition {
