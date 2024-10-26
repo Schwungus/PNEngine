@@ -350,7 +350,7 @@ function ScriptMap() : AssetMap() constructor {
 				_code += _line + chr(13) + chr(10)
 			}
 		} catch (e) {
-			show_error($"!!! ScriptMap.load: '{_name}': Error at line {_lines}: {e.longMessage}", true)
+			show_error($"!!! ScriptMap.load: Error in '{_name}' at line {_lines}: {e.longMessage}", true)
 		}
 		
 		if not _type_header_exists {
