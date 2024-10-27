@@ -1,8 +1,4 @@
 function ui_create(_type, _special = undefined, _replace = true) {
-	if net_active() {
-		return undefined
-	}
-	
 	if _replace {
 		var _ui = global.ui
 		

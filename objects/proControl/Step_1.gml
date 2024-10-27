@@ -1149,23 +1149,26 @@ if _tick >= 1 {
 				
 				if input_check_pressed("pause") {
 					_paused = true
-					i = INPUT_MAX_PLAYERS
 					
-					repeat INPUT_MAX_PLAYERS {
-						with _players[--i] {
-							if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
-								break
-							}
-							
-							if not instance_exists(thing) or get_state("frozen") {
-								_paused = false
-							
-								break
-							}
-						}
+					if not _in_netgame {
+						i = INPUT_MAX_PLAYERS
 						
-						if not _paused {
-							break
+						repeat INPUT_MAX_PLAYERS {
+							with _players[--i] {
+								if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
+									break
+								}
+								
+								if not instance_exists(thing) or get_state("frozen") {
+									_paused = false
+									
+									break
+								}
+							}
+							
+							if not _paused {
+								break
+							}
 						}
 					}
 				}
@@ -1181,10 +1184,31 @@ if _tick >= 1 {
 		if _skip_tick {
 			mouse_dx = 0
 			mouse_dy = 0
-			input_clear_momentary(true);
-			--_tick
 			
-			continue
+			if _in_netgame {
+				input_verb_consume("up")
+				input_verb_consume("left")
+				input_verb_consume("down")
+				input_verb_consume("right")
+				input_verb_consume("walk")
+				input_verb_consume("jump")
+				input_verb_consume("interact")
+				input_verb_consume("attack")
+				input_verb_consume("inventory_up")
+				input_verb_consume("inventory_left")
+				input_verb_consume("inventory_down")
+				input_verb_consume("inventory_right")
+				input_verb_consume("aim")
+				input_verb_consume("aim_up")
+				input_verb_consume("aim_left")
+				input_verb_consume("aim_down")
+				input_verb_consume("aim_right")
+			} else {
+				input_clear_momentary(true);
+				--_tick
+				
+				continue
+			}
 		}
 		
 #region Demo Playback

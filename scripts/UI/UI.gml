@@ -97,7 +97,14 @@ function UI(_ui_script) constructor {
 		return link(proOptionsUI)
 	}
 	
-	static exit_game = function (_level, _transition = noone) {
-		global.level.goto(_level, 0, ThingTags.NONE, _transition)
+	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
+		global.level.goto(_level, _area, _tag, _transition)
 	}
+	
+	static leave = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
+		cmd_disconnect("")
+		global.level.goto(_level, _area, _tag, _transition)
+	}
+	
+	static send_signal = function (_name) {}
 }
