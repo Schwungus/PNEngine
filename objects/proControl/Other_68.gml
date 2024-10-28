@@ -162,9 +162,9 @@ with _netgame {
 				with _other {
 					buffer_write(b, buffer_u8, slot)
 					print($"proControl: Client '{name}' disconnected")
-					destroy()
 				}
 				
+				net_player_destroy(_other)
 				send_others(b)
 				game_update_status()
 				
@@ -388,7 +388,7 @@ with _netgame {
 			
 			if _other != undefined {
 				print($"proControl: Client '{_other.name}' left")
-				_other.destroy()
+				net_player_destroy(_other)
 			}
 			
 			game_update_status()

@@ -699,6 +699,7 @@
     {"name":"net_disconnect","order":11,"path":"scripts/net_disconnect/net_disconnect.yy",},
     {"name":"net_host","order":8,"path":"scripts/net_host/net_host.yy",},
     {"name":"net_master","order":7,"path":"scripts/net_master/net_master.yy",},
+    {"name":"net_player_destroy","order":13,"path":"scripts/net_player_destroy/net_player_destroy.yy",},
     {"name":"net_typeof","order":3,"path":"scripts/net_typeof/net_typeof.yy",},
     {"name":"Netgame","order":2,"path":"scripts/Netgame/Netgame.yy",},
     {"name":"NetPlayer","order":6,"path":"scripts/NetPlayer/NetPlayer.yy",},

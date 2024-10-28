@@ -5792,6 +5792,7 @@
     {"id":{"name":"net_disconnect","path":"scripts/net_disconnect/net_disconnect.yy",},},
     {"id":{"name":"net_host","path":"scripts/net_host/net_host.yy",},},
     {"id":{"name":"net_master","path":"scripts/net_master/net_master.yy",},},
+    {"id":{"name":"net_player_destroy","path":"scripts/net_player_destroy/net_player_destroy.yy",},},
     {"id":{"name":"net_typeof","path":"scripts/net_typeof/net_typeof.yy",},},
     {"id":{"name":"Netgame","path":"scripts/Netgame/Netgame.yy",},},
     {"id":{"name":"NetPlayer","path":"scripts/NetPlayer/NetPlayer.yy",},},

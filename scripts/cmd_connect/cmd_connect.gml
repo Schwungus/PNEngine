@@ -34,12 +34,6 @@ function cmd_connect(_args) {
 	var _port = n >= 2 ? real(_parse_args[1]) : DEFAULT_PORT
 	
 	if not net_connect(_ip, _port, function () {
-		var _ui = global.ui
-		
-		if _ui != undefined {
-			_ui.destroy()
-		}
-		
 		fmod_channel_control_set_paused(global.world_channel_group, false)
 		
 		with TitleBase {
