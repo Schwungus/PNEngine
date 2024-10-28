@@ -27,7 +27,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 				if _netgame != undefined and _netgame.active {
 					with _players[_netgame.local_slot] {
 						if status == PlayerStatus.ACTIVE and instance_exists(camera) {
-							camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
+							camera.render(_width, _height, true).Draw(0, 0)
 							
 							break
 						}
