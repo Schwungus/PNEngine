@@ -413,7 +413,7 @@ function Area() constructor {
 			if _thing.f_persistent {
 				_thing.f_new = false
 				_cant_deactivate = true
-				print($"! Area.deactivate: Cannot deactivate {_thing} ({_thing.thing_script == undefined ? object_get_name(_thing.object_index) : _thing.thing_script.name})")
+				print($"! Area.deactivate: Cannot deactivate Thing {i} ({_thing.get_name()})")
 				
 				continue
 			}
@@ -507,7 +507,7 @@ function Area() constructor {
 			case ThingTags.PLAYERS:
 				repeat ds_list_size(active_things) {
 					with active_things[| i++] {
-						if object_index == PlayerPawn or object_is_ancestor(object_index, PlayerPawn) {
+						if is_ancestor(PlayerPawn) {
 							things[j++] = self
 						}
 					}
@@ -518,7 +518,7 @@ function Area() constructor {
 			case ThingTags.PLAYER_SPAWNS:
 				repeat ds_list_size(active_things) {
 					with active_things[| i++] {
-						if object_index == PlayerSpawn or object_is_ancestor(object_index, PlayerSpawn) {
+						if is_ancestor(PlayerSpawn) {
 							things[j++] = self
 						}
 					}
