@@ -706,6 +706,8 @@
     {"name":"OUIMenu","order":2,"path":"scripts/OUIMenu/OUIMenu.yy",},
     {"name":"OUIOption","order":4,"path":"scripts/OUIOption/OUIOption.yy",},
     {"name":"OUIText","order":3,"path":"scripts/OUIText/OUIText.yy",},
+    {"name":"player_activate","order":3,"path":"scripts/player_activate/player_activate.yy",},
+    {"name":"player_deactivate","order":4,"path":"scripts/player_deactivate/player_deactivate.yy",},
     {"name":"player_input_to_flags","order":2,"path":"scripts/player_input_to_flags/player_input_to_flags.yy",},
     {"name":"pne_collision","order":1,"path":"scripts/pne_collision/pne_collision.yy",},
     {"name":"pne_debug","order":1,"path":"scripts/pne_debug/pne_debug.yy",},

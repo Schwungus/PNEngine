@@ -18,7 +18,7 @@ function cmd_disconnect(_args) {
 		}
 	}
 	
-	global.players[0].activate()
+	player_activate(global.players[0])
 	global.level.goto("lvlTitle")
 	show_caption($"[c_red]Disconnected")
 	

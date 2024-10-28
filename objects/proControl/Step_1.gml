@@ -780,7 +780,7 @@ if _tick >= 1 {
 				
 				repeat array_length(__new_connections) {
 					with _players[__new_connections[i++]] {
-						if not activate() {
+						if not player_activate(self) {
 							if __show_reconnect_caption {
 								var _device = input_player_get_gamepad_type(slot)
 								
@@ -800,7 +800,7 @@ if _tick >= 1 {
 				
 				repeat array_length(__new_disconnections) {
 					with _players[__new_disconnections[i++]] {
-						if not deactivate() {
+						if not player_deactivate(self) {
 							show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~slot)}")
 						}
 					}
@@ -1267,7 +1267,7 @@ if _tick >= 1 {
 						case DemoPackets.PLAYER_ACTIVATE: {
 							var _slot = buffer_read(_demo_buffer, buffer_u8)
 							
-							_players[_slot].activate()
+							player_activate(_players[_slot])
 							
 							break
 						}
@@ -1275,7 +1275,7 @@ if _tick >= 1 {
 						case DemoPackets.PLAYER_DEACTIVATE: {
 							var _slot = buffer_read(_demo_buffer, buffer_u8)
 							
-							_players[_slot].deactivate()
+							player_deactivate(_players[_slot])
 							
 							break
 						}

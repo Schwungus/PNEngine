@@ -99,7 +99,7 @@ function cmd_demo(_args) {
 			var _status = buffer_read(_demo_buffer, buffer_u8)
 			
 			if _status != PlayerStatus.INACTIVE {
-				activate()
+				player_activate(self)
 			}
 			
 			read_states(_demo_buffer)

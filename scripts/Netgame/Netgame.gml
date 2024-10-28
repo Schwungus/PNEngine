@@ -109,7 +109,7 @@ function Netgame() constructor {
 		}
 		
 		_player.net = _net
-		_player.activate()
+		player_activate(_player)
 		players[| _index] = _net
 		
 		// Work around GameMaker quirk where in-between empty indices have a

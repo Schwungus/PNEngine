@@ -52,12 +52,11 @@ repeat INPUT_MAX_PLAYERS {
 		
 		if i == 0 {
 			__show_reconnect_caption = false
-			activate()
+			player_activate(self)
 		}
 	}
 	
-	_players[i] = _player;
-	++i
+	_players[i++] = _player
 }
 
 global.players = _players

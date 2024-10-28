@@ -5784,6 +5784,8 @@
     {"id":{"name":"OUIMenu","path":"scripts/OUIMenu/OUIMenu.yy",},},
     {"id":{"name":"OUIOption","path":"scripts/OUIOption/OUIOption.yy",},},
     {"id":{"name":"OUIText","path":"scripts/OUIText/OUIText.yy",},},
+    {"id":{"name":"player_activate","path":"scripts/player_activate/player_activate.yy",},},
+    {"id":{"name":"player_deactivate","path":"scripts/player_deactivate/player_deactivate.yy",},},
     {"id":{"name":"player_input_to_flags","path":"scripts/player_input_to_flags/player_input_to_flags.yy",},},
     {"id":{"name":"Player","path":"scripts/Player/Player.yy",},},
     {"id":{"name":"pne_assets","path":"scripts/pne_assets/pne_assets.yy",},},
