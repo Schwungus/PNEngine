@@ -1000,12 +1000,21 @@ if _tick >= 1 {
 			_tick = _netgame.tick_count
 			_ticks_queued = true
 			
-			if _tick <= 0 and _netgame.load_queue {
-				load_level = _netgame.load_level
-				load_area = _netgame.load_area
-				load_tag = _netgame.load_tag
-				load_state = LoadStates.START
-				_netgame.load_queue = false
+			if _tick <= 0 {
+				if _netgame.load_queue {
+					load_level = _netgame.load_level
+					load_area = _netgame.load_area
+					load_tag = _netgame.load_tag
+					load_state = LoadStates.START
+					_netgame.load_queue = false
+					_netgame.stall_time = 0
+				} else if ++_netgame.stall_time >= STALL_RATE {
+					show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
+				} else {
+					// Clientside prediction
+				}
+			} else {
+				_netgame.stall_time = 0
 			}
 		}
 	}
