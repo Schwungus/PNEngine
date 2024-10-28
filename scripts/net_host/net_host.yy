@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"net_host",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"net_host",
+  "parent":{
+    "name":"Netgame",
+    "path":"folders/Scripts/PNEngine/Game/Netgame.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

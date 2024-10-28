@@ -33,7 +33,7 @@ function cmd_connect(_args) {
 	var _ip = _parse_args[0]
 	var _port = n >= 2 ? real(_parse_args[1]) : DEFAULT_PORT
 	
-	if not _netgame.connect(_ip, _port, function () {
+	if not net_connect(_ip, _port, function () {
 		var _ui = global.ui
 		
 		if _ui != undefined {
@@ -68,7 +68,7 @@ function cmd_connect(_args) {
 		
 		global.game_status = GameStatus.DEFAULT
 		show_caption($"[c_red]Lost connection ({_netgame.code})")
-		_netgame.destroy()
+		net_destroy()
 	}) {
 		show_caption($"[c_red]No connection")
 		

@@ -30,9 +30,9 @@ function cmd_host(_args) {
 	var _parse_args = string_split(_args, " ", true)
 	var _port = array_length(_parse_args) ? real(_parse_args[0]) : DEFAULT_PORT
 	
-	if not _netgame.host(_port) {
+	if not net_host(_port) {
 		show_caption($"[c_red]No connection")
-		_netgame.destroy()
+		net_destroy()
 		
 		return false
 	}

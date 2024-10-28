@@ -7,7 +7,7 @@ function cmd_disconnect(_args) {
 		return false
 	}
 	
-	_netgame.destroy()
+	net_destroy()
 	global.game_status = GameStatus.DEFAULT
 	
 	if global.input_mode == INPUT_SOURCE_MODE.JOIN {

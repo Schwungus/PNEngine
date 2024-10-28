@@ -107,7 +107,7 @@ with _netgame {
 				}
 				
 				// Send other clients' info to new client.
-				var _new_player = add_player(undefined, _ip, _port)
+				var _new_player = net_add_player(undefined, _ip, _port)
 				var b = net_buffer_create(false, NetHeaders.HOST_ADD_CLIENT, buffer_u8, _new_player.slot, buffer_u8, player_count - 1)
 				var _players = global.players
 				var j = 0
@@ -270,14 +270,14 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_BLOCK_CLIENT: {
-			disconnect()
+			net_disconnect()
 			code = buffer_read(_buffer, buffer_string)
 			
 			if connect_fail_callback != undefined {
 				connect_fail_callback()
 			}
 			
-			destroy()
+			net_destroy()
 			
 			break
 		}
@@ -296,7 +296,7 @@ with _netgame {
 			local_slot = buffer_read(_buffer, buffer_u8)
 			print($"proControl: Assigned as Player {-~local_slot}")
 			
-			var _local = add_player(local_slot, "127.0.0.1", 0)
+			var _local = net_add_player(local_slot, "127.0.0.1", 0)
 			
 			_local.name = global.config.name
 			_local.local = true
@@ -306,7 +306,7 @@ with _netgame {
 				
 				print($"Getting info from Player {-~_slot}")
 				
-				var _other = add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port)
+				var _other = net_add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port)
 				
 				_other.player.status = buffer_read(_buffer, buffer_u8)
 				_other.name = buffer_read(_buffer, buffer_string)
@@ -349,7 +349,7 @@ with _netgame {
 				break
 			}
 			
-			with add_player(_slot, "127.0.0.1", 0) {
+			with net_add_player(_slot, "127.0.0.1", 0) {
 				name = buffer_read(_buffer, buffer_string)
 				print($"proControl: Client '{name}' joined")
 			}
@@ -370,7 +370,7 @@ with _netgame {
 			var _slot = buffer_read(_buffer, buffer_u8)
 			
 			if _slot == local_slot {
-				disconnect()
+				net_disconnect()
 				code = "NET_KICK"
 				was_connected_before = true
 				
@@ -379,7 +379,7 @@ with _netgame {
 				}
 				
 				was_connected_before = false
-				destroy()
+				net_destroy()
 				
 				break
 			}
