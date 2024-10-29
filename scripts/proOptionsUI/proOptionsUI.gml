@@ -387,7 +387,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			new OUIButton("options.confirm.confirm", function () {
 				config_save()
 				config_update()
-				replace(proOptionsUI).main_menu.option = other.main_menu.option
+				replace(proOptionsUI).main_menu.option = main_menu.option
 				
 				return true
 			}),
@@ -400,7 +400,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			new OUIButton("options.confirm.confirm", function () {
 				config_load()
 				config_update()
-				replace(proOptionsUI).main_menu.option = other.main_menu.option
+				replace(proOptionsUI).main_menu.option = main_menu.option
 				
 				return true
 			}),
@@ -413,7 +413,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			new OUIButton("options.confirm.confirm", function () {
 				config_reset()
 				config_update()
-				replace(proOptionsUI).main_menu.option = other.main_menu.option
+				replace(proOptionsUI).main_menu.option = main_menu.option
 				
 				return true
 			}),
