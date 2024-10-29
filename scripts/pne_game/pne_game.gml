@@ -64,9 +64,9 @@ global.default_flags = ds_map_create()
 enum ThingEvents {
 	LOAD,
 	CREATE,
-	TICK_START,
+	TICK_START, // Unused
 	TICK,
-	TICK_END,
+	TICK_END, // Unused
 	DRAW,
 	DRAW_SCREEN,
 	DRAW_GUI,

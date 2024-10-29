@@ -972,10 +972,14 @@ if _tick >= 1 {
 						
 						++i
 					}
-				} else if ++stall_time >= STALL_RATE {
+				}
+				
+				stall_time += _tick
+				
+				if stall_time >= STALL_RATE {
 					_tick = 0
 					
-					if stall_time >= STALL_RATE + TICKRATE {
+					if stall_time >= (STALL_RATE + TICKRATE) {
 						var _text = "[c_yellow]Waiting for: "
 						
 						i = 0
@@ -997,6 +1001,8 @@ if _tick >= 1 {
 				}
 			}
 		} else {
+			var _client_tick = _tick
+			
 			_tick = _netgame.tick_count
 			_ticks_queued = true
 			
@@ -1008,16 +1014,59 @@ if _tick >= 1 {
 					load_state = LoadStates.START
 					_netgame.load_queue = false
 					_netgame.stall_time = 0
-				} else if ++_netgame.stall_time >= STALL_RATE {
+				}
+				
+				_netgame.stall_time += _client_tick
+				
+				if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
 					show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
-				} else {
-					// Clientside prediction
 				}
 			} else {
-				_netgame.stall_time = 0
+				with _players[_netgame.local_slot] {
+					if instance_exists(thing) {
+						with thing {
+							if predict == undefined {
+								break
+							}
+							
+							x = predict.x
+							y = predict.y
+							z = predict.z
+							angle = predict.angle
+							pitch = predict.pitch
+							x_speed = predict.x_speed
+							y_speed = predict.y_speed
+							z_speed = predict.z_speed
+							vector_speed = predict.vector_speed
+							move_angle = predict.move_angle
+							last_prop = predict.last_prop
+							fric = predict.fric
+							grav = predict.grav
+							max_fall_speed = predict.max_fall_speed
+							max_fly_speed = predict.max_fly_speed
+							radius = predict.radius
+							height = predict.height
+							array_copy(floor_ray, 0, predict.floor_ray, 0, RaycastData.__SIZE)
+							array_copy(wall_ray, 0, predict.wall_ray, 0, RaycastData.__SIZE)
+							array_copy(ceiling_ray, 0, predict.ceiling_ray, 0, RaycastData.__SIZE)
+							input_length = predict.input_length
+							jumped = predict.jumped
+							coyote = predict.coyote
+							aim_angle = predict.aim_angle
+							movement_speed = predict.movement_speed
+							jump_speed = predict.jump_speed
+							coyote_time = predict.coyote_time
+							f_grounded = predict.f_grounded
+						}
+					}
+				}
+				
+				_netgame.stall_time = _client_tick
 			}
 		}
 	}
+	
+	var _ticked = false
 	
 	while _tick >= 1 {
 		var _skip_tick = false
@@ -1355,6 +1404,7 @@ if _tick >= 1 {
 				_local_slot = local_slot
 			}
 			
+			var _checksum = ds_queue_dequeue(_tick_queue)
 			var n = ds_queue_dequeue(_tick_queue)
 			
 			repeat n {
@@ -1375,6 +1425,22 @@ if _tick >= 1 {
 					input[PlayerInputs.AIM] = ds_queue_dequeue(_tick_queue)
 					input[PlayerInputs.AIM_UP_DOWN] = ds_queue_dequeue(_tick_queue)
 					input[PlayerInputs.AIM_LEFT_RIGHT] = ds_queue_dequeue(_tick_queue)
+				}
+			}
+			
+			if _checksum {
+				var _clientsum = 0
+				
+				with Thing {
+					_clientsum += floor(x)
+					_clientsum += floor(y)
+					_clientsum += floor(z)
+				}
+				
+				_clientsum = 1 + (abs(instance_number(Thing) + _clientsum) % 255)
+				
+				if _checksum != _clientsum {
+					show_caption($"[c_red]Desynced with host ({_clientsum} =/= {_checksum})", infinity)
 				}
 			}
 			
@@ -1605,12 +1671,24 @@ if _tick >= 1 {
 			}
 			
 			if _in_netgame {
-				i = 0
-				
 				var b = net_buffer_create(true, NetHeaders.HOST_TICK)
+				var _checksum = 0
+				
+				if (_level.time % 20) == 0 {
+					with Thing {
+						_checksum += floor(x)
+						_checksum += floor(y)
+						_checksum += floor(z)
+					}
+					
+					_checksum = 1 + (abs(instance_number(Thing) + _checksum) % 255)
+				}
+				
+				buffer_write(b, buffer_u8, _checksum)
 				
 				with _netgame {
 					buffer_write(b, buffer_u8, player_count)
+					i = 0
 					
 					repeat ds_list_size(players) {
 						var _player = players[| i++]
@@ -1802,8 +1880,8 @@ if _tick >= 1 {
 						}
 					}
 				}
-			}
 #endregion
+			}
 			
 			++i
 		}
@@ -1826,6 +1904,98 @@ if _tick >= 1 {
 		}
 		
 		--_tick
+		_ticked = true
+	}
+	
+	if _ticks_queued {
+		with _players[_netgame.local_slot] {
+			if instance_exists(thing) {
+				with thing {
+					if _ticked {
+						predict ??= {
+							floor_ray: raycast_data_create(),
+							wall_ray: raycast_data_create(),
+							ceiling_ray: raycast_data_create(),
+						}
+						
+						predict.x = x
+						predict.y = y
+						predict.z = z
+						predict.angle = angle
+						predict.pitch = pitch
+						predict.x_speed = x_speed
+						predict.y_speed = y_speed
+						predict.z_speed = z_speed
+						predict.vector_speed = vector_speed
+						predict.move_angle = move_angle
+						predict.last_prop = last_prop
+						predict.fric = fric
+						predict.grav = grav
+						predict.max_fall_speed = max_fall_speed
+						predict.max_fly_speed = max_fly_speed
+						predict.radius = radius
+						predict.height = height
+						array_copy(predict.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+						array_copy(predict.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+						array_copy(predict.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+						predict.input_length = input_length
+						predict.jumped = jumped
+						predict.coyote = coyote
+						predict.aim_angle = aim_angle
+						predict.movement_speed = movement_speed
+						predict.jump_speed = jump_speed
+						predict.coyote_time = coyote_time
+						predict.f_grounded = f_grounded
+					}
+					
+					if not (f_frozen or f_culled) {
+						f_predicting = true
+						
+						// Store original input
+						var _input_up_down = input[PlayerInputs.UP_DOWN]
+						var _input_left_right = input[PlayerInputs.LEFT_RIGHT]
+						var _input_jump = input[PlayerInputs.JUMP]
+						var _input_interact = input[PlayerInputs.INTERACT]
+						var _input_attack = input[PlayerInputs.ATTACK]
+						var _input_inventory_up = input[PlayerInputs.INVENTORY_UP]
+						var _input_inventory_left = input[PlayerInputs.INVENTORY_LEFT]
+						var _input_inventory_down = input[PlayerInputs.INVENTORY_DOWN]
+						var _input_inventory_right = input[PlayerInputs.INVENTORY_RIGHT]
+						var _input_aim = input[PlayerInputs.AIM]
+						
+						// Tick in prediction mode
+						var _move_range = input_check("walk") ? 64 : 127
+						
+						input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+						input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+						input[PlayerInputs.JUMP] = input_check("jump")
+						input[PlayerInputs.INTERACT] = input_check("interact")
+						input[PlayerInputs.ATTACK] = input_check("attack")
+						input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+						input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+						input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+						input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+						input[PlayerInputs.AIM] = input_check("aim")
+						
+						repeat _netgame.stall_time {
+							event_user(ThingEvents.TICK)
+						}
+						
+						input[PlayerInputs.UP_DOWN] = _input_up_down
+						input[PlayerInputs.LEFT_RIGHT] = _input_left_right
+						input[PlayerInputs.JUMP] = _input_jump
+						input[PlayerInputs.INTERACT] = _input_interact
+						input[PlayerInputs.ATTACK] = _input_attack
+						input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
+						input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
+						input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
+						input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
+						input[PlayerInputs.AIM] = _input_aim
+						f_predicting = false
+					}
+				}
+			}
+		}
 	}
 #endregion
 }

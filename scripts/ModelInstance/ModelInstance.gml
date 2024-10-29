@@ -353,7 +353,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return matrix_transform_point(_visual ? draw_matrix : tick_matrix, _x, _y, _z)
 	}
 	
-	static get_node_dq = function (_index) {
+	static get_node_dq = function (_index, _visual = false) {
 		gml_pragma("forceinline")
 		
 		static node_dq = dq_build_identity()

@@ -87,6 +87,8 @@ floor_ray = raycast_data_create()
 wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
 
+predict = undefined
+
 shadow_x = x
 shadow_y = y
 shadow_z = 0
@@ -129,6 +131,7 @@ f_holdable = false
 f_holdable_in_hand = false
 f_interactive = false
 f_grounded = true
+f_predicting = false
 
 m_collision = MCollision.NONE
 m_shadow = MShadow.NONE
