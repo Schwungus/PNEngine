@@ -35,6 +35,7 @@ show_debug_overlay(false)
 #macro CMD_NO_NETGAME if net_active() { print("Cannot use this command in a netgame."); exit }
 #macro CMD_NO_CLIENT if not net_master() { print("Cannot use this command as a netgame client."); exit }
 #macro CMD_NO_DEMO if global.demo_buffer != undefined { print("Cannot use this command during demo I/O."); exit }
+#macro CMD_NO_DEMO_WRITE if global.demo_write { print("Cannot use this command during demo I/O."); exit }
 
 global.console = false
 global.console_buffer = false

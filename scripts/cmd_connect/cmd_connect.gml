@@ -9,6 +9,7 @@ function cmd_connect(_args) {
 	}
 	
 	CMD_NO_DEMO
+	CMD_NO_DEMO_WRITE
 	CMD_NO_NETGAME
 	
 	if global.level.name != "lvlTitle" {
