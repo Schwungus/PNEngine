@@ -11,6 +11,8 @@ function Netgame() constructor {
 	player_count = 0
 	local_slot = 0
 	
+	delay = 0
+	timestamp = current_time
 	tick_queue = ds_queue_create()
 	tick_count = 0
 	ack_count = 0

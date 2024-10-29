@@ -18,7 +18,7 @@ function config_reset() {
 		vid_mipmap_filter: 1,
 		vid_antialias: 0,
 		vid_bloom: true,
-		vid_lighting: 0,
+		vid_lighting: 1,
 		
 		// AUDIO
 		snd_volume: 1,
@@ -33,6 +33,9 @@ function config_reset() {
 		in_pan_y: 6,
 		in_mouse_x: 0.0125,
 		in_mouse_y: 0.0125,
+		
+		// NETWORK
+		net_interp: 0.4,
 	}
 	
 	input_player_reset()

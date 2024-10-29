@@ -87,7 +87,7 @@ floor_ray = raycast_data_create()
 wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
 
-predict = undefined
+predict_host = undefined
 
 shadow_x = x
 shadow_y = y

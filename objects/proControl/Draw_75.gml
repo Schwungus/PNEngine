@@ -314,7 +314,16 @@ if _console {
 }
 
 if global.debug_fps {
-	var _fps = string(fps)
+	var _fps = $"{fps} FPS"
+	var _netgame = global.netgame
+	
+	if _netgame != undefined {
+		with _netgame {
+			if active and not master {
+				_fps += $"\n{delay} ms"
+			}
+		}
+	}
 	
 	draw_set_alpha(0.5)
 	draw_rectangle_color(0, 0, string_width(_fps), string_height(_fps), c_black, c_black, c_black, c_black, false)

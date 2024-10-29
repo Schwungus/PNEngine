@@ -1015,53 +1015,65 @@ if _tick >= 1 {
 					_netgame.load_queue = false
 					_netgame.stall_time = 0
 				}
-				
-				_netgame.stall_time += _client_tick
-				
-				if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
-					show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
-				}
 			} else {
-				with _players[_netgame.local_slot] {
-					if instance_exists(thing) {
-						with thing {
-							if predict == undefined {
-								break
+				with _netgame {
+					with _players[local_slot] {
+						if instance_exists(thing) {
+							with thing {
+								if predict_host == undefined {
+									break
+								}
+								
+								x = predict_host.x
+								y = predict_host.y
+								z = predict_host.z
+								angle = predict_host.angle
+								pitch = predict_host.pitch
+								x_speed = predict_host.x_speed
+								y_speed = predict_host.y_speed
+								z_speed = predict_host.z_speed
+								vector_speed = predict_host.vector_speed
+								move_angle = predict_host.move_angle
+								last_prop = predict_host.last_prop
+								fric = predict_host.fric
+								grav = predict_host.grav
+								max_fall_speed = predict_host.max_fall_speed
+								max_fly_speed = predict_host.max_fly_speed
+								radius = predict_host.radius
+								height = predict_host.height
+								array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+								array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+								array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+								input_length = predict_host.input_length
+								jumped = predict_host.jumped
+								coyote = predict_host.coyote
+								aim_angle = predict_host.aim_angle
+								movement_speed = predict_host.movement_speed
+								jump_speed = predict_host.jump_speed
+								coyote_time = predict_host.coyote_time
+								f_grounded = predict_host.f_grounded
+								
+								if model != undefined {
+									model.x = predict_host.model_x
+									model.y = predict_host.model_y
+									model.z = predict_host.model_z
+									model.yaw = predict_host.model_yaw
+									model.pitch = predict_host.model_pitch
+									model.roll = predict_host.model_roll
+								}
 							}
-							
-							x = predict.x
-							y = predict.y
-							z = predict.z
-							angle = predict.angle
-							pitch = predict.pitch
-							x_speed = predict.x_speed
-							y_speed = predict.y_speed
-							z_speed = predict.z_speed
-							vector_speed = predict.vector_speed
-							move_angle = predict.move_angle
-							last_prop = predict.last_prop
-							fric = predict.fric
-							grav = predict.grav
-							max_fall_speed = predict.max_fall_speed
-							max_fly_speed = predict.max_fly_speed
-							radius = predict.radius
-							height = predict.height
-							array_copy(floor_ray, 0, predict.floor_ray, 0, RaycastData.__SIZE)
-							array_copy(wall_ray, 0, predict.wall_ray, 0, RaycastData.__SIZE)
-							array_copy(ceiling_ray, 0, predict.ceiling_ray, 0, RaycastData.__SIZE)
-							input_length = predict.input_length
-							jumped = predict.jumped
-							coyote = predict.coyote
-							aim_angle = predict.aim_angle
-							movement_speed = predict.movement_speed
-							jump_speed = predict.jump_speed
-							coyote_time = predict.coyote_time
-							f_grounded = predict.f_grounded
 						}
 					}
+					
+					delay = 0
+					stall_time = 0
 				}
-				
-				_netgame.stall_time = _client_tick
+			}
+			
+			_netgame.stall_time += _client_tick
+			
+			if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
+				show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
 			}
 		}
 	}
@@ -1402,6 +1414,7 @@ if _tick >= 1 {
 				--tick_count
 				_tick_queue = tick_queue
 				_local_slot = local_slot
+				delay += ds_queue_dequeue(_tick_queue)
 			}
 			
 			var _checksum = ds_queue_dequeue(_tick_queue)
@@ -1912,43 +1925,52 @@ if _tick >= 1 {
 			if instance_exists(thing) {
 				with thing {
 					if _ticked {
-						predict ??= {
+						predict_host ??= {
 							floor_ray: raycast_data_create(),
 							wall_ray: raycast_data_create(),
 							ceiling_ray: raycast_data_create(),
 						}
 						
-						predict.x = x
-						predict.y = y
-						predict.z = z
-						predict.angle = angle
-						predict.pitch = pitch
-						predict.x_speed = x_speed
-						predict.y_speed = y_speed
-						predict.z_speed = z_speed
-						predict.vector_speed = vector_speed
-						predict.move_angle = move_angle
-						predict.last_prop = last_prop
-						predict.fric = fric
-						predict.grav = grav
-						predict.max_fall_speed = max_fall_speed
-						predict.max_fly_speed = max_fly_speed
-						predict.radius = radius
-						predict.height = height
-						array_copy(predict.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
-						array_copy(predict.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
-						array_copy(predict.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
-						predict.input_length = input_length
-						predict.jumped = jumped
-						predict.coyote = coyote
-						predict.aim_angle = aim_angle
-						predict.movement_speed = movement_speed
-						predict.jump_speed = jump_speed
-						predict.coyote_time = coyote_time
-						predict.f_grounded = f_grounded
+						predict_host.x = x
+						predict_host.y = y
+						predict_host.z = z
+						predict_host.angle = angle
+						predict_host.pitch = pitch
+						predict_host.x_speed = x_speed
+						predict_host.y_speed = y_speed
+						predict_host.z_speed = z_speed
+						predict_host.vector_speed = vector_speed
+						predict_host.move_angle = move_angle
+						predict_host.last_prop = last_prop
+						predict_host.fric = fric
+						predict_host.grav = grav
+						predict_host.max_fall_speed = max_fall_speed
+						predict_host.max_fly_speed = max_fly_speed
+						predict_host.radius = radius
+						predict_host.height = height
+						array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+						array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+						array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+						predict_host.input_length = input_length
+						predict_host.jumped = jumped
+						predict_host.coyote = coyote
+						predict_host.aim_angle = aim_angle
+						predict_host.movement_speed = movement_speed
+						predict_host.jump_speed = jump_speed
+						predict_host.coyote_time = coyote_time
+						predict_host.f_grounded = f_grounded
+						
+						if model != undefined {
+							predict_host.model_x = model.x
+							predict_host.model_y = model.y
+							predict_host.model_z = model.z
+							predict_host.model_yaw = model.yaw
+							predict_host.model_pitch = model.pitch
+							predict_host.model_roll = model.roll
+						}
 					}
 					
-					if not (f_frozen or f_culled) {
+					if not (f_frozen or f_culled) and predict_host != undefined {
 						f_predicting = true
 						
 						// Store original input
@@ -1977,8 +1999,29 @@ if _tick >= 1 {
 						input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
 						input[PlayerInputs.AIM] = input_check("aim")
 						
-						repeat _netgame.stall_time {
+						var i = _netgame.delay * 0.03
+						
+						while i >= 2 {
 							event_user(ThingEvents.TICK)
+							--i
+						}
+						
+						var _net_interp = _config.net_interp
+						
+						x = lerp(predict_host.x, x, _net_interp)
+						y = lerp(predict_host.y, y, _net_interp)
+						z = lerp(predict_host.z, z, _net_interp)
+						angle = lerp_angle(predict_host.angle, angle, _net_interp)
+						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+						aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+						
+						if model != undefined {
+							model.x = lerp(predict_host.model_x, model.x, _net_interp)
+							model.y = lerp(predict_host.model_y, model.y, _net_interp)
+							model.z = lerp(predict_host.model_z, model.z, _net_interp)
+							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
 						}
 						
 						input[PlayerInputs.UP_DOWN] = _input_up_down

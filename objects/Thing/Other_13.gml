@@ -408,4 +408,8 @@ if _ticking {
 	if tick_end != undefined {
 		catspeak_execute(tick_end)
 	}
+} else if model != undefined {
+	model.x = x
+	model.y = y
+	model.z = z
 }

@@ -492,10 +492,12 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_TICK: {
+			var _time = current_time
 			var _checksum = buffer_read(_buffer, buffer_u8)
 			var n = buffer_read(_buffer, buffer_u8)
 			
-			ds_queue_enqueue(tick_queue, _checksum, n)
+			ds_queue_enqueue(tick_queue, _time - timestamp, _checksum, n)
+			timestamp = _time
 			
 			repeat n {
 				var _slot = buffer_read(_buffer, buffer_u8)
