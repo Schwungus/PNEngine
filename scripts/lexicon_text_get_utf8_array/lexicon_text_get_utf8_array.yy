@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"lexicon_get_os_language",
+  "%Name":"lexicon_text_get_utf8_array",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"lexicon_get_os_language",
+  "name":"lexicon_text_get_utf8_array",
   "parent":{
     "name":"General",
     "path":"folders/Scripts/Libraries/Lexicon/General.yy",

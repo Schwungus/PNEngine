@@ -41,14 +41,26 @@
 /* 
     Tells Lexicon to include the fallback language as well when switching languages.
 */
-#macro __LEXICON_FORECE_LOAD_FALLBACK_LANGUAGE false 
+#macro __LEXICON_FORCE_LOAD_FALLBACK_LANGUAGE false 
 
 /*
     Whether to use the old legacy accessor feature "%s" or not.
 */
-#macro __LEXICON_ALLOW_LEGACY_ACCESSOR true
+#macro __LEXICON_ALLOW_LEGACY_ACCESSOR false
 
 /*
     Whether Lexicon should allow dynamic functions to update existing texte entries
 */
-#macro __LEXICON_UPDATE_DYNAMIC_VALUES true
+#macro __LEXICON_UPDATE_DYNAMIC_VALUES false
+
+/*
+	Whether to resolve newlines (\n) upon loading in language\s
+*/
+#macro __LEXICON_RESOLVE_NEWLINES false
+
+/*
+	Whether Lexicon should verify that no recursion is occuring.
+	Turning this off will bypass any recursion checks, but unknown errors or infinite loops may occur.
+	By default this is on.
+*/
+#macro __LEXICON_ENTRY_RECURSION_DETECTION true

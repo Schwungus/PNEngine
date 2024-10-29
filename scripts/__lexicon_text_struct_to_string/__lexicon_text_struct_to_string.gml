@@ -1,4 +1,5 @@
 /// @ignore
+/// feather ignore all
 function __lexicon_text_struct_to_string(_textName, _textStruct) {
 	gml_pragma("forceinline");
 	var _i = 0;
@@ -10,8 +11,9 @@ function __lexicon_text_struct_to_string(_textName, _textStruct) {
 		} else if (is_array(_textStruct[$ _textArray[_i]])) {
 			__lexicon_text_array_to_string(_textKey, _textStruct[$ _textArray[_i]]);
 		} else {
-			if ((!__LEXICON_REPLACE_ENTRIES) && (variable_struct_exists(__LEXICON_STRUCT.textEntries, _textKey))) continue;
-			__LEXICON_STRUCT.textEntries[$ _textKey] = _textStruct[$ _textArray[_i]];
+			//if ((!__LEXICON_REPLACE_ENTRIES) && (variable_struct_exists(__LEXICON_STRUCT.textEntries, _textKey))) continue;
+			//__LEXICON_STRUCT.textEntries[$ _textKey] = _textStruct[$ _textArray[_i]];
+			lexicon_entry_add(_textKey, _textStruct[$ _textArray[_i]]);
 		}
 		++_i;
 	}
