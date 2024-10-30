@@ -35,7 +35,7 @@ function config_reset() {
 		in_mouse_y: 0.0125,
 		
 		// NETWORK
-		net_interp: 0.4,
+		net_interp: 0.3,
 		net_interp_delay: -1,
 	}
 	
