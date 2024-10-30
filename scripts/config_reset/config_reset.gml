@@ -36,6 +36,7 @@ function config_reset() {
 		
 		// NETWORK
 		net_interp: 0.4,
+		net_interp_delay: -1,
 	}
 	
 	input_player_reset()

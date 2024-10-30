@@ -1100,6 +1100,11 @@ if _tick >= 1 {
 								array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
 								array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
 								f_grounded = predict_host.f_grounded
+								yaw = predict_host.yaw
+								roll = predict_host.roll
+								fov = predict_host.fov
+								range = predict_host.range
+								range_lerp = predict_host.range_lerp
 								
 								if model != undefined {
 									model.x = predict_host.model_x
@@ -1109,12 +1114,6 @@ if _tick >= 1 {
 									model.pitch = predict_host.model_pitch
 									model.roll = predict_host.model_roll
 								}
-								
-								yaw = predict_host.yaw
-								roll = predict_host.roll
-								fov = predict_host.fov
-								range = predict_host.range
-								range_lerp = predict_host.range_lerp
 							}
 						}
 					}
@@ -2061,6 +2060,11 @@ if _tick >= 1 {
 						array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
 						array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
 						predict_host.f_grounded = f_grounded
+						predict_host.yaw = yaw
+						predict_host.roll = roll
+						predict_host.fov = fov
+						predict_host.range = range
+						predict_host.range_lerp = range_lerp
 						
 						if model != undefined {
 							predict_host.model_x = model.x
@@ -2070,12 +2074,6 @@ if _tick >= 1 {
 							predict_host.model_pitch = model.pitch
 							predict_host.model_roll = model.roll
 						}
-						
-						predict_host.yaw = yaw
-						predict_host.roll = roll
-						predict_host.fov = fov
-						predict_host.range = range
-						predict_host.range_lerp = range_lerp
 					}
 				}
 			}
@@ -2083,6 +2081,7 @@ if _tick >= 1 {
 			var _input = input
 			var _delay = _netgame.delay * 0.03
 			var _net_interp = _config.net_interp
+			var _net_interp_delay = _config.net_interp_delay
 			
 			if _has_thing {
 				with thing {
@@ -2120,8 +2119,8 @@ if _tick >= 1 {
 					
 					var i = _delay
 					
-					while i >= 2 {
-						event_user(ThingEvents.TICK)
+					while i >= _net_interp_delay {
+						event_user(ThingEvents.TICK);
 						--i
 					}
 					
@@ -2164,8 +2163,7 @@ if _tick >= 1 {
 					f_predicting = true
 					
 					// Store original input
-					var _input = other.input
-					var _input_aim_left_right = _input[PlayerInputs.AIM_LEFT_RIGHT]
+					/*var _input_aim_left_right = _input[PlayerInputs.AIM_LEFT_RIGHT]
 					var _input_aim_up_down = _input[PlayerInputs.AIM_UP_DOWN]
 					var _input_force_left_right = _input[PlayerInputs.FORCE_LEFT_RIGHT]
 					var _input_force_up_down = _input[PlayerInputs.FORCE_UP_DOWN]
@@ -2185,42 +2183,57 @@ if _tick >= 1 {
 						}
 					}
 					
-					var _predict_force_left_right = _input_force_left_right
-					var _predict_aim_left_right
-					
-					if is_nan(_predict_force_left_right) {
+					if is_nan(_input_force_left_right) {
 						var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
 						
-						_predict_aim_left_right = (_input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768
+						print($"DX: {_dx}")
+						_input[PlayerInputs.AIM_LEFT_RIGHT] = (_input_aim_left_right - _dx) % 32768
 					} else {
-						_predict_aim_left_right = round(_predict_force_left_right * PLAYER_AIM_DIRECT) % 32768
+						print($"FORCE X: {_input_force_left_right}")
+						_input[PlayerInputs.AIM_LEFT_RIGHT] = round(_input_force_left_right * PLAYER_AIM_DIRECT) % 32768
 						_input[PlayerInputs.FORCE_LEFT_RIGHT] = NaN
 					}
 					
-					_input[PlayerInputs.AIM_LEFT_RIGHT] = _predict_aim_left_right
-					
-					var _predict_force_up_down = _input_force_up_down
-					var _predict_aim_up_down
-					
-					if is_nan(_predict_force_up_down) {
+					if is_nan(_input_force_up_down) {
 						var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
 						
-						_predict_aim_up_down = (_input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768
+						print($"DY: {_dy}")
+						_input[PlayerInputs.AIM_UP_DOWN] = (_input_aim_up_down - _dy) % 32768
 					} else {
-						_predict_aim_up_down = round(_predict_force_up_down * PLAYER_AIM_DIRECT) % 32768
+						print($"FORCE Y: {_input_force_up_down}")
+						_input[PlayerInputs.AIM_UP_DOWN] = round(_input_force_up_down * PLAYER_AIM_DIRECT) % 32768
 						_input[PlayerInputs.FORCE_UP_DOWN] = NaN
+					}*/
+					
+					var i = _delay
+					
+					while i >= _net_interp_delay {
+						event_user(ThingEvents.TICK);
+						--i
 					}
 					
-					_input[PlayerInputs.AIM_UP_DOWN] = _predict_aim_up_down
+					x = lerp(predict_host.x, x, _net_interp)
+					y = lerp(predict_host.y, y, _net_interp)
+					z = lerp(predict_host.z, z, _net_interp)
+					angle = lerp_angle(predict_host.angle, angle, _net_interp)
+					pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+					yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
+					roll = lerp_angle(predict_host.roll, roll, _net_interp)
+					fov = lerp(predict_host.fov, fov, _net_interp)
 					
-					repeat ceil(_delay) {
-						event_user(ThingEvents.TICK)
+					if model != undefined {
+						model.x = lerp(predict_host.model_x, model.x, _net_interp)
+						model.y = lerp(predict_host.model_y, model.y, _net_interp)
+						model.z = lerp(predict_host.model_z, model.z, _net_interp)
+						model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+						model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+						model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
 					}
 					
-					_input[PlayerInputs.AIM_UP_DOWN] = _input_aim_up_down
+					/*_input[PlayerInputs.AIM_UP_DOWN] = _input_aim_up_down
 					_input[PlayerInputs.AIM_LEFT_RIGHT] = _input_aim_left_right
 					_input[PlayerInputs.FORCE_UP_DOWN] = _input_force_up_down
-					_input[PlayerInputs.FORCE_LEFT_RIGHT] = _input_force_left_right
+					_input[PlayerInputs.FORCE_LEFT_RIGHT] = _input_force_left_right*/
 					f_predicting = false
 				}
 			}
