@@ -768,6 +768,8 @@ if _tick >= 1 {
 	var _netgame = global.netgame
 	var _in_netgame = _netgame != undefined and _netgame.active
 	var _is_master = not _in_netgame or _netgame.master
+	var _mouse_dx = mouse_dx
+	var _mouse_dy = mouse_dy
 	
 	__input_system_tick()
 	
@@ -1052,6 +1054,13 @@ if _tick >= 1 {
 								jump_speed = predict_host.jump_speed
 								coyote_time = predict_host.coyote_time
 								f_grounded = predict_host.f_grounded
+								playcam_z_lerp = predict_host.playcam_z_lerp
+								playcam_z_snap = predict_host.playcam_z_snap
+								playcam_sync_input = predict_host.playcam_sync_input
+								array_copy(playcam_target, 0, predict_host.playcam_target, 0, CameraTargetData.__SIZE)
+								array_copy(playcam, 0, predict_host.playcam, 0, 3)
+								playcam_z = predict_host.playcam_z
+								playcam_z_to = predict_host.playcam_z_to
 								
 								if model != undefined {
 									model.x = predict_host.model_x
@@ -1061,6 +1070,51 @@ if _tick >= 1 {
 									model.pitch = predict_host.model_pitch
 									model.roll = predict_host.model_roll
 								}
+							}
+						}
+						
+						if instance_exists(camera) {
+							with camera {
+								if predict_host == undefined {
+									break
+								}
+								
+								x = predict_host.x
+								y = predict_host.y
+								z = predict_host.z
+								angle = predict_host.angle
+								pitch = predict_host.pitch
+								x_speed = predict_host.x_speed
+								y_speed = predict_host.y_speed
+								z_speed = predict_host.z_speed
+								vector_speed = predict_host.vector_speed
+								move_angle = predict_host.move_angle
+								last_prop = predict_host.last_prop
+								fric = predict_host.fric
+								grav = predict_host.grav
+								max_fall_speed = predict_host.max_fall_speed
+								max_fly_speed = predict_host.max_fly_speed
+								radius = predict_host.radius
+								height = predict_host.height
+								array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+								array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+								array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+								f_grounded = predict_host.f_grounded
+								
+								if model != undefined {
+									model.x = predict_host.model_x
+									model.y = predict_host.model_y
+									model.z = predict_host.model_z
+									model.yaw = predict_host.model_yaw
+									model.pitch = predict_host.model_pitch
+									model.roll = predict_host.model_roll
+								}
+								
+								yaw = predict_host.yaw
+								roll = predict_host.roll
+								fov = predict_host.fov
+								range = predict_host.range
+								range_lerp = predict_host.range_lerp
 							}
 						}
 					}
@@ -1403,9 +1457,6 @@ if _tick >= 1 {
 #endregion
 		
 #region Players
-		var _mouse_dx = mouse_dx
-		var _mouse_dy = mouse_dy
-		
 #region Input
 		if _ticks_queued {
 			var _tick_queue, _local_slot
@@ -1488,8 +1539,6 @@ if _tick >= 1 {
 					_dy_factor += _mouse_dy * in_mouse_y
 				}
 			}
-			
-			var _input = _players[_local_slot].input
 			
 			_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
 			_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
@@ -1922,13 +1971,18 @@ if _tick >= 1 {
 	
 	if _ticks_queued {
 		with _players[_netgame.local_slot] {
-			if instance_exists(thing) {
-				with thing {
-					if _ticked {
+			var _has_thing = instance_exists(thing)
+			var _has_camera = instance_exists(camera)
+			
+			if _ticked {
+				if _has_thing {
+					with thing {
 						predict_host ??= {
 							floor_ray: raycast_data_create(),
 							wall_ray: raycast_data_create(),
 							ceiling_ray: raycast_data_create(),
+							playcam: array_create(3),
+							playcam_target: array_create(CameraTargetData.__SIZE),
 						}
 						
 						predict_host.x = x
@@ -1959,6 +2013,13 @@ if _tick >= 1 {
 						predict_host.jump_speed = jump_speed
 						predict_host.coyote_time = coyote_time
 						predict_host.f_grounded = f_grounded
+						predict_host.playcam_z_lerp = playcam_z_lerp
+						predict_host.playcam_z_snap = playcam_z_snap
+						predict_host.playcam_sync_input = playcam_sync_input
+						array_copy(predict_host.playcam_target, 0, playcam_target, 0, CameraTargetData.__SIZE)
+						array_copy(predict_host.playcam, 0, playcam, 0, 3)
+						predict_host.playcam_z = playcam_z
+						predict_host.playcam_z_to = playcam_z_to
 						
 						if model != undefined {
 							predict_host.model_x = model.x
@@ -1969,73 +2030,198 @@ if _tick >= 1 {
 							predict_host.model_roll = model.roll
 						}
 					}
-					
-					if not (f_frozen or f_culled) and predict_host != undefined {
-						f_predicting = true
-						
-						// Store original input
-						var _input_up_down = input[PlayerInputs.UP_DOWN]
-						var _input_left_right = input[PlayerInputs.LEFT_RIGHT]
-						var _input_jump = input[PlayerInputs.JUMP]
-						var _input_interact = input[PlayerInputs.INTERACT]
-						var _input_attack = input[PlayerInputs.ATTACK]
-						var _input_inventory_up = input[PlayerInputs.INVENTORY_UP]
-						var _input_inventory_left = input[PlayerInputs.INVENTORY_LEFT]
-						var _input_inventory_down = input[PlayerInputs.INVENTORY_DOWN]
-						var _input_inventory_right = input[PlayerInputs.INVENTORY_RIGHT]
-						var _input_aim = input[PlayerInputs.AIM]
-						
-						// Tick in prediction mode
-						var _move_range = input_check("walk") ? 64 : 127
-						
-						input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
-						input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
-						input[PlayerInputs.JUMP] = input_check("jump")
-						input[PlayerInputs.INTERACT] = input_check("interact")
-						input[PlayerInputs.ATTACK] = input_check("attack")
-						input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
-						input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
-						input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
-						input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
-						input[PlayerInputs.AIM] = input_check("aim")
-						
-						var i = _netgame.delay * 0.03
-						
-						while i >= 2 {
-							event_user(ThingEvents.TICK)
-							--i
+				}
+				
+				if _has_camera {
+					with camera {
+						predict_host ??= {
+							floor_ray: raycast_data_create(),
+							wall_ray: raycast_data_create(),
+							ceiling_ray: raycast_data_create(),
 						}
 						
-						var _net_interp = _config.net_interp
-						
-						x = lerp(predict_host.x, x, _net_interp)
-						y = lerp(predict_host.y, y, _net_interp)
-						z = lerp(predict_host.z, z, _net_interp)
-						angle = lerp_angle(predict_host.angle, angle, _net_interp)
-						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
-						aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+						predict_host.x = x
+						predict_host.y = y
+						predict_host.z = z
+						predict_host.angle = angle
+						predict_host.pitch = pitch
+						predict_host.x_speed = x_speed
+						predict_host.y_speed = y_speed
+						predict_host.z_speed = z_speed
+						predict_host.vector_speed = vector_speed
+						predict_host.move_angle = move_angle
+						predict_host.last_prop = last_prop
+						predict_host.fric = fric
+						predict_host.grav = grav
+						predict_host.max_fall_speed = max_fall_speed
+						predict_host.max_fly_speed = max_fly_speed
+						predict_host.radius = radius
+						predict_host.height = height
+						array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+						array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+						array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+						predict_host.f_grounded = f_grounded
 						
 						if model != undefined {
-							model.x = lerp(predict_host.model_x, model.x, _net_interp)
-							model.y = lerp(predict_host.model_y, model.y, _net_interp)
-							model.z = lerp(predict_host.model_z, model.z, _net_interp)
-							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
-							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
-							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+							predict_host.model_x = model.x
+							predict_host.model_y = model.y
+							predict_host.model_z = model.z
+							predict_host.model_yaw = model.yaw
+							predict_host.model_pitch = model.pitch
+							predict_host.model_roll = model.roll
 						}
 						
-						input[PlayerInputs.UP_DOWN] = _input_up_down
-						input[PlayerInputs.LEFT_RIGHT] = _input_left_right
-						input[PlayerInputs.JUMP] = _input_jump
-						input[PlayerInputs.INTERACT] = _input_interact
-						input[PlayerInputs.ATTACK] = _input_attack
-						input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
-						input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
-						input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
-						input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
-						input[PlayerInputs.AIM] = _input_aim
-						f_predicting = false
+						predict_host.yaw = yaw
+						predict_host.roll = roll
+						predict_host.fov = fov
+						predict_host.range = range
+						predict_host.range_lerp = range_lerp
 					}
+				}
+			}
+			
+			var _input = input
+			var _delay = _netgame.delay * 0.03
+			var _net_interp = _config.net_interp
+			
+			if _has_thing {
+				with thing {
+					if f_frozen or f_culled or predict_host == undefined {
+						break
+					}
+					
+					f_predicting = true
+					
+					// Store original input
+					var _input_up_down = _input[PlayerInputs.UP_DOWN]
+					var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
+					var _input_jump = _input[PlayerInputs.JUMP]
+					var _input_interact = _input[PlayerInputs.INTERACT]
+					var _input_attack = _input[PlayerInputs.ATTACK]
+					var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
+					var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
+					var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
+					var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
+					var _input_aim = _input[PlayerInputs.AIM]
+					
+					// Tick in prediction mode
+					var _move_range = input_check("walk") ? 64 : 127
+					
+					_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+					_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+					_input[PlayerInputs.JUMP] = input_check("jump")
+					_input[PlayerInputs.INTERACT] = input_check("interact")
+					_input[PlayerInputs.ATTACK] = input_check("attack")
+					_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+					_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+					_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+					_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+					_input[PlayerInputs.AIM] = input_check("aim")
+					
+					var i = _delay
+					
+					while i >= 2 {
+						event_user(ThingEvents.TICK)
+						--i
+					}
+					
+					x = lerp(predict_host.x, x, _net_interp)
+					y = lerp(predict_host.y, y, _net_interp)
+					z = lerp(predict_host.z, z, _net_interp)
+					angle = lerp_angle(predict_host.angle, angle, _net_interp)
+					pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+					aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+					
+					if model != undefined {
+						model.x = lerp(predict_host.model_x, model.x, _net_interp)
+						model.y = lerp(predict_host.model_y, model.y, _net_interp)
+						model.z = lerp(predict_host.model_z, model.z, _net_interp)
+						model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+						model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+						model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+					}
+					
+					_input[PlayerInputs.UP_DOWN] = _input_up_down
+					_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
+					_input[PlayerInputs.JUMP] = _input_jump
+					_input[PlayerInputs.INTERACT] = _input_interact
+					_input[PlayerInputs.ATTACK] = _input_attack
+					_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
+					_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
+					_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
+					_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
+					_input[PlayerInputs.AIM] = _input_aim
+					f_predicting = false
+				}
+			}
+			
+			if _has_camera {
+				with camera {
+					if f_frozen or f_culled or path_active or predict_host == undefined {
+						break
+					}
+					
+					f_predicting = true
+					
+					// Store original input
+					var _input = other.input
+					var _input_aim_left_right = _input[PlayerInputs.AIM_LEFT_RIGHT]
+					var _input_aim_up_down = _input[PlayerInputs.AIM_UP_DOWN]
+					var _input_force_left_right = _input[PlayerInputs.FORCE_LEFT_RIGHT]
+					var _input_force_up_down = _input[PlayerInputs.FORCE_UP_DOWN]
+					
+					// Tick in prediction mode
+					var _dx_factor = input_value("aim_right") - input_value("aim_left")
+					var _dy_factor = input_value("aim_down") - input_value("aim_up")
+					var _dx_angle, _dy_angle
+					
+					with _config {
+						_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
+						_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+						
+						if _mouse_focused {
+							_dx_factor += _mouse_dx * in_mouse_x
+							_dy_factor += _mouse_dy * in_mouse_y
+						}
+					}
+					
+					var _predict_force_left_right = _input_force_left_right
+					var _predict_aim_left_right
+					
+					if is_nan(_predict_force_left_right) {
+						var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+						
+						_predict_aim_left_right = (_input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768
+					} else {
+						_predict_aim_left_right = round(_predict_force_left_right * PLAYER_AIM_DIRECT) % 32768
+						_input[PlayerInputs.FORCE_LEFT_RIGHT] = NaN
+					}
+					
+					_input[PlayerInputs.AIM_LEFT_RIGHT] = _predict_aim_left_right
+					
+					var _predict_force_up_down = _input_force_up_down
+					var _predict_aim_up_down
+					
+					if is_nan(_predict_force_up_down) {
+						var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+						
+						_predict_aim_up_down = (_input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768
+					} else {
+						_predict_aim_up_down = round(_predict_force_up_down * PLAYER_AIM_DIRECT) % 32768
+						_input[PlayerInputs.FORCE_UP_DOWN] = NaN
+					}
+					
+					_input[PlayerInputs.AIM_UP_DOWN] = _predict_aim_up_down
+					
+					repeat ceil(_delay) {
+						event_user(ThingEvents.TICK)
+					}
+					
+					_input[PlayerInputs.AIM_UP_DOWN] = _input_aim_up_down
+					_input[PlayerInputs.AIM_LEFT_RIGHT] = _input_aim_left_right
+					_input[PlayerInputs.FORCE_UP_DOWN] = _input_force_up_down
+					_input[PlayerInputs.FORCE_LEFT_RIGHT] = _input_force_left_right
+					f_predicting = false
 				}
 			}
 		}
