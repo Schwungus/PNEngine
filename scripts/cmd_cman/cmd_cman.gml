@@ -14,7 +14,7 @@ function cmd_cman(_args) {
 	var _camera_active = global.camera_active
 	
 	if instance_exists(_camera_active) {
-		with _camera_active {
+		with _camera_active.resolve() {
 			global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
 		}
 		
@@ -29,7 +29,7 @@ function cmd_cman(_args) {
 		var _camera = _players[i++].camera
 		
 		if instance_exists(_camera) {
-			with _camera {
+			with _camera.resolve() {
 				global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
 			}
 			
