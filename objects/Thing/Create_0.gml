@@ -593,6 +593,12 @@ bump_avoid = function (_from, _amount = 1) {
 }
 
 grid_iterate = function (_type, _distance, _include_self = false) {
+	gml_pragma("forceinline")
+	
+	return grid_iterate_at(_type, x, y, _distance, _include_self)
+}
+
+grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 	static results = []
 	
 	var _bump_grid, _bump_lists, _bump_x, _bump_y
@@ -609,8 +615,8 @@ grid_iterate = function (_type, _distance, _include_self = false) {
 	var _grid_max_x = _grid_width - 1
 	var _grid_max_y = _grid_height - 1
 	
-	var _gx = (x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
-	var _gy = (y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
+	var _gx = (_x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
+	var _gy = (_y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
 	var _gr = _distance * COLLIDER_REGION_SIZE_INVERSE
 	
 	var _gx1 = clamp(floor(_gx - _gr), 0, _grid_max_x)
