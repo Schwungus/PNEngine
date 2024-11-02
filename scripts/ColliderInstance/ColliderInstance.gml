@@ -12,6 +12,7 @@ function ColliderInstance(_collider) constructor {
 #region Matrices
 	matrix = matrix_build_identity()
 	inverse_matrix = matrix_build_identity()
+	delta_matrix = matrix_build_identity()
 	is_static = true
 	
 	static set_matrix = function (_matrix) {
@@ -33,6 +34,10 @@ function ColliderInstance(_collider) constructor {
 		
 		if d == 0 {
 			return false
+		}
+		
+		if not is_static {
+			delta_matrix = matrix_multiply(inverse_matrix, _matrix)
 		}
 		
 		var m12 = _matrix[12]
@@ -77,7 +82,9 @@ function ColliderInstance(_collider) constructor {
 	static reset_matrix = function () {
 		static _identity = matrix_build_identity()
 		
-		matrix = _identity
+		array_copy(matrix, 0, _identity, 0, 16)
+		array_copy(inverse_matrix, 0, _identity, 0, 16)
+		array_copy(delta_matrix, 0, _identity, 0, 16)
 		is_static = true
 	}
 #endregion
