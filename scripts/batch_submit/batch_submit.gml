@@ -9,6 +9,7 @@ function batch_submit() {
 	
 	global.u_animated.set(0)
 	global.u_color.set(1, 1, 1, 1)
+	global.u_stencil.set(1, 1, 1, 0)
 	global.u_material_alpha_test.set(global.batch_alpha_test)
 	global.u_material_bright.set(global.batch_bright)
 	global.u_material_color.set(1, 1, 1, 1)
