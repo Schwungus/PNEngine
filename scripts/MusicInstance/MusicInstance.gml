@@ -6,18 +6,18 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 	loop = _loop
 	active = _active
 	
-	// 0 = main, 1 = cut, 2 = fade
-	gain = [_gain, 1, 1]
-	gain_start = [_gain, 1, 1]
-	gain_end = [_gain, 1, 1]
-	gain_time = [0, 0, 0]
-	gain_duration = [0, 0, 0]
+	// 0 = main, 1 = cut, 2 = fade, 3 = game
+	gain = [_gain, 1, 1, 1]
+	gain_start = [_gain, 1, 1, 1]
+	gain_end = [_gain, 1, 1, 1]
+	gain_time = [0, 0, 0, 0]
+	gain_duration = [0, 0, 0, 0]
 	
 	ds_list_add(global.music_instances, self)
 	
 	sound_instance = fmod_system_play_sound(_music.stream, true, global.music_channel_group)
 	fmod_channel_control_set_mode(sound_instance, _loop ? FMOD_MODE.LOOP_NORMAL : FMOD_MODE.LOOP_OFF)
-	fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2])
+	fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2] * gain[3])
 	fmod_channel_set_position(sound_instance, _offset, FMOD_TIMEUNIT.PCM)
 	fmod_channel_control_set_paused(sound_instance, false)
 	
@@ -37,7 +37,7 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		
 		if _time <= 0 {
 			gain[_slot] = _gain
-			fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2])
+			fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2] * gain[3])
 			
 			exit
 		}

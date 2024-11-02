@@ -412,7 +412,7 @@ while i {
 		var _update_gain = false
 		var j = 0
 		
-		repeat 3 {
+		repeat 4 {
 			var _gain_time = gain_time[j]
 			var _gain_duration = gain_duration[j]
 			
@@ -426,7 +426,7 @@ while i {
 		}
 		
 		if _update_gain {
-			fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2])
+			fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2] * gain[3])
 		}
 		
 		if (stopping and gain[2] <= 0) or not fmod_channel_control_is_playing(sound_instance) {

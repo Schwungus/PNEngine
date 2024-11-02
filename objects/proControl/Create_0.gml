@@ -699,6 +699,15 @@ with Catspeak {
 			}
 		},
 		
+		"music_gain_all", function (_gain, _time) {
+			var _music_instances = global.music_instances
+			var i = ds_list_size(_music_instances)
+			
+			while i {
+				_music_instances[| --i].set_gain_common(3, _gain, _time)
+			}
+		},
+		
 		"sound_is_playing", function (_sound) {
 			return fmod_channel_control_is_playing(_sound)
 		},
