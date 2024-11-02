@@ -106,6 +106,21 @@ with Catspeak {
 		"matrix_build_projection_perspective", matrix_build_projection_perspective,
 		"matrix_build_projection_perspective_fov", matrix_build_projection_perspective_fov,
 		"matrix_transform_point", matrix_transform_point,
+		
+		"matrix_transform_normal", function (_matrix, _nx, _ny, _nz) {
+			var _result = matrix_transform_vertex(_matrix, _nx, _ny, _nz, 0)
+			var __nx = _result[0]
+			var __ny = _result[1]
+			var __nz = _result[2]
+			var d = 1 / point_distance_3d(0, 0, 0, __nx, __ny, __nz)
+			
+			_result[0] *= d
+			_result[1] *= d
+			_result[2] *= d
+			
+			return _result
+		},
+		
 		"matrix_get", matrix_get,
 		"matrix_set", matrix_set,
 		"matrix_world_reset", matrix_world_reset,
