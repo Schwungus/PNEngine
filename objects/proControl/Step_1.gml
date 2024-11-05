@@ -1267,6 +1267,15 @@ if _tick >= 1 {
 				if _tick_target.exists and _tick_target.f_blocking {
 					_skip_tick = true
 				}
+				
+				// Extra check to prevent a crash when disconnecting
+				// through UI leave() method
+				if _in_netgame and not net_active() {
+					_in_netgame = false
+					_is_master = true
+					_ticks_queued = false
+					_skip_tick = true
+				}
 			} else {
 				var _paused = false
 				
@@ -1298,6 +1307,7 @@ if _tick >= 1 {
 				
 				if _paused {
 					ui_create("Pause")
+					
 					_skip_tick = true
 				}
 			}

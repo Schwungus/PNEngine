@@ -102,7 +102,16 @@ function UI(_ui_script) constructor {
 	}
 	
 	static leave = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
+		var _in_netgame = net_active()
+		
 		cmd_disconnect("")
+		
+		if _in_netgame {
+			// Override the transition while disconnecting to prevent erroneous
+			// warps
+			_transition = noone
+		}
+		
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
