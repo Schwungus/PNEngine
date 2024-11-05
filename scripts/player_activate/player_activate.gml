@@ -3,10 +3,16 @@ function player_activate(_scope) {
 		if status == PlayerStatus.INACTIVE {
 			status = PlayerStatus.PENDING
 			
-			var _device = input_player_get_gamepad_type(slot)
+			var _device
 			
-			if _device == "unknown" {
-				_device = "no controller"
+			if net_active() {
+				_device = "remote"
+			} else {
+				_device = input_player_get_gamepad_type(slot)
+				
+				if _device == "unknown" {
+					_device = "no controller"
+				}
 			}
 			
 			++global.players_ready;

@@ -296,20 +296,23 @@ with _netgame {
 			local_slot = buffer_read(_buffer, buffer_u8)
 			print($"proControl: Assigned as Player {-~local_slot}")
 			
-			var _local = net_add_player(local_slot, "127.0.0.1", 0)
-			
-			_local.name = global.config.name
-			_local.local = true
+			with net_add_player(local_slot, "127.0.0.1", 0) {
+				name = global.config.name
+				local = true
+			}
 			
 			repeat buffer_read(_buffer, buffer_u8) {
 				var _slot = buffer_read(_buffer, buffer_u8)
 				
 				print($"Getting info from Player {-~_slot}")
 				
-				var _other = net_add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port)
-				
-				_other.player.status = buffer_read(_buffer, buffer_u8)
-				_other.name = buffer_read(_buffer, buffer_string)
+				with net_add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port) {
+					if player != undefined {
+						player.status = buffer_read(_buffer, buffer_u8)
+					}
+					
+					name = buffer_read(_buffer, buffer_string)
+				}
 			}
 			
 			// Iterate through all players for ready and active counts
