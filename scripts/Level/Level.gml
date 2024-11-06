@@ -109,23 +109,11 @@ function Level() constructor {
 	/// @desc Returns the amount of the specified Thing and its children in all active areas.
 	static count = function (_type) {
 		var _count = 0
-		var _players = global.players
-		var i = 0
+		var _key = ds_map_find_first(areas)
 		
-		repeat INPUT_MAX_PLAYERS {
-			var _player = global.players[i++]
-			
-			if _player.status != PlayerStatus.ACTIVE or _player.level != self {
-				continue
-			}
-			
-			// TODO: Use bitmasking with area IDs so we don't add up the count
-			//		 from the same area more than once.
-			var _area = _player.area
-			
-			if _area != undefined {
-				_count += _area.count(_type)
-			}
+		repeat ds_map_size(_key) {
+			_count += areas[? _key].count(_type)
+			_key = ds_map_find_next(areas, _key)
 		}
 		
 		return _count
