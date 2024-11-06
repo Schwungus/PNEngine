@@ -100,27 +100,28 @@ function UI(_ui_script) constructor {
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
 		var _inject = false
 		
-		if not f_blocking and global.demo_write {
-			_inject = true
-		} else {
-			if global.demo_buffer != undefined {
-				// Clear the UI, assuming that the following tick buffer
-				// contains a level packet.
-				while global.ui != undefined {
-					global.ui.destroy()
-				}
-				
+		// UIs are non-deterministic!!!
+		// Do some workarounds for demo and netgames.
+		
+		var _netgame = global.netgame
+		
+		if _netgame != undefined and _netgame.active {
+			if not _netgame.master {
 				exit
 			}
 			
-			var _netgame = global.netgame
+			_inject = true
+		} else if global.demo_buffer != undefined {
+			// Clear the UI, assuming that the following tick buffer
+			// contains a level packet.
+			while global.ui != undefined {
+				global.ui.destroy()
+			}
 			
-			if _netgame != undefined and _netgame.active {
-				if not _netgame.master {
-					exit
-				}
-				
+			if global.demo_write {
 				_inject = true
+			} else {
+				exit
 			}
 		}
 		
