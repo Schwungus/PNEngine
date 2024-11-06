@@ -758,7 +758,10 @@ with Catspeak {
 		"UINP_UP_DOWN", UIInputs.UP_DOWN,
 		"UINP_LEFT_RIGHT", UIInputs.LEFT_RIGHT,
 		"UINP_CONFIRM", UIInputs.CONFIRM,
-		"UINP_BACK", UIInputs.BACK
+		"UINP_BACK", UIInputs.BACK,
+		"UINP_MOUSE_X", UIInputs.MOUSE_X,
+		"UINP_MOUSE_Y", UIInputs.MOUSE_Y,
+		"UINP_MOUSE_CONFIRM", UIInputs.MOUSE_CONFIRM
 	)
 	
 	addFunction(

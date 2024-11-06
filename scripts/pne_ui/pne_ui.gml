@@ -3,6 +3,9 @@ enum UIInputs {
 	LEFT_RIGHT,
 	CONFIRM,
 	BACK,
+	MOUSE_X,
+	MOUSE_Y,
+	MOUSE_CONFIRM,
 	__SIZE,
 }
 

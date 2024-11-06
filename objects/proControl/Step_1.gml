@@ -915,6 +915,9 @@ if _tick >= 1 {
 				_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
 				_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
 				_ui_input[UIInputs.BACK] = input_check_pressed("pause")
+				_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
+				_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
+				_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
 				
 				var _tick_target = _ui
 				
