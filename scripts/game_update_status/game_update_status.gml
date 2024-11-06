@@ -1,6 +1,6 @@
 function game_update_status() {
 	var _status = ""
-	var _total = global.players_ready + global.players_active
+	var _total = ds_list_size(global.players_ready) + ds_list_size(global.players_active)
 	var _game_status = global.game_status
 	
 	if _game_status == GameStatus.NETGAME {

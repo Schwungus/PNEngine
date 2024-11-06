@@ -45,7 +45,7 @@ function Level() constructor {
 					exit
 				}
 				
-				if not master {
+				/*if not master {
 					proControl.load_state = LoadStates.CLIENT_WAIT
 					
 					exit
@@ -59,7 +59,7 @@ function Level() constructor {
 					if _player != undefined and not _player.local {
 						_player.ready = false
 					}
-				}
+				}*/
 				
 				if global.level.name == "lvlTitle" {
 					var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
@@ -79,7 +79,7 @@ function Level() constructor {
 					send_others(b)
 				}
 				
-				send_others(net_buffer_create(true, NetHeaders.HOST_LEVEL, buffer_string, _level, buffer_u32, _area, buffer_s32, _tag))
+				//send_others(net_buffer_create(true, NetHeaders.HOST_LEVEL, buffer_string, _level, buffer_u32, _area, buffer_s32, _tag))
 			}
 		} else {
 			with proTransition {

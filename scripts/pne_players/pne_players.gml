@@ -37,8 +37,8 @@ enum PIFlags {
 	AIM = 1 << 7,
 }
 
-global.players_active = 0
-global.players_ready = 0
+global.players_active = ds_list_create()
+global.players_ready = ds_list_create()
 global.default_states = ds_map_create()
 
 var _players = array_create(INPUT_MAX_PLAYERS)
@@ -60,14 +60,14 @@ repeat INPUT_MAX_PLAYERS {
 }
 
 global.players = _players
-global.input_mode = INPUT_SOURCE_MODE.HOTSWAP
+global.input_mode = INPUT_SOURCE_MODE.JOIN
 i = 0
 
-repeat parameter_count() {
+/*repeat parameter_count() {
 	if parameter_string(i++) == "-multiplayer" {
 		global.input_mode = INPUT_SOURCE_MODE.JOIN
 	}
-}
+}*/
 
 input_join_params_set(1, INPUT_MAX_PLAYERS, "leave", undefined, false)
 input_source_mode_set(global.input_mode)

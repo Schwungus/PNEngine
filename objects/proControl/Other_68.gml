@@ -4,10 +4,7 @@ if async_load[? "type"] != network_type_data {
 
 switch load_state {
 	case LoadStates.NONE:
-	case LoadStates.CONNECT:
-	case LoadStates.CLIENT_WAIT:
-	case LoadStates.HOST_READY:
-	case LoadStates.CLIENT_READY: break
+	case LoadStates.CONNECT: break
 	default: exit
 }
 
@@ -189,8 +186,6 @@ with _netgame {
 			case NetHeaders.HOST_DISCONNECT:
 			case NetHeaders.HOST_PING:
 			case NetHeaders.PLAYER_LEFT:
-			case NetHeaders.HOST_LEVEL:
-			case NetHeaders.HOST_LEVEL_READY:
 			case NetHeaders.HOST_STATES_FLAGS:
 			case NetHeaders.HOST_TICK: exit
 		}
@@ -407,37 +402,6 @@ with _netgame {
 			break
 		}
 		
-		case NetHeaders.HOST_LEVEL: {
-			load_level = buffer_read(_buffer, buffer_string)
-			load_area = buffer_read(_buffer, buffer_u32)
-			load_tag = buffer_read(_buffer, buffer_s32)
-			load_queue = true
-			
-			break
-		}
-		
-		case NetHeaders.CLIENT_LEVEL_READY: {
-			if not master {
-				break
-			}
-			
-			var _player = clients[? $"{_ip}:{_port}"]
-			
-			if _player != undefined {
-				_player.ready = true
-			}
-			
-			break
-		}
-		
-		case NetHeaders.HOST_LEVEL_READY: {
-			if proControl.load_state == LoadStates.CLIENT_READY {
-				proControl.load_state = LoadStates.NONE
-			}
-			
-			break
-		}
-		
 		case NetHeaders.HOST_STATES_FLAGS: {
 			var _players = global.players
 			var n = buffer_read(_buffer, buffer_u8)
@@ -496,13 +460,13 @@ with _netgame {
 		
 		case NetHeaders.HOST_TICK: {
 			var _time = current_time
-			var _checksum = buffer_read(_buffer, buffer_u8)
-			var n = buffer_read(_buffer, buffer_u8)
+			//var _checksum = buffer_read(_buffer, buffer_u8)
+			//var n = buffer_read(_buffer, buffer_u8)
 			
-			ds_queue_enqueue(tick_queue, _time - timestamp, _checksum, n)
+			//ds_queue_enqueue(tick_queue, _time - timestamp, _checksum, n)
 			timestamp = _time
 			
-			repeat n {
+			/*repeat n {
 				var _slot = buffer_read(_buffer, buffer_u8)
 				var _input_up_down = buffer_read(_buffer, buffer_s8)
 				var _input_left_right = buffer_read(_buffer, buffer_s8)
@@ -537,7 +501,7 @@ with _netgame {
 				)
 			}
 			
-			++tick_count
+			++tick_count*/
 			
 			break
 		}

@@ -1,3 +1,4 @@
+/// @desc Destroys a NetPlayer and returns its Player for further handling.
 function net_player_destroy(_scope) {
 	with _scope {
 		if session != undefined {
@@ -28,9 +29,9 @@ function net_player_destroy(_scope) {
 			with player {
 				net = undefined
 				
-				if slot != 0 {
+				/*if slot != 0 {
 					player_deactivate(self)
-				}
+				}*/
 			}
 		}
 		
@@ -44,5 +45,9 @@ function net_player_destroy(_scope) {
 		
 		ds_list_destroy(reliable)
 		ds_queue_destroy(input_queue)
+		
+		return player
 	}
+	
+	return undefined
 }

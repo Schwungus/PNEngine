@@ -16,9 +16,15 @@ enum LoadStates {
 	LOAD,
 	FINISH,
 	CONNECT,
-	CLIENT_WAIT,
-	HOST_READY,
-	CLIENT_READY,
+}
+
+enum TickPackets {
+	CMD,
+	SIGNAL,
+	INPUT,
+	LEVEL,
+	ACTIVATE,
+	DEACTIVATE,
 }
 
 enum InterpData {
@@ -38,6 +44,7 @@ global.tick = 0
 global.tick_scale = 1
 global.delta = 1
 global.mouse_focused = false
+global.tick_buffer = buffer_create(1, buffer_grow, 1)
 
 global.interps = ds_list_create()
 

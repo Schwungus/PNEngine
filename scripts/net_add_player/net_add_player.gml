@@ -1,4 +1,4 @@
-/// @desc Adds a new player to the session.
+/// @desc Adds a new NetPlayer to the session and returns it for further handling.
 function net_add_player(_index, _ip, _port) {
 	with global.netgame {
 		if _index == undefined {
@@ -21,7 +21,7 @@ function net_add_player(_index, _ip, _port) {
 		
 		_net = new NetPlayer()
 		
-		var _player = global.players[_index]
+		var _player = (_index > 0 and _index < INPUT_MAX_PLAYERS) ? global.players[_index] : undefined
 		var _key = _ip + ":" + string(_port)
 		
 		with _net {
@@ -33,8 +33,11 @@ function net_add_player(_index, _ip, _port) {
 			key = _key
 		}
 		
-		_player.net = _net
-		player_activate(_player)
+		if _player != undefined {
+			_player.net = _net
+			//player_activate(_player)
+		}
+		
 		players[| _index] = _net
 		
 		// Work around GameMaker quirk where in-between empty indices have a

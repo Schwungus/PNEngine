@@ -1,16 +1,24 @@
 function player_deactivate(_scope) {
 	with _scope {
 		if status != PlayerStatus.INACTIVE {
+			if slot == 0 {
+				print("! Player.deactivate: Player 1 cannot be deactivated")
+				
+				return false
+			}
+			
 			var _in_area = false
 			
 			if status == PlayerStatus.ACTIVE {
-				if global.players_active <= 1 {
+				var _players_active = global.players_active
+				
+				/*if ds_list_size(_players_active) <= 1 {
 					print("! Player.deactivate: Cannot deactivate with one player remaining")
 					
 					return false
-				}
+				}*/
 				
-				--global.players_active;
+				ds_list_delete(_players_active, ds_list_find_index(_players_active, self))
 				
 				if instance_exists(thing) {
 					thing.destroy()
@@ -19,7 +27,9 @@ function player_deactivate(_scope) {
 				_in_area = true
 				show_caption($"[c_red]{lexicon_text("hud.caption.player.disconnect", -~slot)}")
 			} else {
-				--global.players_ready;
+				var _players_ready = global.players_ready
+				
+				ds_list_delete(_players_ready, ds_list_find_index(_players_ready, self))
 				show_caption($"[c_red]{lexicon_text("hud.caption.player.unready", -~slot)}")
 			}
 			
@@ -27,17 +37,6 @@ function player_deactivate(_scope) {
 			
 			if _in_area {
 				set_area(undefined)
-			}
-			
-			if global.demo_write {
-				var _demo_buffer = global.demo_buffer
-				
-				if _demo_buffer != undefined {
-					buffer_write(_demo_buffer, buffer_u32, global.demo_time)
-					buffer_write(_demo_buffer, buffer_u8, DemoPackets.PLAYER_DEACTIVATE)
-					buffer_write(_demo_buffer, buffer_u8, slot)
-					buffer_write(_demo_buffer, buffer_u8, DemoPackets.TERMINATE)
-				}
 			}
 			
 			return true

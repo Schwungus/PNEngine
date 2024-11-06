@@ -31,7 +31,8 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 	var _height = window_get_height()
 	
 #region Draw Active Cameras
-	var _players = global.players
+	var _players_active = global.players_active
+	var _num_active = ds_list_size(_players_active)
 	var _camera_man = global.camera_man
 	var _has_camera_man = instance_exists(_camera_man)
 	
@@ -51,77 +52,71 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 				var _netgame = global.netgame
 				
 				if _netgame != undefined and _netgame.active {
-					with _players[_netgame.local_slot] {
-						if status == PlayerStatus.ACTIVE and instance_exists(camera) {
+					with global.players[_netgame.local_slot] {
+						if instance_exists(camera) {
 							camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-								
+						}
+					}
+				} else {
+					switch _num_active {
+						case 1: {
+							with _players_active[| 0] {
+								if instance_exists(camera) {
+									camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
+								}
+							}
+							
 							break
 						}
-					}
-				} else switch global.players_active {
-					case 1: {
-						var i = 0
 						
-						repeat INPUT_MAX_PLAYERS {
-							with _players[i++] {
-								if status == PlayerStatus.ACTIVE and instance_exists(camera) {
-									camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-									
-									break
+						case 2: {
+							_height *= 0.5
+							
+							var _y = 0
+							var i = 0
+							
+							repeat _num_active {
+								with _players_active[| i] {
+									if instance_exists(camera) {
+										camera.render(_width, _height, i == 0).DrawStretched(0, _y, 480, 135)
+									}
 								}
+								
+								_y += 135;
+								++i
 							}
+							
+							break
 						}
 						
-						break
-					}
-					
-					case 2: {
-						_height *= 0.5
-						
-						var _y = 0
-						var i = 0
-						
-						repeat INPUT_MAX_PLAYERS {
-							with _players[i] {
-								if status == PlayerStatus.ACTIVE and instance_exists(camera) {
-									camera.render(_width, _height, i == 0).DrawStretched(0, _y, 480, 135)
+						case 3:
+						case 4: {
+							_width *= 0.5
+							_height *= 0.5
+							
+							var _x = 0
+							var _y = 0
+							var i = 0
+							
+							repeat _num_active {
+								with _players_active[| i] {
+									if instance_exists(camera) {
+										camera.render(_width, _height, i == 0).DrawStretched(_x, _y, 240, 135)
+									}
 								}
-							}
-							
-							_y += 135;
-							++i
-						}
-						
-						break
-					}
-					
-					case 3:
-					case 4: {
-						_width *= 0.5
-						_height *= 0.5
-						
-						var _x = 0
-						var _y = 0
-						var i = 0
-						
-						repeat INPUT_MAX_PLAYERS {
-							with _players[i] {
-								if status == PlayerStatus.ACTIVE and instance_exists(camera) {
-									camera.render(_width, _height, i == 0).DrawStretched(_x, _y, 240, 135)
+								
+								_x += 240
+								
+								if _x > _width {
+									_x = 0
+									_y += 135
 								}
+								
+								++i
 							}
 							
-							_x += 240
-							
-							if _x > _width {
-								_x = 0
-								_y += 135
-							}
-							
-							++i
+							break
 						}
-						
-						break
 					}
 				}
 			}
@@ -136,12 +131,8 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 	var _gui_priority = global.gui_priority
 	var i = 0
 	
-	repeat INPUT_MAX_PLAYERS {
-		var _player = _players[i++]
-		
-		if _player.status != PlayerStatus.ACTIVE {
-			continue
-		}
+	repeat _num_active {
+		var _player = _players_active[| i++]
 		
 		var _area = _player.area
 		
