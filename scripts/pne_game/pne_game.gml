@@ -19,7 +19,6 @@ enum LoadStates {
 }
 
 enum TickPackets {
-	CMD,
 	SIGNAL,
 	INPUT,
 	LEVEL,
@@ -45,6 +44,7 @@ global.tick_scale = 1
 global.delta = 1
 global.mouse_focused = false
 global.tick_buffer = buffer_create(1, buffer_grow, 1)
+global.inject_tick_buffer = false
 
 global.interps = ds_list_create()
 

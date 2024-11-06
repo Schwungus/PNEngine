@@ -728,7 +728,7 @@ if _tick >= 1 {
 				global.console_input_previous = _input
 				print($"> {_input}")
 				
-				/*array_foreach(string_split(_input, ";", true), function (_element, _index) {
+				array_foreach(string_split(_input, ";", true), function (_element, _index) {
 					var _input = string_trim(_element)
 				
 					if _input != "" {
@@ -749,7 +749,7 @@ if _tick >= 1 {
 							print($"Unknown command '{_cmd}'")
 						}
 					}
-				})*/
+				})
 			}
 			
 			keyboard_string = ""
@@ -864,6 +864,7 @@ if _tick >= 1 {
 	// Cache loads of stuff
 	var _players = global.players
 	var _players_active = global.players_active
+	var _level = global.level
 	
 	while _tick >= 1 {
 		var _skip_tick = false
@@ -991,7 +992,11 @@ if _tick >= 1 {
 		}
 		
 		// Write to tick buffer
-		buffer_seek(_tick_buffer, buffer_seek_start, 0)
+		if global.inject_tick_buffer {
+			global.inject_tick_buffer = false
+		} else {
+			buffer_seek(_tick_buffer, buffer_seek_start, 0)
+		}
 		
 		if _local_changed {
 			with _local_connections {
@@ -1156,6 +1161,20 @@ if _tick >= 1 {
 							input[PlayerInputs.AIM_LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s16)
 							input[PlayerInputs.AIM_UP_DOWN] = buffer_read(_tick_buffer, buffer_s16)
 						}
+						
+						break
+					}
+					
+					case TickPackets.LEVEL: {
+						var _name = buffer_read(_tick_buffer, buffer_string)
+						var _area = buffer_read(_tick_buffer, buffer_u32)
+						var _tag = buffer_read(_tick_buffer, buffer_s32)
+						
+						if _level != undefined {
+							_level.goto(_name, _area, _tag)
+						}
+						
+						break
 					}
 				}
 			}
@@ -1330,6 +1349,10 @@ if _tick >= 1 {
 					}
 #endregion
 				}
+			}
+			
+			if _level != undefined {
+				++_level.time
 			}
 #endregion
 		}

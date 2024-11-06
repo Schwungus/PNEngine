@@ -39,97 +39,56 @@ function Level() constructor {
 		
 		if net_active() {
 			instance_destroy(proTransition)
-			
-			with global.netgame {
-				if _level == undefined {
-					exit
-				}
-				
-				/*if not master {
-					proControl.load_state = LoadStates.CLIENT_WAIT
-					
-					exit
-				}
-				
-				var i = 0
-				
-				repeat ds_list_size(players) {
-					var _player = players[| i++]
-					
-					if _player != undefined and not _player.local {
-						_player.ready = false
-					}
-				}*/
-				
-				if global.level.name == "lvlTitle" {
-					var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
-					
-					// States
-					var _players = global.players
-					
-					i = 0
-					
-					repeat INPUT_MAX_PLAYERS {
-						buffer_write(b, buffer_u8, i)
-						_players[i++].write_states(b)
-					}
-					
-					// Flags
-					global.flags[FlagGroups.GLOBAL].write(b)
-					send_others(b)
-				}
-				
-				//send_others(net_buffer_create(true, NetHeaders.HOST_LEVEL, buffer_string, _level, buffer_u32, _area, buffer_s32, _tag))
-			}
-		} else {
-			with proTransition {
-				if state < 3 {
-					exit
-				}
-			}
-			
-			var _script = undefined
-			
-			if is_string(_transition) {
-				if string_starts_with(_transition, "pro") {
-					show_error($"!!! Level.goto: Tried to transition to level using protected Transition '{_transition}'", true)
-				}
-				
-				var _index = asset_get_index(_transition)
-				
-				if not object_exists(_index) or not object_is_ancestor(_index, proTransition) {
-					_script = global.scripts.get(_transition)
-					
-					if _script != undefined and is_instanceof(_script, TransitionScript) {
-						_index = _script.internal_parent
-					} else {
-						_index = noone
-						print($"! Level.goto: Transition '{_transition}' not found")
-					}
-				}
-				
-				_transition = _index
-			}
-			
-			if object_exists(_transition) and (_transition == proTransition or object_is_ancestor(_transition, proTransition)) {
-				with instance_create_depth(0, 0, 0, _transition) {
-					if _script != undefined {
-						transition_script = _script
-						reload = _script.reload
-						create = _script.create
-						clean_up = _script.clean_up
-						tick = _script.tick
-						draw_screen = _script.draw_screen
-					}
-					
-					to_level = _level
-					to_area = _area
-					to_tag = _tag
-					event_user(ThingEvents.CREATE)
-				}
-				
+			_transition = noone
+		}
+		
+		with proTransition {
+			if state < 3 {
 				exit
 			}
+		}
+		
+		var _script = undefined
+		
+		if is_string(_transition) {
+			if string_starts_with(_transition, "pro") {
+				show_error($"!!! Level.goto: Tried to transition to level using protected Transition '{_transition}'", true)
+			}
+			
+			var _index = asset_get_index(_transition)
+			
+			if not object_exists(_index) or not object_is_ancestor(_index, proTransition) {
+				_script = global.scripts.get(_transition)
+				
+				if _script != undefined and is_instanceof(_script, TransitionScript) {
+					_index = _script.internal_parent
+				} else {
+					_index = noone
+					print($"! Level.goto: Transition '{_transition}' not found")
+				}
+			}
+			
+			_transition = _index
+		}
+		
+		if object_exists(_transition) and (_transition == proTransition or object_is_ancestor(_transition, proTransition)) {
+			with instance_create_depth(0, 0, 0, _transition) {
+				if _script != undefined {
+					transition_script = _script
+					reload = _script.reload
+					create = _script.create
+					clean_up = _script.clean_up
+					tick = _script.tick
+					draw_screen = _script.draw_screen
+				}
+				
+				to_level = _level
+				to_area = _area
+				to_tag = _tag
+				event_user(ThingEvents.CREATE)
+			}
+			
+			exit
 		}
 		
 		with proControl {

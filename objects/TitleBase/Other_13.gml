@@ -156,6 +156,24 @@ if menu != undefined and not locked {
 						_checkpoint[0] = level
 						_checkpoint[1] = area
 						_checkpoint[2] = tag
+						
+						var _netgame = global.netgame
+						
+						if _netgame != undefined and _netgame.master {
+							var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
+							
+							// States
+							i = 0
+							
+							repeat INPUT_MAX_PLAYERS {
+								buffer_write(b, buffer_u8, i)
+								_players[i++].write_states(b)
+							}
+							
+							// Flags
+							_global.write(b)
+							_netgame.send_others(b)
+						}
 					}
 					
 					_exit = true

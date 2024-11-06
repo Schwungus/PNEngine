@@ -21,6 +21,15 @@ function cmd_level(_args) {
 	
 	var _area = n >= 2 ? real(_parse_args[1]) : 0
 	var _tag = n >= 3 ? real(_parse_args[2]) : ThingTags.NONE
+	var _tick_buffer = global.tick_buffer
 	
-	global.level.goto(_level, _area, _tag)
+	if not global.inject_tick_buffer {
+		buffer_seek(_tick_buffer, buffer_seek_start, 0)
+		global.inject_tick_buffer = true
+	}
+	
+	buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)
+	buffer_write(_tick_buffer, buffer_string, _level)
+	buffer_write(_tick_buffer, buffer_u32, _area)
+	buffer_write(_tick_buffer, buffer_s32, _tag)
 }

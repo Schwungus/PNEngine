@@ -98,6 +98,38 @@ function UI(_ui_script) constructor {
 	}
 	
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
+		var _signal = false
+		
+		if not f_blocking and global.demo_write {
+			_signal = true
+		} else {
+			var _netgame = global.netgame
+			
+			if _netgame != undefined and _netgame.active {
+				if not _netgame.master {
+					exit
+				}
+				
+				_signal = true
+			}
+		}
+		
+		if _signal {
+			var _tick_buffer = global.tick_buffer
+			
+			if not global.inject_tick_buffer {
+				buffer_seek(_tick_buffer, buffer_seek_start, 0)
+				global.inject_tick_buffer = true
+			}
+			
+			buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)
+			buffer_write(_tick_buffer, buffer_string, _level)
+			buffer_write(_tick_buffer, buffer_u32, _area)
+			buffer_write(_tick_buffer, buffer_s32, _tag)
+			
+			exit
+		}
+		
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
