@@ -44,7 +44,7 @@ function cmd_demo(_args) {
 		print($"! cmd_demo: Demo version '{_gmver}' does not match game version '{GM_version}'. Expect desyncs to happen!")
 	}
 	
-	var _is_netgame = buffer_read(_demo_buffer, buffer_bool)
+	var _is_netgame = buffer_read(_demo_buffer, buffer_u8)
 	
 	// Mods
 	var _mods = global.mods
@@ -106,16 +106,13 @@ function cmd_demo(_args) {
 		}
 	}
 	
-	// Level
+	// Level & flags
 	var _level = buffer_read(_demo_buffer, buffer_string)
 	var _area = buffer_read(_demo_buffer, buffer_u32)
 	var _tag = buffer_read(_demo_buffer, buffer_s32)
 	
-	// Flags
 	global.flags[FlagGroups.GLOBAL].read(_demo_buffer)
-	
 	global.demo_buffer = _demo_buffer
-	global.demo_next = buffer_read(_demo_buffer, buffer_u32)
 	global.game_status = GameStatus.DEMO
 	
 	if _is_netgame {

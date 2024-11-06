@@ -8,7 +8,6 @@ function cmd_level(_args) {
 		exit
 	}
 	
-	CMD_NO_DEMO
 	CMD_NO_CLIENT
 	
 	var _level = _parse_args[0]
@@ -21,12 +20,7 @@ function cmd_level(_args) {
 	
 	var _area = n >= 2 ? real(_parse_args[1]) : 0
 	var _tag = n >= 3 ? real(_parse_args[2]) : ThingTags.NONE
-	var _tick_buffer = global.tick_buffer
-	
-	if not global.inject_tick_buffer {
-		buffer_seek(_tick_buffer, buffer_seek_start, 0)
-		global.inject_tick_buffer = true
-	}
+	var _tick_buffer = inject_tick_packet()
 	
 	buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)
 	buffer_write(_tick_buffer, buffer_string, _level)

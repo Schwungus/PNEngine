@@ -1,6 +1,4 @@
 function cmd_drec(_args) {
-	CMD_NO_NETGAME
-	
 	if global.demo_write {
 		print("! cmd_drec: Already recording")
 		

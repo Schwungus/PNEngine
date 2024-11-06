@@ -98,11 +98,21 @@ function UI(_ui_script) constructor {
 	}
 	
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
-		var _signal = false
+		var _inject = false
 		
 		if not f_blocking and global.demo_write {
-			_signal = true
+			_inject = true
 		} else {
+			if global.demo_buffer != undefined {
+				// Clear the UI, assuming that the following tick buffer
+				// contains a level packet.
+				while global.ui != undefined {
+					global.ui.destroy()
+				}
+				
+				exit
+			}
+			
 			var _netgame = global.netgame
 			
 			if _netgame != undefined and _netgame.active {
@@ -110,17 +120,12 @@ function UI(_ui_script) constructor {
 					exit
 				}
 				
-				_signal = true
+				_inject = true
 			}
 		}
 		
-		if _signal {
-			var _tick_buffer = global.tick_buffer
-			
-			if not global.inject_tick_buffer {
-				buffer_seek(_tick_buffer, buffer_seek_start, 0)
-				global.inject_tick_buffer = true
-			}
+		if _inject {
+			var _tick_buffer = inject_tick_packet()
 			
 			buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)
 			buffer_write(_tick_buffer, buffer_string, _level)

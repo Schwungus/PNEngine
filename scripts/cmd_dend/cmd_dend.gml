@@ -6,21 +6,6 @@ function cmd_dend(_args) {
 			print("! cmd_dend: Stopping")
 			buffer_delete(global.demo_buffer)
 			global.demo_buffer = undefined
-			global.demo_time = 0
-			global.demo_next = 0
-			
-			var _demo_input = global.demo_input
-			var i = 0
-			
-			repeat INPUT_MAX_PLAYERS {
-				var _input = _demo_input[i++]
-				var j = 0
-				
-				repeat PlayerInputs.__SIZE {
-					_input[j++] = 0
-				}
-			}
-			
 			global.game_status = GameStatus.DEFAULT
 			
 			var _devices = input_players_get_status().__players
@@ -65,8 +50,8 @@ function cmd_dend(_args) {
 		exit
 	}
 	
-	buffer_write(_demo_buffer, buffer_u32, global.demo_time)
-	buffer_write(_demo_buffer, buffer_u8, DemoPackets.END)
+	buffer_write(_demo_buffer, buffer_u32, 0xFFFFFFFF)
+	buffer_resize(_demo_buffer, buffer_tell(_demo_buffer))
 	
 	var _filename = _parse_args[0] + ".pnd"
 	
@@ -74,20 +59,5 @@ function cmd_dend(_args) {
 	buffer_delete(_demo_buffer)
 	global.demo_write = false
 	global.demo_buffer = undefined
-	global.demo_time = 0
-	global.demo_next = 0
-	
-	var _demo_input = global.demo_input
-	var i = 0
-	
-	repeat INPUT_MAX_PLAYERS {
-		var _input = _demo_input[i++]
-		var j = 0
-		
-		repeat PlayerInputs.__SIZE {
-			_input[j++] = 0
-		}
-	}
-	
 	print($"cmd_dend: Saved as '{_filename}'")
 }

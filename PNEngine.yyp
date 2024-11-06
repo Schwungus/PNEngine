@@ -5606,6 +5606,7 @@
     {"id":{"name":"image_get_uvs","path":"scripts/image_get_uvs/image_get_uvs.yy",},},
     {"id":{"name":"Image","path":"scripts/Image/Image.yy",},},
     {"id":{"name":"ImageMap","path":"scripts/ImageMap/ImageMap.yy",},},
+    {"id":{"name":"inject_tick_packet","path":"scripts/inject_tick_packet/inject_tick_packet.yy",},},
     {"id":{"name":"input_accessibility_global_cooldown_get","path":"scripts/input_accessibility_global_cooldown_get/input_accessibility_global_cooldown_get.yy",},},
     {"id":{"name":"input_accessibility_global_cooldown_set","path":"scripts/input_accessibility_global_cooldown_set/input_accessibility_global_cooldown_set.yy",},},
     {"id":{"name":"input_accessibility_global_toggle_get","path":"scripts/input_accessibility_global_toggle_get/input_accessibility_global_toggle_get.yy",},},

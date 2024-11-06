@@ -583,11 +583,11 @@ switch load_state {
 			buffer_write(_demo_buffer, buffer_string, "PNEDEMO")
 			buffer_write(_demo_buffer, buffer_string, GM_version)
 			
-			/* Add a special boolean to check if this was recorded during a
-			   netgame.
+			/* Add a special integer to check if this was recorded during a
+			   netgame. (0 = local, 1 = host, 2 = client)
 			   Some mods may have special behaviour on netgames, so this is
 			   required. */
-			buffer_write(_demo_buffer, buffer_bool, global.game_status & GameStatus.NETGAME)
+			buffer_write(_demo_buffer, buffer_u8, net_active() + (not net_master()))
 			
 			// Mods
 			var _mods = global.mods
@@ -616,17 +616,12 @@ switch load_state {
 				}
 			}
 			
-			// Level
+			// Level & flags
 			buffer_write(_demo_buffer, buffer_string, load_level)
 			buffer_write(_demo_buffer, buffer_u32, load_area)
 			buffer_write(_demo_buffer, buffer_s32, load_tag)
-			
-			// Flags
 			global.flags[FlagGroups.GLOBAL].write(_demo_buffer)
-			
 			global.demo_buffer = _demo_buffer
-			global.demo_time = 0
-			global.demo_next = 0
 			print("proControl: Recording demo")
 		}
 		
@@ -704,6 +699,12 @@ var _config = global.config
 if _tick >= 1 {
 	__input_system_tick()
 	
+	// Cache demo stuff
+	var _demo_write = global.demo_write
+	var _demo_buffer = global.demo_buffer
+	var _playing_demo = not _demo_write and _demo_buffer != undefined
+	var _recording_demo = _demo_write and _demo_buffer != undefined
+	
 #region Debug
 	if input_check_pressed("debug_overlay") {
 		global.debug_overlay = not global.debug_overlay
@@ -757,24 +758,15 @@ if _tick >= 1 {
 			/*if global.netgame == undefined {
 				_in_netgame = false
 				_is_master = true
-			}
+			}*/
 			
 			if global.demo_buffer == undefined {
-				_has_demo = false
 				_playing_demo = false
 				_recording_demo = false
-			}*/
+			}
 		} else if input_check_pressed("pause") {
 			global.console_input = keyboard_string
-			//cmd_close("")
-			
-			input_source_mode_set(global.input_mode)
-			global.console = false
-			
-			if _ui == undefined or not _ui.f_blocking {
-				fmod_channel_control_set_paused(global.world_channel_group, false)
-			}
-			
+			cmd_close("")
 			input_verb_consume("pause")
 		}
 		
@@ -813,7 +805,7 @@ if _tick >= 1 {
 #endregion
 	
 	var _local_connections = input_players_get_status()
-	var _local_changed = _local_connections.__any_changed
+	var _local_changed = _local_connections.__any_changed and not _playing_demo
 	
 #region Start Interpolation
 	var i = ds_list_size(_interps)
@@ -861,7 +853,7 @@ if _tick >= 1 {
 	var _tick_buffer = global.tick_buffer
 	var _tick_size = 0
 	
-	// Cache loads of stuff
+	// Cache player stuff
 	var _players = global.players
 	var _players_active = global.players_active
 	var _level = global.level
@@ -998,6 +990,7 @@ if _tick >= 1 {
 			buffer_seek(_tick_buffer, buffer_seek_start, 0)
 		}
 		
+		// Handle player activations inside the tick
 		if _local_changed {
 			with _local_connections {
 				var i = 0
@@ -1021,63 +1014,66 @@ if _tick >= 1 {
 		}
 		
 		if not _skip_tick {
-			// Local input
-			var i = 0
-			var _mouse_dx = mouse_dx
-			var _mouse_dy = mouse_dy
-			
-			repeat ds_list_size(_players_active) {
-				with _players_active[| i++] {
-					var j = slot
+			if _playing_demo {
+				_tick_size = buffer_read(_demo_buffer, buffer_u32)
+				
+				if _tick_size == 0xFFFFFFFF {
+					cmd_dend("")
+					_demo_buffer = undefined
+					_playing_demo = false
+					_tick = 0
 					
-					// Main
-					var _move_range = input_check("walk", j) ? 64 : 127
-					var _input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
-					var _input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
-					var _input_jump = input_check("jump", j)
-					var _input_interact = input_check("interact", j)
-					var _input_attack = input_check("attack", j)
-					
-					// Inventory
-					var _input_inventory_up = input_check("inventory_up", j)
-					var _input_inventory_left = input_check("inventory_left", j)
-					var _input_inventory_down = input_check("inventory_down", j)
-					var _input_inventory_right = input_check("inventory_right", j)
-					
-					// Camera
-					var _input_aim = input_check("aim", j)
-					var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
-					var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
-					var _dx_angle, _dy_angle
-					
-					with _config {
-						_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
-						_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
-					
-						if j == 0 and _mouse_focused {
-							_dx_factor += _mouse_dx * in_mouse_x
-							_dy_factor += _mouse_dy * in_mouse_y
+					break
+				}
+				
+				var _pos = buffer_tell(_demo_buffer)
+				
+				buffer_copy(_demo_buffer, _pos, _tick_size, _tick_buffer, 0)
+				buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
+				buffer_resize(_tick_buffer, _tick_size)
+			} else {
+				// Local input
+				var i = 0
+				var _mouse_dx = mouse_dx
+				var _mouse_dy = mouse_dy
+				
+				repeat ds_list_size(_players_active) {
+					with _players_active[| i++] {
+						var j = slot
+						
+						// Main
+						var _move_range = input_check("walk", j) ? 64 : 127
+						var _input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
+						var _input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
+						var _input_jump = input_check("jump", j)
+						var _input_interact = input_check("interact", j)
+						var _input_attack = input_check("attack", j)
+						
+						// Inventory
+						var _input_inventory_up = input_check("inventory_up", j)
+						var _input_inventory_left = input_check("inventory_left", j)
+						var _input_inventory_down = input_check("inventory_down", j)
+						var _input_inventory_right = input_check("inventory_right", j)
+						
+						// Camera
+						var _input_aim = input_check("aim", j)
+						var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
+						var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
+						var _dx_angle, _dy_angle
+						
+						with _config {
+							_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
+							_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+							
+							if j == 0 and _mouse_focused {
+								_dx_factor += _mouse_dx * in_mouse_x
+								_dy_factor += _mouse_dy * in_mouse_y
+							}
 						}
-					}
-					
-					var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-					var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
-					
-					// Check difference and write to buffer
-					/*if _input_up_down != input[PlayerInputs.UP_DOWN]
-					   or _input_left_right != input[PlayerInputs.LEFT_RIGHT]
-					   or _input_jump != input[PlayerInputs.JUMP]
-					   or _input_interact != input[PlayerInputs.INTERACT]
-					   or _input_attack != input[PlayerInputs.ATTACK]
-					   or _input_inventory_up != input[PlayerInputs.INVENTORY_UP]
-					   or _input_inventory_left != input[PlayerInputs.INVENTORY_LEFT]
-					   or _input_inventory_down != input[PlayerInputs.INVENTORY_DOWN]
-					   or _input_inventory_right != input[PlayerInputs.INVENTORY_RIGHT]
-					   or _input_aim != input[PlayerInputs.AIM]
-					   or _dx != 0
-					   or _dy != 0 {*/
-					// Nevermind, don't do this check because this can cause
-					// boolean inputs to flicker every tick.
+						
+						var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+						var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+						
 						buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
 						buffer_write(_tick_buffer, buffer_u8, j)
 						buffer_write(_tick_buffer, buffer_s8, _input_up_down)
@@ -1096,12 +1092,22 @@ if _tick >= 1 {
 						
 						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
 						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768)
-					//}
+					}
 				}
+				
+				_tick_size = buffer_tell(_tick_buffer)
 			}
 			
-			// Read tick buffer
-			_tick_size = buffer_tell(_tick_buffer)
+			// Parse tick buffer
+			if _recording_demo {
+				buffer_write(_demo_buffer, buffer_u32, _tick_size)
+				
+				var _pos = buffer_tell(_demo_buffer)
+				
+				buffer_copy(_tick_buffer, 0, _tick_size, _demo_buffer, _pos)
+				buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
+			}
+			
 			buffer_seek(_tick_buffer, buffer_seek_start, 0)
 			
 			while buffer_tell(_tick_buffer) < _tick_size {

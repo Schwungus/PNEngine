@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"inject_tick_packet",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"inject_tick_packet",
+  "parent":{
+    "name":"Game",
+    "path":"folders/Scripts/PNEngine/Game.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

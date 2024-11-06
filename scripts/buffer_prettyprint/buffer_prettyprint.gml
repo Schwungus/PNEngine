@@ -31,7 +31,7 @@ function buffer_prettyprint(_buf, _per_row = 20) {
 	buffer_write(_out, buffer_text, "):")
 	
 	for (var i = 0; i < _size; i++) {
-		if i % _per_row == 0 { // row start
+		if (i % _per_row) == 0 { // row start
 			if i > 0 { // printable chars
 				buffer_write(_out, buffer_text, " | ")
 				buffer_write(_chars, buffer_u8, 0)
