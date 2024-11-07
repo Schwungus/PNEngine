@@ -11,9 +11,6 @@ switch load_state {
 var _ip = async_load[? "ip"]
 var _port = async_load[? "port"]
 var _buffer = async_load[? "buffer"]
-
-buffer_seek(_buffer, buffer_seek_start, 0) // ???
-
 var _reliable = buffer_read(_buffer, buffer_u32)
 var _header = buffer_read(_buffer, buffer_u8)
 var _netgame = global.netgame
@@ -30,7 +27,7 @@ with _netgame {
 				}
 				
 				// Is the server full?
-				if player_count >= INPUT_MAX_PLAYERS {
+				if player_count >= NET_MAX_PLAYERS {
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_FULL"))
 						
 					exit
@@ -97,7 +94,7 @@ with _netgame {
 				
 				// Block the unfortunate new client if another one managed to
 				// join before them.
-				if player_count >= INPUT_MAX_PLAYERS {
+				if player_count >= NET_MAX_PLAYERS {
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_FULL"))
 					
 					exit
@@ -106,19 +103,19 @@ with _netgame {
 				// Send other clients' info to new client.
 				var _new_player = net_add_player(undefined, _ip, _port)
 				var b = net_buffer_create(false, NetHeaders.HOST_ADD_CLIENT, buffer_u8, _new_player.slot, buffer_u8, player_count - 1)
-				var _players = global.players
+				//var _players = global.players
 				var j = 0
+				
+				repeat player_count {
+					var _player = players[| j]
 					
-				repeat INPUT_MAX_PLAYERS {
-					with _players[j] {
-						if status == PlayerStatus.INACTIVE or net == _new_player {
-							continue
+					if not (_player == undefined or _player == _new_player) {
+						with _player {
+							print($"proControl: Sending info from Player {-~j} ({name})")
+							buffer_write(b, buffer_u8, j)
+							buffer_write(b, buffer_u8, player == undefined ? PlayerStatus.INACTIVE : player.status)
+							buffer_write(b, buffer_string, name)
 						}
-						
-						print($"proControl: Sending info from Player {-~j}")
-						buffer_write(b, buffer_u8, j)
-						buffer_write(b, buffer_u8, status)
-						buffer_write(b, buffer_string, net.name)
 					}
 					
 					++j
@@ -131,6 +128,14 @@ with _netgame {
 				var _name = buffer_read(_buffer, buffer_string)
 				
 				_new_player.name = _name
+				
+				if _slot < INPUT_MAX_PLAYERS {
+					var _tick_buffer = inject_tick_packet()
+					
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
+					buffer_write(_tick_buffer, buffer_u8, _slot)
+				}
+				
 				send_others(net_buffer_create(true, NetHeaders.PLAYER_JOINED, buffer_u8, _slot, buffer_string, _name))
 				game_update_status()
 				print($"proControl: Assigned client '{_name}' to player {-~_slot}")
@@ -161,8 +166,17 @@ with _netgame {
 					print($"proControl: Client '{name}' disconnected")
 				}
 				
-				net_player_destroy(_other)
 				send_others(b)
+				
+				var _player = net_player_destroy(_other)
+				
+				if _player != undefined {
+					var _tick_buffer = inject_tick_packet()
+					
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+					buffer_write(_tick_buffer, buffer_u8, _player.slot)
+				}
+				
 				game_update_status()
 				
 				exit
@@ -294,6 +308,10 @@ with _netgame {
 			with net_add_player(local_slot, "127.0.0.1", 0) {
 				name = global.config.name
 				local = true
+				
+				if player != undefined {
+					player_activate(player)
+				}
 			}
 			
 			repeat buffer_read(_buffer, buffer_u8) {
@@ -302,34 +320,37 @@ with _netgame {
 				print($"Getting info from Player {-~_slot}")
 				
 				with net_add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port) {
-					if player != undefined {
-						player.status = buffer_read(_buffer, buffer_u8)
-					}
+					var _status = buffer_read(_buffer, buffer_u8)
 					
 					name = buffer_read(_buffer, buffer_string)
+					
+					if player != undefined {
+						player.status = _status
+						player_activate(player)
+					}
 				}
 			}
 			
 			// Iterate through all players for ready and active counts
-			global.players_ready = 0
-			global.players_active = 0
+			var _players_ready = global.players_ready
+			var _players_active = global.players_active
+			
+			ds_list_clear(_players_ready)
+			ds_list_clear(_players_active)
 			
 			var _players = global.players
 			var i = 0
 			
 			repeat INPUT_MAX_PLAYERS {
-				switch _players[i++].status {
-					case PlayerStatus.PENDING:
-						++global.players_ready
-					break
-						
-					case PlayerStatus.ACTIVE:
-						++global.players_active
-					break
+				var _player = _players[i++]
+				
+				switch _player.status {
+					case PlayerStatus.PENDING: ds_list_add(_players_ready, _player) break
+					case PlayerStatus.ACTIVE: ds_list_add(_players_active, _player) break
 				}
 			}
 			
-			print($"Total players: {player_count} ({global.players_ready} ready, {global.players_active} active)")
+			print($"Total players: {player_count} ({ds_list_size(_players_ready)} ready, {ds_list_size(_players_active)} active)")
 			
 			if connect_success_callback != undefined {
 				connect_success_callback()
@@ -403,6 +424,8 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_STATES_FLAGS: {
+			print("proControl: Received save data from host")
+			
 			var _players = global.players
 			var n = buffer_read(_buffer, buffer_u8)
 			
@@ -464,6 +487,7 @@ with _netgame {
 			//var n = buffer_read(_buffer, buffer_u8)
 			
 			//ds_queue_enqueue(tick_queue, _time - timestamp, _checksum, n)
+			print($"Host tick {buffer_get_size(_buffer) - buffer_tell(_buffer)} bytes in {_time - timestamp} ms")
 			timestamp = _time
 			
 			/*repeat n {

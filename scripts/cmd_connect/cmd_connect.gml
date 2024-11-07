@@ -9,7 +9,6 @@ function cmd_connect(_args) {
 	}
 	
 	CMD_NO_DEMO
-	CMD_NO_DEMO_WRITE
 	CMD_NO_NETGAME
 	
 	if global.level.name != "lvlTitle" {
@@ -18,7 +17,7 @@ function cmd_connect(_args) {
 		return false
 	}
 	
-	if (global.players_ready + global.players_active) > 1 {
+	if (ds_list_size(global.players_ready) + ds_list_size(global.players_active)) > 1 {
 		print("! cmd_connect: Cannot connect with more than 1 local player")
 		
 		return false

@@ -19,11 +19,12 @@ enum LoadStates {
 }
 
 enum TickPackets {
-	SIGNAL,
-	INPUT,
-	LEVEL,
+	CHECKSUM,
 	ACTIVATE,
 	DEACTIVATE,
+	INPUT,
+	SIGNAL,
+	LEVEL,
 }
 
 enum InterpData {

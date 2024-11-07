@@ -61,6 +61,8 @@ function save_game() {
 	global.flags[FlagGroups.GLOBAL].write(_buffer)
 	
 	// Output
+	buffer_resize(_buffer, buffer_tell(_buffer))
+	
 	var _filename = global.save_name + ".sav"
 	
 	buffer_save(_buffer, SAVES_PATH + _filename)

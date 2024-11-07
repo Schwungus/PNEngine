@@ -19,6 +19,10 @@ function net_host(_port = DEFAULT_PORT) {
 			name = global.config.name
 			local = true
 			tick_acked = true
+			
+			if player != undefined {
+				player_activate(player)
+			}
 		}
 		
 		time_source_start(ping_time_source)

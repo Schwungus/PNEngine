@@ -5,7 +5,7 @@ function net_add_player(_index, _ip, _port) {
 			_index = ds_list_find_index(players, undefined)
 			
 			if _index == -1 {
-				if player_count >= INPUT_MAX_PLAYERS {
+				if player_count >= NET_MAX_PLAYERS {
 					return undefined
 				}
 				
@@ -27,15 +27,15 @@ function net_add_player(_index, _ip, _port) {
 		with _net {
 			session = other
 			slot = _index
-			player = _player
 			ip = _ip
 			port = _port
 			key = _key
-		}
-		
-		if _player != undefined {
-			_player.net = _net
-			//player_activate(_player)
+			
+			if _player != undefined {
+				_player.net = _net
+				player = _player
+				//player_activate(_player)
+			}
 		}
 		
 		players[| _index] = _net

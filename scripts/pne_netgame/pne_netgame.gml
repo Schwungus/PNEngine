@@ -1,5 +1,6 @@
 #macro DEFAULT_PORT 7788
 #macro STALL_RATE 15
+#macro NET_MAX_PLAYERS 8
 
 enum NetHeaders {
 	// Internal

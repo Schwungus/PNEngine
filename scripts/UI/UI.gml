@@ -101,7 +101,7 @@ function UI(_ui_script) constructor {
 		var _inject = false
 		
 		// UIs are non-deterministic!!!
-		// Do some workarounds for demo and netgames.
+		// Do some workarounds for demos and netgames.
 		
 		var _netgame = global.netgame
 		
@@ -112,8 +112,8 @@ function UI(_ui_script) constructor {
 			
 			_inject = true
 		} else if global.demo_buffer != undefined {
-			// Clear the UI, assuming that the following tick buffer
-			// contains a level packet.
+			// Clear the UI, assuming that the following tick buffer contains a
+			// level packet.
 			while global.ui != undefined {
 				global.ui.destroy()
 			}

@@ -699,11 +699,14 @@ var _config = global.config
 if _tick >= 1 {
 	__input_system_tick()
 	
-	// Cache demo stuff
+	// Cache game session info
 	var _demo_write = global.demo_write
 	var _demo_buffer = global.demo_buffer
 	var _playing_demo = not _demo_write and _demo_buffer != undefined
 	var _recording_demo = _demo_write and _demo_buffer != undefined
+	var _netgame = global.netgame
+	var _in_netgame = _netgame != undefined and _netgame.active
+	var _is_master = not _in_netgame or _netgame.master
 	
 #region Debug
 	if input_check_pressed("debug_overlay") {
@@ -755,10 +758,10 @@ if _tick >= 1 {
 			
 			keyboard_string = ""
 			
-			/*if global.netgame == undefined {
+			if global.netgame == undefined {
 				_in_netgame = false
 				_is_master = true
-			}*/
+			}
 			
 			if global.demo_buffer == undefined {
 				_playing_demo = false
@@ -770,7 +773,7 @@ if _tick >= 1 {
 			input_verb_consume("pause")
 		}
 		
-		/*if _in_netgame {
+		if _in_netgame {
 			input_verb_consume("up")
 			input_verb_consume("left")
 			input_verb_consume("down")
@@ -788,24 +791,24 @@ if _tick >= 1 {
 			input_verb_consume("aim_left")
 			input_verb_consume("aim_down")
 			input_verb_consume("aim_right")
-		} else {*/
+		} else {
 			_tick = 0
-		//}
+		}
 	} else {
 		if input_check_pressed("debug_console") {
 			input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
 			global.console = true
 			keyboard_string = global.console_input
 			
-			//if not _in_netgame {
+			if not _in_netgame {
 				fmod_channel_control_set_paused(global.world_channel_group, true)
-			//}
+			}
 		}
 	}
 #endregion
 	
 	var _local_connections = input_players_get_status()
-	var _local_changed = _local_connections.__any_changed and not _playing_demo
+	var _local_changed = _local_connections.__any_changed and not (_playing_demo or _in_netgame)
 	
 #region Start Interpolation
 	var i = ds_list_size(_interps)
@@ -940,19 +943,19 @@ if _tick >= 1 {
 				
 				// Extra check to prevent a crash when disconnecting
 				// through UI leave() method
-				/*if _in_netgame and not net_active() {
+				if _in_netgame and not net_active() {
 					_in_netgame = false
 					_is_master = true
-					_ticks_queued = false
+					//_ticks_queued = false
 					_skip_tick = true
-				}*/
+				}
 			} else {
 				var _paused = false
 				
 				if input_check_pressed("pause") {
 					_paused = true
 					
-					//if not _in_netgame {
+					if not _in_netgame {
 						i = ds_list_size(_players_active)
 						
 						while i {
@@ -972,7 +975,7 @@ if _tick >= 1 {
 								break
 							}
 						}
-					//}
+					}
 				}
 				
 				if _paused {
@@ -980,6 +983,27 @@ if _tick >= 1 {
 					
 					_skip_tick = true
 				}
+			}
+			
+			if _in_netgame and _skip_tick {
+				input_verb_consume("up")
+				input_verb_consume("left")
+				input_verb_consume("down")
+				input_verb_consume("right")
+				input_verb_consume("walk")
+				input_verb_consume("jump")
+				input_verb_consume("interact")
+				input_verb_consume("attack")
+				input_verb_consume("inventory_up")
+				input_verb_consume("inventory_left")
+				input_verb_consume("inventory_down")
+				input_verb_consume("inventory_right")
+				input_verb_consume("aim")
+				input_verb_consume("aim_up")
+				input_verb_consume("aim_left")
+				input_verb_consume("aim_down")
+				input_verb_consume("aim_right")
+				_skip_tick = false
 			}
 		}
 		
@@ -1087,7 +1111,7 @@ if _tick >= 1 {
 							_input_inventory_left,
 							_input_inventory_down,
 							_input_inventory_right,
-							_input_aim,
+							_input_aim
 						))
 						
 						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
@@ -1096,6 +1120,14 @@ if _tick >= 1 {
 				}
 				
 				_tick_size = buffer_tell(_tick_buffer)
+				
+				if _in_netgame and _is_master {
+					var b = net_buffer_create(true, NetHeaders.HOST_TICK)
+                    var _pos = buffer_tell(b)
+					
+					buffer_copy(_tick_buffer, 0, _tick_size, b, _pos)
+					_netgame.send_others(b, _pos + _tick_size)
+				}
 			}
 			
 			// Parse tick buffer

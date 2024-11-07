@@ -26,13 +26,11 @@ function net_player_destroy(_scope) {
 		}
 		
 		if player != undefined {
-			with player {
-				net = undefined
-				
-				/*if slot != 0 {
-					player_deactivate(self)
-				}*/
-			}
+			player.net = undefined
+			
+			/* if player.slot != 0 {
+				player_deactivate(player)
+			} */
 		}
 		
 		time_source_stop(reliable_time_source)
