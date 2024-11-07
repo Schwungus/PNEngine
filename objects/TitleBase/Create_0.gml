@@ -81,6 +81,25 @@ set_menu = function (_menu, _allow_return = true) {
 	
 	return false
 }
+
+goto = function (_level, _area, _tag, _transition) {
+	if _level != undefined {
+		var _netgame = global.netgame
+		
+		if _netgame.active and _netgame.master {
+			var _tick_buffer = inject_tick_packet()
+			
+			buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)
+			buffer_write(_tick_buffer, buffer_string, _level)
+			buffer_write(_tick_buffer, buffer_u32, _area)
+			buffer_write(_tick_buffer, buffer_s32, _tag)
+			
+			exit
+		}
+	}
+	
+	global.level.goto(_level, _area, _tag, _transition)
+}
 #endregion
 
 #region Virtual Functions

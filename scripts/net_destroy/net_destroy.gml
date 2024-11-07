@@ -6,6 +6,11 @@ function net_destroy() {
 		ds_map_destroy(clients)
 		
 		if ds_exists(tick_queue, ds_type_queue) {
+			while ds_queue_size(tick_queue) {
+				ds_queue_dequeue(tick_queue) // Delay
+				buffer_delete(ds_queue_dequeue(tick_queue)) // Tick buffer
+			}
+			
 			ds_queue_destroy(tick_queue)
 		}
 		

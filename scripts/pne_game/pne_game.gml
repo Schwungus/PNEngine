@@ -16,6 +16,7 @@ enum LoadStates {
 	LOAD,
 	FINISH,
 	CONNECT,
+	HOST_WAIT,
 }
 
 enum TickPackets {

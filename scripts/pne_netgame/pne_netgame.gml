@@ -1,6 +1,5 @@
 #macro DEFAULT_PORT 7788
 #macro STALL_RATE 15
-#macro NET_MAX_PLAYERS 8
 
 enum NetHeaders {
 	// Internal
@@ -27,10 +26,10 @@ enum NetHeaders {
 	
 	// Game
 	HOST_STATES_FLAGS,
-	CLIENT_CMD,
 	CLIENT_SIGNAL,
 	CLIENT_INPUT,
 	HOST_TICK,
+	CLIENT_READY,
 	
 	__SIZE,
 }

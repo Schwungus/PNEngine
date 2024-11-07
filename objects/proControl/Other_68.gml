@@ -4,7 +4,8 @@ if async_load[? "type"] != network_type_data {
 
 switch load_state {
 	case LoadStates.NONE:
-	case LoadStates.CONNECT: break
+	case LoadStates.CONNECT:
+	case LoadStates.HOST_WAIT: break
 	default: exit
 }
 
@@ -27,7 +28,7 @@ with _netgame {
 				}
 				
 				// Is the server full?
-				if player_count >= NET_MAX_PLAYERS {
+				if player_count >= INPUT_MAX_PLAYERS {
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_FULL"))
 						
 					exit
@@ -94,16 +95,23 @@ with _netgame {
 				
 				// Block the unfortunate new client if another one managed to
 				// join before them.
-				if player_count >= NET_MAX_PLAYERS {
+				if player_count >= INPUT_MAX_PLAYERS {
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_FULL"))
 					
+					exit
+				}
+				
+				// Block the unfortunate new client if we already managed to
+				// get out of the title screen.
+				if global.level.name != "lvlTitle" {
+					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_ACTIVE"))
+						
 					exit
 				}
 				
 				// Send other clients' info to new client.
 				var _new_player = net_add_player(undefined, _ip, _port)
 				var b = net_buffer_create(false, NetHeaders.HOST_ADD_CLIENT, buffer_u8, _new_player.slot, buffer_u8, player_count - 1)
-				//var _players = global.players
 				var j = 0
 				
 				repeat player_count {
@@ -128,14 +136,7 @@ with _netgame {
 				var _name = buffer_read(_buffer, buffer_string)
 				
 				_new_player.name = _name
-				
-				if _slot < INPUT_MAX_PLAYERS {
-					var _tick_buffer = inject_tick_packet()
-					
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, _slot)
-				}
-				
+				player_activate(_new_player.player)
 				send_others(net_buffer_create(true, NetHeaders.PLAYER_JOINED, buffer_u8, _slot, buffer_string, _name))
 				game_update_status()
 				print($"proControl: Assigned client '{_name}' to player {-~_slot}")
@@ -169,14 +170,10 @@ with _netgame {
 				send_others(b)
 				
 				var _player = net_player_destroy(_other)
+				var _tick_buffer = inject_tick_packet()
 				
-				if _player != undefined {
-					var _tick_buffer = inject_tick_packet()
-					
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, _player.slot)
-				}
-				
+				buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+				buffer_write(_tick_buffer, buffer_u8, _player.slot)
 				game_update_status()
 				
 				exit
@@ -308,10 +305,9 @@ with _netgame {
 			with net_add_player(local_slot, "127.0.0.1", 0) {
 				name = global.config.name
 				local = true
-				
-				if player != undefined {
-					player_activate(player)
-				}
+				other.local_net = self
+				other.local_player = player
+				player_activate(player)
 			}
 			
 			repeat buffer_read(_buffer, buffer_u8) {
@@ -370,6 +366,7 @@ with _netgame {
 			
 			with net_add_player(_slot, "127.0.0.1", 0) {
 				name = buffer_read(_buffer, buffer_string)
+				player_activate(player)
 				print($"proControl: Client '{name}' joined")
 			}
 			
@@ -450,31 +447,14 @@ with _netgame {
 			if _player != undefined {
 				var _input_up_down = buffer_read(_buffer, buffer_s8)
 				var _input_left_right = buffer_read(_buffer, buffer_s8)
-				
 				var _input_flags = buffer_read(_buffer, buffer_u8)
-				var _input_jump = _input_flags & PIFlags.JUMP
-				var _input_interact = _input_flags & PIFlags.INTERACT
-				var _input_attack = _input_flags & PIFlags.ATTACK
-				var _input_inventory_up = _input_flags & PIFlags.INVENTORY_UP
-				var _input_inventory_left = _input_flags & PIFlags.INVENTORY_LEFT
-				var _input_inventory_down = _input_flags & PIFlags.INVENTORY_DOWN
-				var _input_inventory_right = _input_flags & PIFlags.INVENTORY_RIGHT
-				var _input_aim = _input_flags & PIFlags.AIM
-				
 				var _input_aim_up_down = buffer_read(_buffer, buffer_s16)
 				var _input_aim_left_right = buffer_read(_buffer, buffer_s16)
 				
 				ds_queue_enqueue(_player.input_queue,
 					_input_up_down,
 					_input_left_right,
-					_input_jump,
-					_input_interact,
-					_input_attack,
-					_input_inventory_up,
-					_input_inventory_left,
-					_input_inventory_down,
-					_input_inventory_right,
-					_input_aim,
+					_input_flags,
 					_input_aim_up_down,
 					_input_aim_left_right
 				)
@@ -483,49 +463,30 @@ with _netgame {
 		
 		case NetHeaders.HOST_TICK: {
 			var _time = current_time
-			//var _checksum = buffer_read(_buffer, buffer_u8)
-			//var n = buffer_read(_buffer, buffer_u8)
 			
-			//ds_queue_enqueue(tick_queue, _time - timestamp, _checksum, n)
-			print($"Host tick {buffer_get_size(_buffer) - buffer_tell(_buffer)} bytes in {_time - timestamp} ms")
+			ds_queue_enqueue(tick_queue, _time - timestamp)
 			timestamp = _time
 			
-			/*repeat n {
-				var _slot = buffer_read(_buffer, buffer_u8)
-				var _input_up_down = buffer_read(_buffer, buffer_s8)
-				var _input_left_right = buffer_read(_buffer, buffer_s8)
-				
-				var _input_flags = buffer_read(_buffer, buffer_u8)
-				var _input_jump = _input_flags & PIFlags.JUMP
-				var _input_interact = _input_flags & PIFlags.INTERACT
-				var _input_attack = _input_flags & PIFlags.ATTACK
-				var _input_inventory_up = _input_flags & PIFlags.INVENTORY_UP
-				var _input_inventory_left = _input_flags & PIFlags.INVENTORY_LEFT
-				var _input_inventory_down = _input_flags & PIFlags.INVENTORY_DOWN
-				var _input_inventory_right = _input_flags & PIFlags.INVENTORY_RIGHT
-				var _input_aim = _input_flags & PIFlags.AIM
-				
-				var _input_aim_up_down = buffer_read(_buffer, buffer_s16)
-				var _input_aim_left_right = buffer_read(_buffer, buffer_s16)
-				
-				ds_queue_enqueue(tick_queue,
-					_slot,
-					_input_up_down,
-					_input_left_right,
-					_input_jump,
-					_input_interact,
-					_input_attack,
-					_input_inventory_up,
-					_input_inventory_left,
-					_input_inventory_down,
-					_input_inventory_right,
-					_input_aim,
-					_input_aim_up_down,
-					_input_aim_left_right
-				)
-			}
+			var _pos = buffer_tell(_buffer)
+			var _size = buffer_get_size(_buffer) - _pos
+			var _tick = buffer_create(_size, buffer_fixed, 1)
 			
-			++tick_count*/
+			buffer_copy(_buffer, _pos, _size, _tick, 0)
+			ds_queue_enqueue(tick_queue, _tick);
+			++tick_count
+			
+			break
+		}
+		
+		case NetHeaders.CLIENT_READY: {
+			if master {
+				var _player = clients[? $"{_ip}:{_port}"]
+				
+				if _player != undefined {
+					print($"proControl: Got ready from client {_player.key}")
+					_player.ready = true
+				}
+			}
 			
 			break
 		}

@@ -5,7 +5,7 @@ function net_add_player(_index, _ip, _port) {
 			_index = ds_list_find_index(players, undefined)
 			
 			if _index == -1 {
-				if player_count >= NET_MAX_PLAYERS {
+				if player_count >= INPUT_MAX_PLAYERS {
 					return undefined
 				}
 				
@@ -21,7 +21,7 @@ function net_add_player(_index, _ip, _port) {
 		
 		_net = new NetPlayer()
 		
-		var _player = (_index > 0 and _index < INPUT_MAX_PLAYERS) ? global.players[_index] : undefined
+		var _player = global.players[_index]
 		var _key = _ip + ":" + string(_port)
 		
 		with _net {

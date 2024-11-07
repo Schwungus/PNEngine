@@ -25,8 +25,8 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 			} else {
 				var _netgame = global.netgame
 				
-				if _netgame != undefined and _netgame.active {
-					with global.players[_netgame.local_slot] {
+				if _netgame != undefined and _netgame.active and _netgame.local_player != undefined {
+					with _netgame.local_player {
 						if instance_exists(camera) {
 							camera.render(_width, _height, true).Draw(0, 0)
 						}

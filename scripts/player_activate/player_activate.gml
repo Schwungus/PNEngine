@@ -6,7 +6,7 @@ function player_activate(_scope) {
 			var _device
 			
 			if net_active() {
-				_device = "remote"
+				_device = net != undefined ? net.name : "unknown"
 			} else {
 				_device = input_player_get_gamepad_type(slot)
 				

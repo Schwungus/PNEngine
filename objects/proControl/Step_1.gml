@@ -1,5 +1,23 @@
 switch load_state {
 	case LoadStates.START: {
+		var _netgame = global.netgame
+		
+		if _netgame != undefined and _netgame.master and _netgame.player_count > 1 {
+			with _netgame {
+				var i = 0
+				
+				repeat ds_list_size(players) {
+					var _player = players[| i++]
+					
+					if _player == undefined {
+						continue
+					}
+					
+					_player.ready = (_player == local_net)
+				}
+			}
+		}
+		
 		load_state = LoadStates.UNLOAD
 		
 		exit
@@ -643,6 +661,21 @@ switch load_state {
 			}
 		}
 		
+		var _netgame = global.netgame
+		
+		if _netgame != undefined {
+			if _netgame.master {
+				var _player_count = _netgame.player_count
+				
+				if _player_count > 1 {
+					print($"proControl: Waiting for {_player_count} players")
+					load_state = LoadStates.HOST_WAIT
+				}
+			} else {
+				_netgame.send_host(net_buffer_create(true, NetHeaders.CLIENT_READY))
+			}
+		}
+		
 		exit
 	}
 	
@@ -650,6 +683,32 @@ switch load_state {
 		// This is a dummy load state that waits until the netgame connection
 		// returns a result.
 		exit
+	}
+	
+	case LoadStates.HOST_WAIT: {
+		var _netgame = global.netgame
+		
+		if _netgame != undefined and _netgame.master and _netgame.player_count > 1 {
+			with _netgame {
+				var i = 0
+				
+				repeat ds_list_size(players) {
+					var _player = players[| i++]
+					
+					if _player == undefined {
+						continue
+					}
+					
+					if not _player.ready {
+						exit
+					}
+				}
+			}
+		}
+		
+		load_state = LoadStates.NONE
+		
+		break
 	}
 }
 
@@ -861,6 +920,236 @@ if _tick >= 1 {
 	var _players_active = global.players_active
 	var _level = global.level
 	
+#region Netgame Pre-Processing
+	if _in_netgame {
+		if _is_master {
+			with _netgame {
+				if ack_count >= player_count {
+					ack_count = 1
+					stall_time = 0
+					i = 0
+					
+					repeat ds_list_size(players) {
+						var _player = players[| i]
+						
+						if _player != undefined {
+							_player.tick_acked = (i == local_slot)
+						}
+						
+						++i
+					}
+				}
+				
+				stall_time += _tick
+				
+				if stall_time >= STALL_RATE {
+					_tick = 0
+					
+					if stall_time >= (STALL_RATE + TICKRATE) {
+						var _text = "[c_yellow]Waiting for: "
+						
+						i = 0
+						
+						repeat ds_list_size(players) {
+							var _player = players[| i++]
+							
+							if _player == undefined {
+								continue
+							}
+							
+							with _player {
+								if not tick_acked {
+									_text += name + $" (P{i}) "
+								}
+							}
+						}
+						
+						show_caption(_text, 3 * (1 / max(_tick_inc, 0.01)))
+					}
+				}
+			}
+		} else {
+			var _client_tick = _tick
+			
+			_tick = _netgame.tick_count
+			
+			if _tick > 0 {
+				with _netgame {
+					if local_player != undefined {
+						with local_player {
+							if instance_exists(thing) {
+								with thing {
+									if predict_host == undefined {
+										break
+									}
+								
+									x = predict_host.x
+									y = predict_host.y
+									z = predict_host.z
+									angle = predict_host.angle
+									pitch = predict_host.pitch
+									x_speed = predict_host.x_speed
+									y_speed = predict_host.y_speed
+									z_speed = predict_host.z_speed
+									vector_speed = predict_host.vector_speed
+									move_angle = predict_host.move_angle
+									last_prop = predict_host.last_prop
+									fric = predict_host.fric
+									grav = predict_host.grav
+									max_fall_speed = predict_host.max_fall_speed
+									max_fly_speed = predict_host.max_fly_speed
+									radius = predict_host.radius
+									height = predict_host.height
+									array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+									array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+									array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+									input_length = predict_host.input_length
+									jumped = predict_host.jumped
+									coyote = predict_host.coyote
+									aim_angle = predict_host.aim_angle
+									movement_speed = predict_host.movement_speed
+									jump_speed = predict_host.jump_speed
+									coyote_time = predict_host.coyote_time
+									f_grounded = predict_host.f_grounded
+									playcam_z_lerp = predict_host.playcam_z_lerp
+									playcam_z_snap = predict_host.playcam_z_snap
+									playcam_sync_input = predict_host.playcam_sync_input
+									array_copy(playcam_target, 0, predict_host.playcam_target, 0, CameraTargetData.__SIZE)
+									array_copy(playcam, 0, predict_host.playcam, 0, 3)
+									playcam_z = predict_host.playcam_z
+									playcam_z_to = predict_host.playcam_z_to
+								
+									if model != undefined {
+										model.x = predict_host.model_x
+										model.y = predict_host.model_y
+										model.z = predict_host.model_z
+										model.yaw = predict_host.model_yaw
+										model.pitch = predict_host.model_pitch
+										model.roll = predict_host.model_roll
+									}
+								}
+							}
+						
+							if instance_exists(camera) {
+								with camera {
+									if predict_host == undefined {
+										break
+									}
+								
+									x = predict_host.x
+									y = predict_host.y
+									z = predict_host.z
+									angle = predict_host.angle
+									pitch = predict_host.pitch
+									x_speed = predict_host.x_speed
+									y_speed = predict_host.y_speed
+									z_speed = predict_host.z_speed
+									vector_speed = predict_host.vector_speed
+									move_angle = predict_host.move_angle
+									last_prop = predict_host.last_prop
+									fric = predict_host.fric
+									grav = predict_host.grav
+									max_fall_speed = predict_host.max_fall_speed
+									max_fly_speed = predict_host.max_fly_speed
+									radius = predict_host.radius
+									height = predict_host.height
+									array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+									array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+									array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+									f_grounded = predict_host.f_grounded
+									yaw = predict_host.yaw
+									roll = predict_host.roll
+									fov = predict_host.fov
+									range = predict_host.range
+									range_lerp = predict_host.range_lerp
+								
+									if model != undefined {
+										model.x = predict_host.model_x
+										model.y = predict_host.model_y
+										model.z = predict_host.model_z
+										model.yaw = predict_host.model_yaw
+										model.pitch = predict_host.model_pitch
+										model.roll = predict_host.model_roll
+									}
+								}
+							}
+						}
+					}
+					
+					delay = 0
+					stall_time = 0
+				}
+			}
+			
+			_netgame.stall_time += _client_tick
+			
+			while _client_tick >= 1 {
+				// Main
+				var _move_range = input_check("walk") ? 64 : 127
+				var _input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
+				var _input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
+				var _input_jump = input_check("jump")
+				var _input_interact = input_check("interact")
+				var _input_attack = input_check("attack")
+				
+				// Inventory
+				var _input_inventory_up = input_check("inventory_up")
+				var _input_inventory_left = input_check("inventory_left")
+				var _input_inventory_down = input_check("inventory_down")
+				var _input_inventory_right = input_check("inventory_right")
+				
+				// Camera
+				var _input_aim = input_check("aim")
+				var _dx_factor = input_value("aim_right") - input_value("aim_left")
+				var _dy_factor = input_value("aim_down") - input_value("aim_up")
+				var _dx_angle, _dy_angle
+				var _mouse_dx = mouse_dx
+				var _mouse_dy = mouse_dy
+				
+				with _config {
+					_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
+					_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+					
+					if _mouse_focused {
+						_dx_factor += _mouse_dx * in_mouse_x
+						_dy_factor += _mouse_dy * in_mouse_y
+					}
+				}
+				
+				var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+				var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+				
+				_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
+					buffer_s8, _input_up_down,
+					buffer_s8, _input_left_right,
+					
+					buffer_u8, player_input_to_flags(
+						_input_jump,
+						_input_interact,
+						_input_attack,
+						_input_inventory_up,
+						_input_inventory_left,
+						_input_inventory_down,
+						_input_inventory_right,
+						_input_aim
+					),
+					
+					buffer_s16, _dx % 32768,
+					buffer_s16, _dy % 32768
+				))
+				
+				--_client_tick;
+			}
+			
+			if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
+				show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
+			}
+		}
+	}
+#endregion
+	
+	var _ticked = false
+	
 	while _tick >= 1 {
 		var _skip_tick = false
 		
@@ -946,7 +1235,6 @@ if _tick >= 1 {
 				if _in_netgame and not net_active() {
 					_in_netgame = false
 					_is_master = true
-					//_ticks_queued = false
 					_skip_tick = true
 				}
 			} else {
@@ -985,7 +1273,7 @@ if _tick >= 1 {
 				}
 			}
 			
-			if _in_netgame and _skip_tick {
+			if (_in_netgame or global.game_status & GameStatus.NETGAME) and _skip_tick {
 				input_verb_consume("up")
 				input_verb_consume("left")
 				input_verb_consume("down")
@@ -1055,7 +1343,7 @@ if _tick >= 1 {
 				buffer_copy(_demo_buffer, _pos, _tick_size, _tick_buffer, 0)
 				buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
 				buffer_resize(_tick_buffer, _tick_size)
-			} else {
+			} else if _is_master {
 				// Local input
 				var i = 0
 				var _mouse_dx = mouse_dx
@@ -1064,56 +1352,77 @@ if _tick >= 1 {
 				repeat ds_list_size(_players_active) {
 					with _players_active[| i++] {
 						var j = slot
+						var _input_up_down, _input_left_right, _input_flags, _dx, _dy
 						
-						// Main
-						var _move_range = input_check("walk", j) ? 64 : 127
-						var _input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
-						var _input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
-						var _input_jump = input_check("jump", j)
-						var _input_interact = input_check("interact", j)
-						var _input_attack = input_check("attack", j)
-						
-						// Inventory
-						var _input_inventory_up = input_check("inventory_up", j)
-						var _input_inventory_left = input_check("inventory_left", j)
-						var _input_inventory_down = input_check("inventory_down", j)
-						var _input_inventory_right = input_check("inventory_right", j)
-						
-						// Camera
-						var _input_aim = input_check("aim", j)
-						var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
-						var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
-						var _dx_angle, _dy_angle
-						
-						with _config {
-							_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
-							_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+						if _in_netgame and j > 0 {
+							_input_up_down = input[PlayerInputs.UP_DOWN]
+							_input_left_right = input[PlayerInputs.LEFT_RIGHT]
 							
-							if j == 0 and _mouse_focused {
-								_dx_factor += _mouse_dx * in_mouse_x
-								_dy_factor += _mouse_dy * in_mouse_y
+							_input_flags = player_input_to_flags(
+								input[PlayerInputs.JUMP],
+								input[PlayerInputs.INTERACT],
+								input[PlayerInputs.ATTACK],
+								input[PlayerInputs.INVENTORY_UP],
+								input[PlayerInputs.INVENTORY_LEFT],
+								input[PlayerInputs.INVENTORY_DOWN],
+								input[PlayerInputs.INVENTORY_RIGHT],
+								input[PlayerInputs.AIM],
+							)
+							
+							_dx = 0
+							_dy = 0
+							
+							with net {
+								while ds_queue_size(input_queue) {
+									_input_up_down = ds_queue_dequeue(input_queue)
+									_input_left_right = ds_queue_dequeue(input_queue)
+									_input_flags = ds_queue_dequeue(input_queue)
+									_dx += ds_queue_dequeue(input_queue)
+									_dy += ds_queue_dequeue(input_queue)
+								}
 							}
+						} else {
+							// Main
+							var _move_range = input_check("walk", j) ? 64 : 127
+							
+							_input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
+							_input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
+							
+							_input_flags = player_input_to_flags(
+								input_check("jump", j),
+								input_check("interact", j),
+								input_check("attack", j),
+								input_check("inventory_up", j),
+								input_check("inventory_left", j),
+								input_check("inventory_down", j),
+								input_check("inventory_right", j),
+								input_check("aim", j),
+							)
+							
+							// Camera
+							var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
+							var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
+							var _dx_angle, _dy_angle
+							
+							with _config {
+								_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
+								_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+								
+								if j == 0 and _mouse_focused {
+									_dx_factor += _mouse_dx * in_mouse_x
+									_dy_factor += _mouse_dy * in_mouse_y
+								}
+							}
+							
+							_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+							_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
 						}
-						
-						var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-						var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
 						
 						buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
 						buffer_write(_tick_buffer, buffer_u8, j)
 						buffer_write(_tick_buffer, buffer_s8, _input_up_down)
 						buffer_write(_tick_buffer, buffer_s8, _input_left_right)
-						
-						buffer_write(_tick_buffer, buffer_u8, player_input_to_flags(
-							_input_jump,
-							_input_interact,
-							_input_attack,
-							_input_inventory_up,
-							_input_inventory_left,
-							_input_inventory_down,
-							_input_inventory_right,
-							_input_aim
-						))
-						
+						buffer_write(_tick_buffer, buffer_u8, _input_flags)
 						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
 						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768)
 					}
@@ -1121,12 +1430,39 @@ if _tick >= 1 {
 				
 				_tick_size = buffer_tell(_tick_buffer)
 				
-				if _in_netgame and _is_master {
+				if _in_netgame {
+					with _level {
+						if name != "lvlTitle" and (time % 20) == 0 {
+							var _checksum = 0
+							
+							with Thing {
+								_checksum += floor(x)
+								_checksum += floor(y)
+								_checksum += floor(z)
+							}
+							
+							buffer_write(_tick_buffer, buffer_u8, TickPackets.CHECKSUM)
+							buffer_write(_tick_buffer, buffer_u8, abs(time + instance_number(Thing) + _checksum) % 255)
+							_tick_size += 2
+						}
+					}
+					
 					var b = net_buffer_create(true, NetHeaders.HOST_TICK)
-                    var _pos = buffer_tell(b)
+					var _pos = buffer_tell(b)
 					
 					buffer_copy(_tick_buffer, 0, _tick_size, b, _pos)
 					_netgame.send_others(b, _pos + _tick_size)
+				}
+			} else {
+				with _netgame {
+					delay = ds_queue_dequeue(tick_queue)
+					
+					var _relay = ds_queue_dequeue(tick_queue)
+					
+					_tick_size = buffer_get_size(_relay)
+					buffer_copy(_relay, 0, _tick_size, _tick_buffer, 0)
+					buffer_delete(_relay);
+					--tick_count
 				}
 			}
 			
@@ -1212,6 +1548,30 @@ if _tick >= 1 {
 							_level.goto(_name, _area, _tag)
 						}
 						
+						_tick = 0
+						
+						break
+					}
+					
+					case TickPackets.CHECKSUM: {
+						var _checksum = buffer_read(_tick_buffer, buffer_u8)
+						
+						if not _is_master {
+							var _clientsum = 0
+							
+							with Thing {
+								_clientsum += floor(x)
+								_clientsum += floor(y)
+								_clientsum += floor(z)
+							}
+							
+							_clientsum = abs(_level.time + instance_number(Thing) + _clientsum) % 255
+							
+							if _checksum != _clientsum {
+								show_caption($"[c_red]Desynced with host ({_clientsum} =/= {_checksum})", infinity)
+							}
+						}
+						
 						break
 					}
 				}
@@ -1222,6 +1582,7 @@ if _tick >= 1 {
 			
 			while i {
 				with _players_active[| --i] {
+#region Force Aim
 					var _input_force_x = input[PlayerInputs.FORCE_LEFT_RIGHT]
 					
 					if not is_nan(_input_force_x) {
@@ -1235,6 +1596,7 @@ if _tick >= 1 {
 						input[PlayerInputs.AIM_UP_DOWN] = round(_input_force_y * PLAYER_AIM_DIRECT) % 32768
 						input[PlayerInputs.FORCE_UP_DOWN] = NaN
 					}
+#endregion
 					
 #region Area
 					if area != undefined {
@@ -1397,8 +1759,240 @@ if _tick >= 1 {
 		
 		mouse_dx = 0
 		mouse_dy = 0
-		input_clear_momentary(true);
+		input_clear_momentary(true)
+		_ticked = true;
 		--_tick
+	}
+#endregion
+	
+#region Client Prediction
+	if not _is_master {
+		var _local_player = _netgame.local_player
+		
+		if _local_player != undefined {
+			with _local_player {
+				var _has_thing = instance_exists(thing)
+				var _has_camera = instance_exists(camera)
+				
+				if _ticked {
+					if _has_thing {
+						with thing {
+							predict_host ??= {
+								floor_ray: raycast_data_create(),
+								wall_ray: raycast_data_create(),
+								ceiling_ray: raycast_data_create(),
+								playcam: array_create(3),
+								playcam_target: array_create(CameraTargetData.__SIZE),
+							}
+							
+							predict_host.x = x
+							predict_host.y = y
+							predict_host.z = z
+							predict_host.angle = angle
+							predict_host.pitch = pitch
+							predict_host.x_speed = x_speed
+							predict_host.y_speed = y_speed
+							predict_host.z_speed = z_speed
+							predict_host.vector_speed = vector_speed
+							predict_host.move_angle = move_angle
+							predict_host.last_prop = last_prop
+							predict_host.fric = fric
+							predict_host.grav = grav
+							predict_host.max_fall_speed = max_fall_speed
+							predict_host.max_fly_speed = max_fly_speed
+							predict_host.radius = radius
+							predict_host.height = height
+							array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+							array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+							array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+							predict_host.input_length = input_length
+							predict_host.jumped = jumped
+							predict_host.coyote = coyote
+							predict_host.aim_angle = aim_angle
+							predict_host.movement_speed = movement_speed
+							predict_host.jump_speed = jump_speed
+							predict_host.coyote_time = coyote_time
+							predict_host.f_grounded = f_grounded
+							predict_host.playcam_z_lerp = playcam_z_lerp
+							predict_host.playcam_z_snap = playcam_z_snap
+							predict_host.playcam_sync_input = playcam_sync_input
+							array_copy(predict_host.playcam_target, 0, playcam_target, 0, CameraTargetData.__SIZE)
+							array_copy(predict_host.playcam, 0, playcam, 0, 3)
+							predict_host.playcam_z = playcam_z
+							predict_host.playcam_z_to = playcam_z_to
+							
+							if model != undefined {
+								predict_host.model_x = model.x
+								predict_host.model_y = model.y
+								predict_host.model_z = model.z
+								predict_host.model_yaw = model.yaw
+								predict_host.model_pitch = model.pitch
+								predict_host.model_roll = model.roll
+							}
+						}
+					}
+					
+					if _has_camera {
+						with camera {
+							predict_host ??= {
+								floor_ray: raycast_data_create(),
+								wall_ray: raycast_data_create(),
+								ceiling_ray: raycast_data_create(),
+							}
+							
+							predict_host.x = x
+							predict_host.y = y
+							predict_host.z = z
+							predict_host.angle = angle
+							predict_host.pitch = pitch
+							predict_host.x_speed = x_speed
+							predict_host.y_speed = y_speed
+							predict_host.z_speed = z_speed
+							predict_host.vector_speed = vector_speed
+							predict_host.move_angle = move_angle
+							predict_host.last_prop = last_prop
+							predict_host.fric = fric
+							predict_host.grav = grav
+							predict_host.max_fall_speed = max_fall_speed
+							predict_host.max_fly_speed = max_fly_speed
+							predict_host.radius = radius
+							predict_host.height = height
+							array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+							array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+							array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+							predict_host.f_grounded = f_grounded
+							predict_host.yaw = yaw
+							predict_host.roll = roll
+							predict_host.fov = fov
+							predict_host.range = range
+							predict_host.range_lerp = range_lerp
+							
+							if model != undefined {
+								predict_host.model_x = model.x
+								predict_host.model_y = model.y
+								predict_host.model_z = model.z
+								predict_host.model_yaw = model.yaw
+								predict_host.model_pitch = model.pitch
+								predict_host.model_roll = model.roll
+							}
+						}
+					}
+				}
+				
+				var _input = input
+				var _delay = _netgame.delay * 0.03
+				var _net_interp = _config.net_interp
+				var _net_interp_delay = _config.net_interp_delay
+				
+				if _has_thing {
+					with thing {
+						if f_frozen or f_culled or predict_host == undefined {
+							break
+						}
+						
+						f_predicting = true
+						
+						// Store original input
+						var _input_up_down = _input[PlayerInputs.UP_DOWN]
+						var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
+						var _input_jump = _input[PlayerInputs.JUMP]
+						var _input_interact = _input[PlayerInputs.INTERACT]
+						var _input_attack = _input[PlayerInputs.ATTACK]
+						var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
+						var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
+						var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
+						var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
+						var _input_aim = _input[PlayerInputs.AIM]
+						
+						// Tick in prediction mode
+						var _move_range = input_check("walk") ? 64 : 127
+						
+						_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+						_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+						_input[PlayerInputs.JUMP] = input_check("jump")
+						_input[PlayerInputs.INTERACT] = input_check("interact")
+						_input[PlayerInputs.ATTACK] = input_check("attack")
+						_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+						_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+						_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+						_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+						_input[PlayerInputs.AIM] = input_check("aim")
+						
+						var i = _delay
+						
+						while i >= _net_interp_delay {
+							event_user(ThingEvents.TICK);
+							--i
+						}
+						
+						x = lerp(predict_host.x, x, _net_interp)
+						y = lerp(predict_host.y, y, _net_interp)
+						z = lerp(predict_host.z, z, _net_interp)
+						angle = lerp_angle(predict_host.angle, angle, _net_interp)
+						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+						aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+						
+						if model != undefined {
+							model.x = lerp(predict_host.model_x, model.x, _net_interp)
+							model.y = lerp(predict_host.model_y, model.y, _net_interp)
+							model.z = lerp(predict_host.model_z, model.z, _net_interp)
+							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+						}
+						
+						_input[PlayerInputs.UP_DOWN] = _input_up_down
+						_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
+						_input[PlayerInputs.JUMP] = _input_jump
+						_input[PlayerInputs.INTERACT] = _input_interact
+						_input[PlayerInputs.ATTACK] = _input_attack
+						_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
+						_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
+						_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
+						_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
+						_input[PlayerInputs.AIM] = _input_aim
+						f_predicting = false
+					}
+				}
+				
+				if _has_camera {
+					with camera {
+						if f_frozen or f_culled or path_active or predict_host == undefined {
+							break
+						}
+						
+						f_predicting = true
+						
+						var i = _delay
+						
+						while i >= _net_interp_delay {
+							event_user(ThingEvents.TICK);
+							--i
+						}
+						
+						x = lerp(predict_host.x, x, _net_interp)
+						y = lerp(predict_host.y, y, _net_interp)
+						z = lerp(predict_host.z, z, _net_interp)
+						angle = lerp_angle(predict_host.angle, angle, _net_interp)
+						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+						yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
+						roll = lerp_angle(predict_host.roll, roll, _net_interp)
+						fov = lerp(predict_host.fov, fov, _net_interp)
+						
+						if model != undefined {
+							model.x = lerp(predict_host.model_x, model.x, _net_interp)
+							model.y = lerp(predict_host.model_y, model.y, _net_interp)
+							model.z = lerp(predict_host.model_z, model.z, _net_interp)
+							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+						}
+						
+						f_predicting = false
+					}
+				}
+			}
+		}
 	}
 #endregion
 }

@@ -10,6 +10,8 @@ function Netgame() constructor {
 	clients = ds_map_create()
 	player_count = 0
 	local_slot = 0
+	local_net = undefined
+	local_player = undefined
 	
 	delay = 0
 	timestamp = current_time
@@ -141,7 +143,7 @@ function Netgame() constructor {
 		repeat ds_list_size(players) {
 			var _player = players[| i++]
 			
-			if _player != undefined and _player.slot != local_slot {
+			if _player != undefined and _player != local_net {
 				send_player(_player, _buffer, _size, false)
 			}
 		}

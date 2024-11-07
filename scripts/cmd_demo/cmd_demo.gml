@@ -46,6 +46,8 @@ function cmd_demo(_args) {
 	
 	var _is_netgame = buffer_read(_demo_buffer, buffer_u8)
 	
+	global.demo_client = _is_netgame > 1
+	
 	// Mods
 	var _mods = global.mods
 	

@@ -6,6 +6,7 @@ function cmd_dend(_args) {
 			print("! cmd_dend: Stopping")
 			buffer_delete(global.demo_buffer)
 			global.demo_buffer = undefined
+			global.demo_client = false
 			global.game_status = GameStatus.DEFAULT
 			
 			var _devices = input_players_get_status().__players
@@ -36,6 +37,7 @@ function cmd_dend(_args) {
 	
 	if _demo_buffer == undefined {
 		global.demo_write = false
+		global.demo_client = false
 		print("cmd_dend: Cancelling")
 		
 		exit
@@ -59,5 +61,6 @@ function cmd_dend(_args) {
 	buffer_delete(_demo_buffer)
 	global.demo_write = false
 	global.demo_buffer = undefined
+	global.demo_client = false
 	print($"cmd_dend: Saved as '{_filename}'")
 }
