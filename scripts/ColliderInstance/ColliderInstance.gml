@@ -16,63 +16,11 @@ function ColliderInstance(_collider) constructor {
 	is_static = true
 	
 	static set_matrix = function (_matrix) {
-		var m0 = _matrix[0]
-		var m1 = _matrix[1]
-		var m2 = _matrix[2]
-		var m4 = _matrix[4]
-		var m5 = _matrix[5]
-		var m6 = _matrix[6]
-		var m8 = _matrix[8]
-		var m9 = _matrix[9]
-		var m10 = _matrix[10]
-		
-		var i0 = m5 * m10 - m9 * m6
-		var i4 = m8 * m6  - m4 * m10
-		var i8 = m4 * m9  - m8 * m5
-		
-		var d = dot_product_3d(m0, m1, m2, i0, i4, i8)
-		
-		if d == 0 {
-			return false
-		}
-		
 		if not is_static {
 			delta_matrix = matrix_multiply(inverse_matrix, _matrix)
 		}
 		
-		var m12 = _matrix[12]
-		var m13 = _matrix[13]
-		var m14 = _matrix[14]
-		
-		var i1 = m9 * m2  - m1 * m10
-		var i2 = m1 * m6  - m5 * m2
-		var i5 = m0 * m10 - m8 * m2
-		var i6 = m4 * m2  - m0 * m6
-		var i9 = m8 * m1  - m0 * m9
-		var i10 = m0 * m5  - m4 * m1
-		
-		inverse_matrix[0] = i0
-		inverse_matrix[1] = i1
-		inverse_matrix[2] = i2
-		inverse_matrix[4] = i4
-		inverse_matrix[5] = i5
-		inverse_matrix[6] = i6
-		inverse_matrix[8] = i8
-		inverse_matrix[9] = i9
-		inverse_matrix[10] = i10
-		inverse_matrix[12] = -dot_product_3d(m12, m13, m14, i0, i4, i8)
-		inverse_matrix[13] = -dot_product_3d(m12, m13, m14, i1, i5, i9)
-		inverse_matrix[14] = -dot_product_3d(m12, m13, m14, i2, i6, i10)
-		inverse_matrix[15] = m0 * m5 * m10 - m0 * m6 * m9 - m4 * m1 * m10 + m4 * m2 * m9 + m8 * m1 * m6 - m8 * m2 * m5
-		
-		d = 1 / d
-		
-		var i = 0
-		
-		repeat 16 {
-			inverse_matrix[i++] *= d
-		}
-		
+		inverse_matrix = matrix_inverse(_matrix)
 		matrix = _matrix
 		is_static = false
 		
