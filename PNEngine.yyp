@@ -5259,7 +5259,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2024.1100.0.674",
+    "IDEVersion":"2024.1100.0.659",
   },
   "name":"PNEngine",
   "resources":[
@@ -5438,6 +5438,7 @@
     {"id":{"name":"__lexicon_throw","path":"scripts/__lexicon_throw/__lexicon_throw.yy",},},
     {"id":{"name":"__lexicon_trace","path":"scripts/__lexicon_trace/__lexicon_trace.yy",},},
     {"id":{"name":"__MultiClientExtensionTest","path":"scripts/__MultiClientExtensionTest/__MultiClientExtensionTest.yy",},},
+    {"id":{"name":"__scr_catspeak_gml_interface","path":"scripts/__scr_catspeak_gml_interface/__scr_catspeak_gml_interface.yy",},},
     {"id":{"name":"__scribble_class_element","path":"scripts/__scribble_class_element/__scribble_class_element.yy",},},
     {"id":{"name":"__scribble_class_event","path":"scripts/__scribble_class_event/__scribble_class_event.yy",},},
     {"id":{"name":"__scribble_class_font","path":"scripts/__scribble_class_font/__scribble_class_font.yy",},},
