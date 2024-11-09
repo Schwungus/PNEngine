@@ -53,7 +53,7 @@ function ScriptMap() : AssetMap() constructor {
 				++_lines
 				
 				if string_starts_with(_line, "#thing") {
-#region ThingScript
+#region Thing
 					if _type_header_exists {
 						throw $"Cannot have more than one type header, found '{_line}'"
 					}
@@ -148,20 +148,20 @@ function ScriptMap() : AssetMap() constructor {
 								throw $"Parent '{_parent}' not found"
 							} else {
 								if not is_instanceof(parent, HandlerScript) {
-									throw $"Cannot inherit non-HandlerScript '{_parent}'"
+									throw $"Cannot inherit non-Handler '{_parent}'"
 								}
 								
-								main = _parent.main
-								load = _parent.load
-								player_connected = _parent.player_connected
-								player_disconnected = _parent.player_disconnected
-								player_activated = _parent.player_activated
-								player_deactivated = _parent.player_deactivated
-								level_started = _parent.level_started
-								area_changed = _parent.area_changed
-								area_activated = _parent.area_activated
-								area_deactivated = _parent.area_deactivated
-								ui_signalled = _parent.ui_signalled
+								main = parent.main
+								load = parent.load
+								player_connected = parent.player_connected
+								player_disconnected = parent.player_disconnected
+								player_activated = parent.player_activated
+								player_deactivated = parent.player_deactivated
+								level_started = parent.level_started
+								area_changed = parent.area_changed
+								area_activated = parent.area_activated
+								area_deactivated = parent.area_deactivated
+								ui_signalled = parent.ui_signalled
 							}
 						}
 					}
@@ -283,7 +283,7 @@ function ScriptMap() : AssetMap() constructor {
 					_omit_line = true
 #endregion
 				} else if string_starts_with(_line, "#ui") {
-#region UIScript
+#region UI
 					if _type_header_exists {
 						throw $"Cannot have more than one type header, found '{_line}'"
 					}
