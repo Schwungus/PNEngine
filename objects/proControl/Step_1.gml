@@ -146,21 +146,6 @@ switch load_state {
 				save_game()
 			}
 			
-			var _script = _json[$ "script"]
-			
-			if is_string(_script) {
-				with _level {
-					level_script = global.scripts.fetch(_script)
-					
-					if level_script != undefined {
-						start = level_script.start
-						area_changed = level_script.area_changed
-						area_activated = level_script.area_activated
-						area_deactivated = level_script.area_deactivated
-					}
-				}
-			}
-			
 			var _music_tracks = _json[$ "music"]
 			
 			if _music_tracks != undefined {
@@ -644,10 +629,6 @@ switch load_state {
 		}
 		
 		with _level {
-			if start != undefined {
-				catspeak_execute(start)
-			}
-			
 			np_setpresence_timestamps(rp_time ? date_current_datetime() : 0, 0, false)
 		}
 		
@@ -1200,9 +1181,14 @@ if _tick >= 1 {
 				_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
 				_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
 				_ui_input[UIInputs.BACK] = input_check_pressed("pause")
-				_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
-				_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
-				_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+				
+				if _mouse_focused {
+					_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
+					_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
+					_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+				} else {
+					_ui_input[UIInputs.MOUSE_CONFIRM] = false
+				}
 				
 				var _tick_target = _ui
 				
@@ -1267,7 +1253,7 @@ if _tick >= 1 {
 				}
 				
 				if _paused {
-					ui_create("Pause")
+					ui_create("Pause", {level: _level})
 					
 					_skip_tick = true
 				}
@@ -1573,6 +1559,34 @@ if _tick >= 1 {
 						}
 						
 						break
+					}
+					
+					case TickPackets.SIGNAL: {
+						var _slot = buffer_read(_tick_buffer, buffer_u8)
+						var _sender = _slot < INPUT_MAX_PLAYERS ? _players[_slot] : undefined
+						var _name = buffer_read(_tick_buffer, buffer_string)
+						var _argc = buffer_read(_tick_buffer, buffer_u8)
+						var _args = global.signal_args
+						
+						array_resize(_args, _argc)
+						
+						var i = 0
+						
+						repeat _argc {
+							_args[i++] = buffer_read_dynamic(_tick_buffer)
+						}
+						
+						var _handlers = global.handlers
+						
+						i = ds_list_size(_handlers)
+						
+						while i {
+							with _handlers[| --i] {
+								if ui_signalled != undefined {
+									catspeak_execute(ui_signalled, _sender, _name, _args)
+								}
+							}
+						}
 					}
 				}
 			}

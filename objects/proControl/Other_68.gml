@@ -480,11 +480,42 @@ with _netgame {
 		
 		case NetHeaders.CLIENT_READY: {
 			if master {
-				var _player = clients[? $"{_ip}:{_port}"]
+				var _net = clients[? $"{_ip}:{_port}"]
 				
-				if _player != undefined {
-					print($"proControl: Got ready from client {_player.key}")
-					_player.ready = true
+				if _net != undefined {
+					print($"proControl: Got ready from Player {-~_net.slot} ({_net.name})")
+					_net.ready = true
+				}
+			}
+			
+			break
+		}
+		
+		case NetHeaders.CLIENT_SIGNAL: {
+			if master {
+				var _net = clients[? $"{_ip}:{_port}"]
+				
+				if _net != undefined {
+					var _name = buffer_read(_buffer, buffer_string)
+					var _slot = _net.slot
+					
+					print($"proControl: Got signal '{_name}' from Player {-~_slot} ({_net.name})")
+					
+					var _tick_buffer = inject_tick_packet()
+					
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.SIGNAL)
+					buffer_write(_tick_buffer, buffer_u8, _slot)
+					buffer_write(_tick_buffer, buffer_string, _name)
+					
+					var _argc = buffer_read(_buffer, buffer_u8)
+					
+					buffer_write(_tick_buffer, buffer_u8, _argc)
+					
+					repeat _argc {
+						var _arg = buffer_read_dynamic(_buffer)
+						
+						buffer_write_dynamic(_tick_buffer)
+					}
 				}
 			}
 			

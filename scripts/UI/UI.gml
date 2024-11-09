@@ -153,5 +153,43 @@ function UI(_ui_script) constructor {
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
-	static send_signal = function (_name) {}
+	static send_signal = function (_name) {
+		if not net_master() {
+			var b = net_buffer_create(true, NetHeaders.CLIENT_SIGNAL, buffer_string, _name)
+			
+			var _argc = argument_count - 1
+			
+			buffer_write(b, buffer_u8, _argc)
+			
+			var i = 1
+			
+			repeat _argc {
+				buffer_write_dynamic(b, argument[i++])
+			}
+			
+			global.netgame.send_host(b)
+			
+			exit
+		}
+		
+		if global.demo_buffer != undefined and not global.demo_write {
+			exit
+		}
+		
+		var _tick_buffer = inject_tick_packet()
+		
+		buffer_write(_tick_buffer, buffer_u8, TickPackets.SIGNAL)
+		buffer_write(_tick_buffer, buffer_u8, 0) // Player slot (Always player 1 in local)
+		buffer_write(_tick_buffer, buffer_string, _name)
+		
+		var _argc = argument_count - 1
+		
+		buffer_write(_tick_buffer, buffer_u8, _argc)
+		
+		var i = 1
+		
+		repeat _argc {
+			buffer_write_dynamic(_tick_buffer, argument[i++])
+		}
+	}
 }

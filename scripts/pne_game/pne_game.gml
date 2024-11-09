@@ -44,11 +44,13 @@ global.freeze_step = true
 global.tick = 0
 global.tick_scale = 1
 global.delta = 1
-global.mouse_focused = false
 global.tick_buffer = buffer_create(1, buffer_grow, 1)
 global.inject_tick_buffer = false
 
+global.mouse_focused = false
+
 global.interps = ds_list_create()
+global.handlers = ds_list_create()
 
 global.saves = ds_list_create()
 global.save_name = "Debug"

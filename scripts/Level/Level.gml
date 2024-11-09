@@ -15,13 +15,6 @@ function Level() constructor {
 	
 	time = 0
 	
-	level_script = undefined
-	
-	start = undefined
-	area_changed = undefined
-	area_activated = undefined
-	area_deactivated = undefined
-	
 	/// @desc Destroys the contents of the level, allowing it to be removed.
 	static destroy = function () {
 		repeat ds_map_size(areas) {

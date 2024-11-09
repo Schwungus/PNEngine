@@ -77,3 +77,4 @@ _oui_values[OUIValues.VOLUME] = ["0%", "5%", "10%", "15%", "20%", "25%", "30%", 
 global.ui = undefined
 global.ui_input = array_create(UIInputs.__SIZE)
 global.oui_values = _oui_values
+global.signal_args = []

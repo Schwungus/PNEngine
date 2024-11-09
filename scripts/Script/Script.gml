@@ -16,18 +16,4 @@ function Script() : Asset() constructor {
 		
 		return false
 	}
-	
-	static flush_function = function (_func) {
-		if not is_catspeak(_func) {
-			exit
-		}
-		
-		with method_get_self(_func) {
-			var i = 0
-			
-			repeat array_length(locals) {
-				locals[i++] = undefined
-			}
-		}
-	}
 }

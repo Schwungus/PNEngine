@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"LevelScript",
+  "%Name":"Handler",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"LevelScript",
+  "name":"Handler",
   "parent":{
-    "name":"Script",
-    "path":"folders/Scripts/PNEngine/Assets/Asset Types/Script.yy",
+    "name":"Game",
+    "path":"folders/Scripts/PNEngine/Game.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

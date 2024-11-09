@@ -121,45 +121,50 @@ function ScriptMap() : AssetMap() constructor {
 					_type_header_exists = true
 					_omit_line = true
 #endregion
-				} else if string_starts_with(_line, "#level") {
-#region Level
+				} else if string_starts_with(_line, "#handler") {
+#region Handler
 					if _type_header_exists {
 						throw $"Cannot have more than one type header, found '{_line}'"
 					}
 					
-						_script = new LevelScript()
+					_script = new HandlerScript()
+					
+					var _parents = string_split(_line, " ", true)
+					var _parents_n = array_length(_parents)
+					
+					if _parents_n >= 2 {
+						if _parents_n > 2 {
+							throw "Cannot inherit more than one Handler"
+						}
 						
-						var _parents = string_split(_line, " ", true)
-						var _parents_n = array_length(_parents)
+						var _parent = _parents[1]
 						
-						if _parents_n >= 2 {
-							if _parents_n > 2 {
-								throw "Cannot inherit more than one LevelScript"
-							}
+						load(_parent)
+						
+						with _script {
+							parent = other.get(_parent)
 							
-							var _parent = _parents[1]
-							
-							load(_parent)
-							
-							with _script {
-								parent = other.get(_parent)
-								
-								if parent == undefined {
-									throw $"Parent '{_parent}' not found"
-								} else {
-									if not is_instanceof(parent, LevelScript) {
-										throw $"Cannot inherit non-LevelScript '{_parent}'"
-									}
-									
-									main = _parent.main
-									load = _parent.load
-									start = _parent.start
-									area_changed = _parent.area_changed
-									area_activated = _parent.area_activated
-									area_deactivated = _parent.area_deactivated
+							if parent == undefined {
+								throw $"Parent '{_parent}' not found"
+							} else {
+								if not is_instanceof(parent, HandlerScript) {
+									throw $"Cannot inherit non-HandlerScript '{_parent}'"
 								}
+								
+								main = _parent.main
+								load = _parent.load
+								player_connected = _parent.player_connected
+								player_disconnected = _parent.player_disconnected
+								player_activated = _parent.player_activated
+								player_deactivated = _parent.player_deactivated
+								level_started = _parent.level_started
+								area_changed = _parent.area_changed
+								area_activated = _parent.area_activated
+								area_deactivated = _parent.area_deactivated
+								ui_signalled = _parent.ui_signalled
 							}
 						}
+					}
 					
 					_type_header_exists = true
 					_omit_line = true
@@ -417,11 +422,16 @@ function ScriptMap() : AssetMap() constructor {
 				draw = _globals[$ "draw"]
 				draw_screen = _globals[$ "draw_screen"]
 				draw_gui = _globals[$ "draw_gui"]
-			} else if is_instanceof(self, LevelScript) {
-				start = _globals[$ "start"]
+			} else if is_instanceof(self, HandlerScript) {
+				player_connected = _globals[$ "player_connected"]
+				player_disconnected = _globals[$ "player_disconnected"]
+				player_activated = _globals[$ "player_activated"]
+				player_deactivated = _globals[$ "player_deactivated"]
+				level_started = _globals[$ "level_started"]
 				area_changed = _globals[$ "area_changed"]
 				area_activated = _globals[$ "area_activated"]
 				area_deactivated = _globals[$ "area_deactivated"]
+				ui_signalled = _globals[$ "ui_signalled"]
 			} else if is_instanceof(self, TransitionScript) {
 				reload = _globals[$ "reload"]
 				create = _globals[$ "create"]

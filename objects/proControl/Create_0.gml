@@ -771,7 +771,27 @@ with Catspeak {
 			return ui_create(_type, _special, true)
 		},
 		
-		"ui_exists", ui_exists
+		"ui_exists", ui_exists,
+		
+		"ui_root", function () {
+			return global.ui
+		},
+		
+		"ui_top", function () {
+			var _top = global.ui
+			
+			while _top != undefined {
+				var _child = _top.child
+				
+				if _child == undefined {
+					break
+				}
+				
+				_top = _child
+			}
+			
+			return _top
+		}
 	)
 #endregion
 #endregion
@@ -874,6 +894,25 @@ repeat ds_map_size(_mods) {
 		
 		if is_string(_rpc_id) {
 			global.game_rpc_id = _rpc_id
+		}
+		
+		var _handefs = _info[$ "handlers"]
+		
+		if is_array(_handefs) {
+			var _scripts = global.scripts
+			var _handlers = global.handlers
+			
+			i = 0
+			
+			repeat array_length(_handefs) {
+				var _hname = force_type(_handefs[i++], "string")
+				var _handler_script = _scripts.fetch(_hname)
+				
+				if _handler_script != undefined {
+					_handler_script.transient = true
+					ds_list_add(_handlers, new Handler(_handler_script))
+				}
+			}
 		}
 		
 		var _states = _info[$ "states"]

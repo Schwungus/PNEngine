@@ -185,12 +185,6 @@ function Player() constructor {
 						_thing.player_entered(_newcomer)
 					}
 					
-					with level {
-						if area_changed != undefined {
-							catspeak_execute(area_changed, _newcomer, other)
-						}
-					}
-					
 					var _pawn = _newcomer.thing
 					
 					if instance_exists(_pawn) {
