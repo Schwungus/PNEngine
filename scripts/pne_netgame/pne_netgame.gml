@@ -1,5 +1,5 @@
 #macro DEFAULT_PORT 7788
-#macro STALL_RATE 15
+#macro STALL_RATE 10
 
 enum NetHeaders {
 	// Internal

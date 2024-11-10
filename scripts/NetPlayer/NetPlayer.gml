@@ -20,12 +20,18 @@ function NetPlayer() constructor {
 	reliable = ds_list_create()
 	
 	reliable_time_source = time_source_create(time_source_global, 0.25, time_source_units_seconds, method(self, function () {
-		if ds_list_empty(reliable) {
+		var n = ds_list_size(reliable)
+		
+		if not n {
 			time_source_stop(reliable_time_source)
 			
 			exit
 		}
 		
-		session.send_player(self, reliable[| 0], undefined, false, false)
+		var i = 0
+		
+		repeat n {
+			session.send_player(self, reliable[| i++], undefined, false, false)
+		}
 	}), [], -1)
 }

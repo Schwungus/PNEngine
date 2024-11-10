@@ -902,9 +902,14 @@ if _tick >= 1 {
 	if _in_netgame {
 		if _is_master {
 			with _netgame {
+				// You can stall the game if there are too many reliable
+				// packets queued up, but I don't think that's necessary.
+				//var _dont_stall = false
+				
 				if ack_count >= player_count {
 					ack_count = 1
 					stall_time = 0
+					//_dont_stall = true
 					i = 0
 					
 					repeat ds_list_size(players) {
@@ -912,11 +917,25 @@ if _tick >= 1 {
 						
 						if _player != undefined {
 							_player.tick_acked = (i == local_slot)
+							
+							/*if i == local_slot {
+								_player.tick_acked = true
+							} else {
+								_player.tick_acked = false
+								
+								if ds_list_size(_player.reliable) > TICKRATE {
+									_dont_stall = false
+								}
+							}*/
 						}
 						
 						++i
 					}
 				}
+				
+				/*if _dont_stall {
+					stall_time = 0
+				}*/
 				
 				stall_time += _tick
 				
@@ -949,7 +968,7 @@ if _tick >= 1 {
 		} else {
 			var _client_tick = _tick
 			
-			_tick = _netgame.tick_count
+			_tick = min(_netgame.tick_count, STALL_RATE)
 			
 			if _tick > 0 {
 				with _netgame {
@@ -1061,7 +1080,7 @@ if _tick >= 1 {
 			
 			_netgame.stall_time += _client_tick
 			
-			while _client_tick >= 1 {
+			//while _client_tick >= 1 {
 				// Main
 				var _move_range = input_check("walk") ? 64 : 127
 				var _input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
@@ -1116,8 +1135,8 @@ if _tick >= 1 {
 					buffer_s16, _dy % 32768
 				));
 				
-				--_client_tick
-			}
+				//--_client_tick
+			//}
 			
 			if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
 				show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
@@ -1891,7 +1910,7 @@ if _tick >= 1 {
 				}
 				
 				var _input = input
-				var _delay = _netgame.delay * 0.03
+				var _delay = min(_netgame.delay * 0.03, STALL_RATE)
 				var _net_interp = _config.net_interp
 				var _net_interp_delay = _config.net_interp_delay
 				

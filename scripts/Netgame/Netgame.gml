@@ -1,3 +1,11 @@
+#macro WRITE_RELIABLE buffer_poke(_buffer, 0, buffer_u32, ++reliable_index)\
+\
+var b = buffer_create(_size, buffer_fixed, 1)\
+\
+buffer_copy(_buffer, 0, _size, b, 0)\
+ds_list_add(reliable, b)\
+time_source_start(reliable_time_source)
+
 function Netgame() constructor {
 	active = false
 	
@@ -39,14 +47,7 @@ function Netgame() constructor {
 			
 			if _player != undefined {
 				with _player {
-					++reliable_index
-					buffer_poke(_buffer, 0, buffer_u32, reliable_index)
-					
-					var b = buffer_create(_size, buffer_fixed, 1)
-					
-					buffer_copy(_buffer, 0, _size, b, 0)
-					ds_list_add(reliable, b)
-					time_source_start(reliable_time_source)
+					WRITE_RELIABLE
 				}
 			}
 		}
@@ -67,14 +68,7 @@ function Netgame() constructor {
 			
 			if _player != undefined {
 				with _player {
-					++reliable_index
-					buffer_poke(_buffer, 0, buffer_u32, reliable_index)
-					
-					var b = buffer_create(_size, buffer_fixed, 1)
-					
-					buffer_copy(_buffer, 0, _size, b, 0)
-					ds_list_add(reliable, b)
-					time_source_start(reliable_time_source)
+					WRITE_RELIABLE
 				}
 				
 				network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
@@ -92,14 +86,7 @@ function Netgame() constructor {
 		
 		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
 			with _player {
-				++reliable_index
-				buffer_poke(_buffer, 0, buffer_u32, reliable_index)
-				
-				var b = buffer_create(_size, buffer_fixed, 1)
-				
-				buffer_copy(_buffer, 0, _size, b, 0)
-				ds_list_add(reliable, b)
-				time_source_start(reliable_time_source)
+				WRITE_RELIABLE
 			}
 		}
 		
@@ -116,14 +103,7 @@ function Netgame() constructor {
 		
 		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
 			with players[| 0] {
-				++reliable_index
-				buffer_poke(_buffer, 0, buffer_u32, reliable_index)
-				
-				var b = buffer_create(_size, buffer_fixed, 1)
-				
-				buffer_copy(_buffer, 0, _size, b, 0)
-				ds_list_add(reliable, b)
-				time_source_start(reliable_time_source)
+				WRITE_RELIABLE
 			}
 		}
 		
