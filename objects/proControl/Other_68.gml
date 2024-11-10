@@ -438,27 +438,27 @@ with _netgame {
 		}
 		
 		case NetHeaders.CLIENT_INPUT: {
-			if not master {
-				break
-			}
-			
-			var _player = clients[? $"{_ip}:{_port}"]
-			
-			if _player != undefined {
-				var _input_up_down = buffer_read(_buffer, buffer_s8)
-				var _input_left_right = buffer_read(_buffer, buffer_s8)
-				var _input_flags = buffer_read(_buffer, buffer_u8)
-				var _input_aim_up_down = buffer_read(_buffer, buffer_s16)
-				var _input_aim_left_right = buffer_read(_buffer, buffer_s16)
+			if master {
+				var _player = clients[? $"{_ip}:{_port}"]
 				
-				ds_queue_enqueue(_player.input_queue,
-					_input_up_down,
-					_input_left_right,
-					_input_flags,
-					_input_aim_up_down,
-					_input_aim_left_right
-				)
+				if _player != undefined {
+					var _input_up_down = buffer_read(_buffer, buffer_s8)
+					var _input_left_right = buffer_read(_buffer, buffer_s8)
+					var _input_flags = buffer_read(_buffer, buffer_u8)
+					var _input_aim_up_down = buffer_read(_buffer, buffer_s16)
+					var _input_aim_left_right = buffer_read(_buffer, buffer_s16)
+					
+					ds_queue_enqueue(_player.input_queue,
+						_input_up_down,
+						_input_left_right,
+						_input_flags,
+						_input_aim_up_down,
+						_input_aim_left_right
+					)
+				}
 			}
+			
+			break
 		}
 		
 		case NetHeaders.HOST_TICK: {
