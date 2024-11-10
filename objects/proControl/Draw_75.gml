@@ -427,7 +427,5 @@ while i {
 }
 #endregion
 
-if load_state == LoadStates.NONE {
-	fmod_system_update()
-}
+fmod_system_update()
 #endregion

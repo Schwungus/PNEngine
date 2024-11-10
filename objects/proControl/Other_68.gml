@@ -462,10 +462,7 @@ with _netgame {
 		}
 		
 		case NetHeaders.HOST_TICK: {
-			var _time = current_time
-			
-			ds_queue_enqueue(tick_queue, _time - timestamp)
-			timestamp = _time
+			ds_queue_enqueue(tick_queue, current_time)
 			
 			var _pos = buffer_tell(_buffer)
 			var _size = buffer_get_size(_buffer) - _pos
