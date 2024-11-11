@@ -36,12 +36,23 @@ function net_player_destroy(_scope) {
 		time_source_stop(reliable_time_source)
 		time_source_destroy(reliable_time_source)
 		
-		repeat ds_list_size(reliable) {
-			buffer_delete(reliable[| 0])
-			ds_list_delete(reliable, 0)
+		repeat ds_map_size(reliable_read) {
+			var _key = ds_map_find_first(reliable_read)
+			
+			buffer_delete(reliable_read[? _key])
+			ds_map_delete(reliable_read, _key)
 		}
 		
-		ds_list_destroy(reliable)
+		ds_map_destroy(reliable_read)
+		
+		repeat ds_map_size(reliable_write) {
+			var _key = ds_map_find_first(reliable_write)
+			
+			buffer_delete(reliable_write[? _key])
+			ds_map_delete(reliable_write, _key)
+		}
+		
+		ds_map_destroy(reliable_write)
 		ds_queue_destroy(input_queue)
 		
 		return player

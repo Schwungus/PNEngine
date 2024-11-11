@@ -923,7 +923,7 @@ if _tick >= 1 {
 							} else {
 								_player.tick_acked = false
 								
-								if ds_list_size(_player.reliable) > TICKRATE {
+								if ds_map_size(_player.reliable_write) > TICKRATE {
 									_dont_stall = false
 								}
 							}*/

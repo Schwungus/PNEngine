@@ -15,12 +15,13 @@ function NetPlayer() constructor {
 	name = ""
 	player = undefined
 	
-	reliable_index = 0
-	reliable_received = 0
-	reliable = ds_list_create()
+	reliable_write = ds_map_create()
+	reliable_write_index = 1
+	reliable_read = ds_map_create()
+	reliable_read_index = 1
 	
 	reliable_time_source = time_source_create(time_source_global, 0.25, time_source_units_seconds, method(self, function () {
-		var n = ds_list_size(reliable)
+		var n = ds_map_size(reliable_write)
 		
 		if not n {
 			time_source_stop(reliable_time_source)
@@ -28,10 +29,11 @@ function NetPlayer() constructor {
 			exit
 		}
 		
-		var i = 0
+		var _key = ds_map_find_first(reliable_write)
 		
 		repeat n {
-			session.send_player(self, reliable[| i++], undefined, false, false)
+			session.send_player(self, reliable_write[? _key], undefined, false, false)
+			_key = ds_map_find_next(reliable_write, _key)
 		}
 	}), [], -1)
 }

@@ -1,9 +1,9 @@
-#macro WRITE_RELIABLE buffer_poke(_buffer, 0, buffer_u32, ++reliable_index)\
+#macro WRITE_RELIABLE buffer_poke(_buffer, 0, buffer_u32, reliable_write_index)\
 \
 var b = buffer_create(_size, buffer_fixed, 1)\
 \
 buffer_copy(_buffer, 0, _size, b, 0)\
-ds_list_add(reliable, b)\
+ds_map_add(reliable_write, reliable_write_index++, b)\
 time_source_start(reliable_time_source)
 
 function Netgame() constructor {
@@ -124,7 +124,7 @@ function Netgame() constructor {
 			var _player = players[| i++]
 			
 			if _player != undefined and _player != local_net {
-				send_player(_player, _buffer, _size, false)
+				send_player(_player, _buffer, _size, false, _overwrite)
 			}
 		}
 		
