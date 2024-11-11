@@ -40,8 +40,6 @@ with _netgame {
 					ds_map_delete(reliable_read, reliable_read_index++)
 				}
 			} else {
-				print($"proControl: Out of order packet from {_key} ({_reliable} =/= {reliable_read_index})")
-				
 				if reliable_read_index < _reliable and not ds_map_exists(reliable_read, _reliable) {
 					var _size = buffer_get_size(_buffer)
 					var b = buffer_create(_size, buffer_fixed, 1)

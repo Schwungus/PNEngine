@@ -1245,7 +1245,17 @@ if _tick >= 1 {
 				if input_check_pressed("pause") {
 					_paused = true
 					
-					if not _in_netgame {
+					if _in_netgame {
+						if _is_master {
+							with TitleBase {
+								if (menu != undefined and menu.from != undefined) or global.title_delete_state {
+									_paused = false
+									
+									break
+								}
+							}
+						}
+					} else {
 						i = ds_list_size(_players_active)
 						
 						while i {
@@ -1275,24 +1285,27 @@ if _tick >= 1 {
 				}
 			}
 			
-			if (_in_netgame or global.game_status & GameStatus.NETGAME) and _skip_tick {
-				input_verb_consume("up")
-				input_verb_consume("left")
-				input_verb_consume("down")
-				input_verb_consume("right")
-				input_verb_consume("walk")
-				input_verb_consume("jump")
-				input_verb_consume("interact")
-				input_verb_consume("attack")
-				input_verb_consume("inventory_up")
-				input_verb_consume("inventory_left")
-				input_verb_consume("inventory_down")
-				input_verb_consume("inventory_right")
-				input_verb_consume("aim")
-				input_verb_consume("aim_up")
-				input_verb_consume("aim_left")
-				input_verb_consume("aim_down")
-				input_verb_consume("aim_right")
+			if (global.game_status & GameStatus.NETGAME) and _skip_tick {
+				if _in_netgame {
+					input_verb_consume("up")
+					input_verb_consume("left")
+					input_verb_consume("down")
+					input_verb_consume("right")
+					input_verb_consume("walk")
+					input_verb_consume("jump")
+					input_verb_consume("interact")
+					input_verb_consume("attack")
+					input_verb_consume("inventory_up")
+					input_verb_consume("inventory_left")
+					input_verb_consume("inventory_down")
+					input_verb_consume("inventory_right")
+					input_verb_consume("aim")
+					input_verb_consume("aim_up")
+					input_verb_consume("aim_left")
+					input_verb_consume("aim_down")
+					input_verb_consume("aim_right")
+				}
+				
 				_skip_tick = false
 			}
 		}

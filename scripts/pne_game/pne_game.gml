@@ -56,6 +56,7 @@ global.saves = ds_list_create()
 global.save_name = "Debug"
 global.title_start = true
 global.title_delete_state = 0
+global.title_loaded = false
 #endregion
 
 #region Levels

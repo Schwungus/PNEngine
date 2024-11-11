@@ -156,6 +156,7 @@ if menu != undefined and not locked {
 						_checkpoint[0] = level
 						_checkpoint[1] = area
 						_checkpoint[2] = tag
+						global.title_loaded = true
 						
 						var _netgame = global.netgame
 						
