@@ -86,7 +86,7 @@ goto = function (_level, _area, _tag, _transition) {
 	if _level != undefined {
 		var _netgame = global.netgame
 		
-		if _netgame.active and _netgame.master {
+		if _netgame != undefined and _netgame.active and _netgame.master {
 			var _tick_buffer = inject_tick_packet()
 			
 			buffer_write(_tick_buffer, buffer_u8, TickPackets.LEVEL)

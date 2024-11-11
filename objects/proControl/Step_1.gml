@@ -744,6 +744,11 @@ if _tick >= 1 {
 	var _netgame = global.netgame
 	var _in_netgame = _netgame != undefined and _netgame.active
 	var _is_master = not _in_netgame or _netgame.master
+	var _block_input = false
+	
+	var _game_tick = _tick
+	var _ui_tick = _tick
+	var _trans_tick = _tick
 	
 #region Debug
 	if input_check_pressed("debug_overlay") {
@@ -810,26 +815,12 @@ if _tick >= 1 {
 			input_verb_consume("pause")
 		}
 		
-		if _in_netgame {
-			input_verb_consume("up")
-			input_verb_consume("left")
-			input_verb_consume("down")
-			input_verb_consume("right")
-			input_verb_consume("walk")
-			input_verb_consume("jump")
-			input_verb_consume("interact")
-			input_verb_consume("attack")
-			input_verb_consume("inventory_up")
-			input_verb_consume("inventory_left")
-			input_verb_consume("inventory_down")
-			input_verb_consume("inventory_right")
-			input_verb_consume("aim")
-			input_verb_consume("aim_up")
-			input_verb_consume("aim_left")
-			input_verb_consume("aim_down")
-			input_verb_consume("aim_right")
+		if not _in_netgame {
+			_game_tick = 0
+			_ui_tick = 0
+			_trans_tick = 0
 		} else {
-			_tick = 0
+			_block_input = true
 		}
 	} else {
 		if input_check_pressed("debug_console") {
@@ -845,7 +836,29 @@ if _tick >= 1 {
 #endregion
 	
 	var _local_connections = input_players_get_status()
-	var _local_changed = _local_connections.__any_changed and not (_playing_demo or _in_netgame)
+	
+	// Handle player activations by injecting into the tick buffer
+	if _local_connections.__any_changed and not (_playing_demo or _in_netgame) {
+		var _tick_buffer = inject_tick_packet()
+		
+		with _local_connections {
+			var i = 0
+			
+			repeat array_length(__new_connections) {
+				buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
+				buffer_write(_tick_buffer, buffer_u8, __new_connections[i]);
+				++i
+			}
+			
+			i = 0
+			
+			repeat array_length(__new_disconnections) {
+				buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+				buffer_write(_tick_buffer, buffer_u8, __new_disconnections[i]);
+				++i
+			}
+		}
+	}
 	
 #region Start Interpolation
 	var i = ds_list_size(_interps)
@@ -898,18 +911,174 @@ if _tick >= 1 {
 	var _players_active = global.players_active
 	var _level = global.level
 	
+	// Transition (non-deterministic)
+	if instance_exists(proTransition) {
+		var _skip_tick = false
+		
+		while _trans_tick >= 1 {
+			with proTransition {
+				event_user(ThingEvents.TICK)
+				
+				// Freeze the world while the screen is fading in
+				switch state {
+					case 1:
+						var _transition_canvas = global.transition_canvas
+						var _width = window_get_width()
+						var _height = window_get_height()
+						
+						_transition_canvas.Resize(_width, _height)
+						_transition_canvas.Start()
+						draw_clear(c_black)
+						screen_width = _width
+						screen_height = _height
+						event_user(ThingEvents.DRAW_SCREEN)
+						_transition_canvas.Finish()
+						
+						with proControl {
+							load_level = other.to_level
+							load_area = other.to_area
+							load_tag = other.to_tag
+							load_state = LoadStates.START
+						}
+						
+						state = 2
+						
+					case 0:
+					case 2:
+						_skip_tick = true
+						
+						break
+				}
+			}
+			
+			--_trans_tick
+		}
+		
+		if _skip_tick {
+			mouse_dx = 0
+			mouse_dy = 0
+			_ui_tick = 0
+			_game_tick = 0
+		}
+	}
+	
+	// UI (non-deterministic)
+	while _ui_tick >= 1 {
+		var _skip_tick = false
+		
+		if _ui != undefined {
+			var _ui_input = global.ui_input
+			
+			_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 2, 12)
+			_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
+			_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
+			_ui_input[UIInputs.BACK] = input_check_pressed("pause")
+			
+			if _mouse_focused {
+				_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
+				_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
+				_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+			} else {
+				_ui_input[UIInputs.MOUSE_CONFIRM] = false
+			}
+			
+			var _tick_target = _ui
+			
+			while true {
+				var _child = _tick_target.child
+				
+				if _child == undefined {
+					break
+				}
+				
+				_tick_target = _child
+			}
+			
+			with _tick_target {
+				if tick != undefined {
+					catspeak_execute(tick)
+				}
+				
+				if not exists and parent != undefined {
+					_tick_target = parent
+				}
+			}
+			
+			if _tick_target.exists and _tick_target.f_blocking {
+				_skip_tick = true
+			}
+			
+			// Extra check to prevent a crash when disconnecting
+			// through UI leave() method
+			if _in_netgame and not net_active() {
+				_in_netgame = false
+				_is_master = true
+				_skip_tick = true
+			}
+		} else {
+			var _paused = false
+			
+			if input_check_pressed("pause") {
+				_paused = true
+				
+				if _in_netgame {
+					if _is_master {
+						with TitleBase {
+							if (menu != undefined and menu.from != undefined) or global.title_delete_state {
+								_paused = false
+								
+								break
+							}
+						}
+					}
+				} else {
+					i = ds_list_size(_players_active)
+					
+					while i {
+						with _players_active[| --i] {
+							if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
+								break
+							}
+							
+							if not instance_exists(thing) or get_state("frozen") {
+								_paused = false
+								
+								break
+							}
+						}
+						
+						if not _paused {
+							break
+						}
+					}
+				}
+			}
+			
+			if _paused {
+				ui_create("Pause", {level: _level})
+				
+				_skip_tick = true
+			}
+		}
+		
+		if _skip_tick {
+			if (global.game_status & GameStatus.NETGAME) {
+				_block_input = true
+			} else {
+				_game_tick = 0
+			}
+		}
+		
+		--_ui_tick
+	}
+	
 #region Netgame Pre-Processing
 	if _in_netgame {
 		if _is_master {
 			with _netgame {
-				// You can stall the game if there are too many reliable
-				// packets queued up, but I don't think that's necessary.
-				//var _dont_stall = false
-				
 				if ack_count >= player_count {
 					ack_count = 1
 					stall_time = 0
-					//_dont_stall = true
 					i = 0
 					
 					repeat ds_list_size(players) {
@@ -917,30 +1086,16 @@ if _tick >= 1 {
 						
 						if _player != undefined {
 							_player.tick_acked = (i == local_slot)
-							
-							/*if i == local_slot {
-								_player.tick_acked = true
-							} else {
-								_player.tick_acked = false
-								
-								if ds_map_size(_player.reliable_write) > TICKRATE {
-									_dont_stall = false
-								}
-							}*/
 						}
 						
 						++i
 					}
 				}
 				
-				/*if _dont_stall {
-					stall_time = 0
-				}*/
-				
 				stall_time += _tick
 				
 				if stall_time >= STALL_RATE {
-					_tick = 0
+					_game_tick = 0
 					
 					if stall_time >= (STALL_RATE + TICKRATE) {
 						var _text = "[c_yellow]Waiting for: "
@@ -966,11 +1121,9 @@ if _tick >= 1 {
 				}
 			}
 		} else {
-			var _client_tick = _tick
+			_game_tick = min(_netgame.tick_count, STALL_RATE)
 			
-			_tick = min(_netgame.tick_count, STALL_RATE)
-			
-			if _tick > 0 {
+			if _game_tick > 0 {
 				with _netgame {
 					if local_player != undefined {
 						with local_player {
@@ -1078,65 +1231,84 @@ if _tick >= 1 {
 				}
 			}
 			
-			_netgame.stall_time += _client_tick
+			_netgame.stall_time += _tick
 			
-			//while _client_tick >= 1 {
+			var _input_up_down, _input_left_right
+			var _input_jump, _input_interact, _input_attack
+			var _input_inventory_up, _input_inventory_left, _input_inventory_down, _input_inventory_right
+			var _input_aim, _dx, _dy
+			
+			if _block_input {
+				_input_up_down = 0
+				_input_left_right = 0
+				_input_jump = false
+				_input_interact = false
+				_input_attack = false
+				_input_inventory_up = false
+				_input_inventory_left = false
+				_input_inventory_down = false
+				_input_inventory_right = false
+				_input_aim = false
+				_dx = 0
+				_dy = 0
+			} else {
 				// Main
 				var _move_range = input_check("walk") ? 64 : 127
-				var _input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
-				var _input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
-				var _input_jump = input_check("jump")
-				var _input_interact = input_check("interact")
-				var _input_attack = input_check("attack")
+				
+				_input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
+				_input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
+				_input_jump = input_check("jump")
+				_input_interact = input_check("interact")
+				_input_attack = input_check("attack")
 				
 				// Inventory
-				var _input_inventory_up = input_check("inventory_up")
-				var _input_inventory_left = input_check("inventory_left")
-				var _input_inventory_down = input_check("inventory_down")
-				var _input_inventory_right = input_check("inventory_right")
+				_input_inventory_up = input_check("inventory_up")
+				_input_inventory_left = input_check("inventory_left")
+				_input_inventory_down = input_check("inventory_down")
+				_input_inventory_right = input_check("inventory_right")
 				
 				// Camera
-				var _input_aim = input_check("aim")
+				_input_aim = input_check("aim")
+				
 				var _dx_factor = input_value("aim_right") - input_value("aim_left")
 				var _dy_factor = input_value("aim_down") - input_value("aim_up")
 				var _dx_angle, _dy_angle
-				var _mouse_dx = mouse_dx
-				var _mouse_dy = mouse_dy
 				
 				with _config {
 					_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
 					_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
 					
 					if _mouse_focused {
-						_dx_factor += _mouse_dx * in_mouse_x
-						_dy_factor += _mouse_dy * in_mouse_y
+						_dx_factor += other.mouse_dx * in_mouse_x
+						_dy_factor += other.mouse_dy * in_mouse_y
 					}
 				}
 				
-				var _dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-				var _dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+				_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+				_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+			}
+			
+			mouse_dx = 0
+			mouse_dy = 0
+			
+			_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
+				buffer_s8, _input_up_down,
+				buffer_s8, _input_left_right,
 				
-				_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
-					buffer_s8, _input_up_down,
-					buffer_s8, _input_left_right,
-					
-					buffer_u8, player_input_to_flags(
-						_input_jump,
-						_input_interact,
-						_input_attack,
-						_input_inventory_up,
-						_input_inventory_left,
-						_input_inventory_down,
-						_input_inventory_right,
-						_input_aim
-					),
-					
-					buffer_s16, _dx % 32768,
-					buffer_s16, _dy % 32768
-				));
+				buffer_u8, player_input_to_flags(
+					_input_jump,
+					_input_interact,
+					_input_attack,
+					_input_inventory_up,
+					_input_inventory_left,
+					_input_inventory_down,
+					_input_inventory_right,
+					_input_aim
+				),
 				
-				//--_client_tick
-			//}
+				buffer_s16, _dx % 32768,
+				buffer_s16, _dy % 32768
+			));
 			
 			if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
 				show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
@@ -1147,169 +1319,7 @@ if _tick >= 1 {
 	
 	var _ticked = false
 	
-	while _tick >= 1 {
-		var _skip_tick = false
-		
-		// Transition (Non-deterministic, do not rely on its outcome)
-		with proTransition {
-			event_user(ThingEvents.TICK)
-			
-			// Freeze the world while the screen is fading in
-			switch state {
-				case 1:
-					var _transition_canvas = global.transition_canvas
-					var _width = window_get_width()
-					var _height = window_get_height()
-					
-					_transition_canvas.Resize(_width, _height)
-					_transition_canvas.Start()
-					draw_clear(c_black)
-					screen_width = _width
-					screen_height = _height
-					event_user(ThingEvents.DRAW_SCREEN)
-					_transition_canvas.Finish()
-					
-					with proControl {
-						load_level = other.to_level
-						load_area = other.to_area
-						load_tag = other.to_tag
-						load_state = LoadStates.START
-					}
-					
-					state = 2
-					
-				case 0:
-				case 2:
-					_skip_tick = true
-					
-					break
-			}
-		}
-		
-		// UI (Non-deterministic, do not rely on its outcome)
-		if not _skip_tick {
-			_ui = global.ui
-			
-			if _ui != undefined {
-				var _ui_input = global.ui_input
-				
-				_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 2, 12)
-				_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
-				_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
-				_ui_input[UIInputs.BACK] = input_check_pressed("pause")
-				
-				if _mouse_focused {
-					_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
-					_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
-					_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
-				} else {
-					_ui_input[UIInputs.MOUSE_CONFIRM] = false
-				}
-				
-				var _tick_target = _ui
-				
-				while true {
-					var _child = _tick_target.child
-					
-					if _child == undefined {
-						break
-					}
-					
-					_tick_target = _child
-				}
-				
-				with _tick_target {
-					if tick != undefined {
-						catspeak_execute(tick)
-					}
-					
-					if not exists and parent != undefined {
-						_tick_target = parent
-					}
-				}
-				
-				if _tick_target.exists and _tick_target.f_blocking {
-					_skip_tick = true
-				}
-				
-				// Extra check to prevent a crash when disconnecting
-				// through UI leave() method
-				if _in_netgame and not net_active() {
-					_in_netgame = false
-					_is_master = true
-					_skip_tick = true
-				}
-			} else {
-				var _paused = false
-				
-				if input_check_pressed("pause") {
-					_paused = true
-					
-					if _in_netgame {
-						if _is_master {
-							with TitleBase {
-								if (menu != undefined and menu.from != undefined) or global.title_delete_state {
-									_paused = false
-									
-									break
-								}
-							}
-						}
-					} else {
-						i = ds_list_size(_players_active)
-						
-						while i {
-							with _players_active[| --i] {
-								if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
-									break
-								}
-								
-								if not instance_exists(thing) or get_state("frozen") {
-									_paused = false
-									
-									break
-								}
-							}
-							
-							if not _paused {
-								break
-							}
-						}
-					}
-				}
-				
-				if _paused {
-					ui_create("Pause", {level: _level})
-					
-					_skip_tick = true
-				}
-			}
-			
-			if (global.game_status & GameStatus.NETGAME) and _skip_tick {
-				if _in_netgame {
-					input_verb_consume("up")
-					input_verb_consume("left")
-					input_verb_consume("down")
-					input_verb_consume("right")
-					input_verb_consume("walk")
-					input_verb_consume("jump")
-					input_verb_consume("interact")
-					input_verb_consume("attack")
-					input_verb_consume("inventory_up")
-					input_verb_consume("inventory_left")
-					input_verb_consume("inventory_down")
-					input_verb_consume("inventory_right")
-					input_verb_consume("aim")
-					input_verb_consume("aim_up")
-					input_verb_consume("aim_left")
-					input_verb_consume("aim_down")
-					input_verb_consume("aim_right")
-				}
-				
-				_skip_tick = false
-			}
-		}
-		
+	while _game_tick >= 1 {
 		// Write to tick buffer
 		if global.inject_tick_buffer {
 			global.inject_tick_buffer = false
@@ -1317,494 +1327,474 @@ if _tick >= 1 {
 			buffer_seek(_tick_buffer, buffer_seek_start, 0)
 		}
 		
-		// Handle player activations inside the tick
-		if _local_changed {
-			with _local_connections {
-				var i = 0
+		if _playing_demo {
+			_tick_size = buffer_read(_demo_buffer, buffer_u32)
+			
+			if _tick_size == 0xFFFFFFFF {
+				cmd_dend("")
+				_demo_buffer = undefined
+				_playing_demo = false
+				_game_tick = 0
 				
-				repeat array_length(__new_connections) {
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, __new_connections[i]);
-					++i
-				}
-				
-				i = 0
-				
-				repeat array_length(__new_disconnections) {
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, __new_disconnections[i]);
-					++i
+				break
+			}
+			
+			var _pos = buffer_tell(_demo_buffer)
+			
+			buffer_copy(_demo_buffer, _pos, _tick_size, _tick_buffer, 0)
+			buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
+			buffer_resize(_tick_buffer, _tick_size)
+		} else if _is_master {
+			// Local input
+			var i = 0
+			var _mouse_dx = mouse_dx
+			var _mouse_dy = mouse_dy
+			
+			repeat ds_list_size(_players_active) {
+				with _players_active[| i++] {
+					var j = slot
+					var _input_up_down, _input_left_right, _input_flags, _dx, _dy
+					
+					if _in_netgame and j > 0 {
+						_input_up_down = input[PlayerInputs.UP_DOWN]
+						_input_left_right = input[PlayerInputs.LEFT_RIGHT]
+						
+						_input_flags = player_input_to_flags(
+							input[PlayerInputs.JUMP],
+							input[PlayerInputs.INTERACT],
+							input[PlayerInputs.ATTACK],
+							input[PlayerInputs.INVENTORY_UP],
+							input[PlayerInputs.INVENTORY_LEFT],
+							input[PlayerInputs.INVENTORY_DOWN],
+							input[PlayerInputs.INVENTORY_RIGHT],
+							input[PlayerInputs.AIM]
+						)
+						
+						_dx = 0
+						_dy = 0
+						
+						with net {
+							while ds_queue_size(input_queue) {
+								_input_up_down = ds_queue_dequeue(input_queue)
+								_input_left_right = ds_queue_dequeue(input_queue)
+								_input_flags = ds_queue_dequeue(input_queue)
+								_dx += ds_queue_dequeue(input_queue)
+								_dy += ds_queue_dequeue(input_queue)
+							}
+						}
+					} else if _block_input {
+						_input_up_down = 0
+						_input_left_right = 0
+						_input_flags = 0
+						_dx = 0
+						_dy = 0
+					} else {
+						// Main
+						var _move_range = input_check("walk", j) ? 64 : 127
+						
+						_input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
+						_input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
+						
+						_input_flags = player_input_to_flags(
+							input_check("jump", j),
+							input_check("interact", j),
+							input_check("attack", j),
+							input_check("inventory_up", j),
+							input_check("inventory_left", j),
+							input_check("inventory_down", j),
+							input_check("inventory_right", j),
+							input_check("aim", j)
+						)
+						
+						// Camera
+						var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
+						var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
+						var _dx_angle, _dy_angle
+						
+						with _config {
+							_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
+							_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+							
+							if j == 0 and _mouse_focused {
+								_dx_factor += _mouse_dx * in_mouse_x
+								_dy_factor += _mouse_dy * in_mouse_y
+							}
+						}
+						
+						_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+						_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+					}
+					
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
+					buffer_write(_tick_buffer, buffer_u8, j)
+					buffer_write(_tick_buffer, buffer_s8, _input_up_down)
+					buffer_write(_tick_buffer, buffer_s8, _input_left_right)
+					buffer_write(_tick_buffer, buffer_u8, _input_flags)
+					buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
+					buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768)
 				}
 			}
 			
-			_local_changed = false
+			mouse_dx = 0
+			mouse_dy = 0
+			
+			if _in_netgame or _recording_demo {
+				with _level {
+					if name != "lvlTitle" and (time % 15) == 0 {
+						var _checksum = 0
+						
+						with Thing {
+							_checksum += 1 + floor(x) + floor(y) + floor(z)
+						}
+						
+						buffer_write(_tick_buffer, buffer_u8, TickPackets.CHECKSUM)
+						buffer_write(_tick_buffer, buffer_u8, abs(time + _checksum) % 256)
+					}
+				}
+			}
+			
+			_tick_size = buffer_tell(_tick_buffer)
+			
+			if _in_netgame {
+				var b = net_buffer_create(true, NetHeaders.HOST_TICK)
+				var _pos = buffer_tell(b)
+				
+				buffer_copy(_tick_buffer, 0, _tick_size, b, _pos)
+				_netgame.send_others(b, _pos + _tick_size)
+			}
+		} else {
+			with _netgame {
+				var _time = current_time
+				
+				delay += _time - ds_queue_dequeue(tick_queue)
+				timestamp = _time
+				
+				var _relay = ds_queue_dequeue(tick_queue)
+				
+				_tick_size = buffer_get_size(_relay)
+				buffer_copy(_relay, 0, _tick_size, _tick_buffer, 0)
+				buffer_delete(_relay);
+				--tick_count
+			}
 		}
 		
-		if not _skip_tick {
-			if _playing_demo {
-				_tick_size = buffer_read(_demo_buffer, buffer_u32)
-				
-				if _tick_size == 0xFFFFFFFF {
-					cmd_dend("")
-					_demo_buffer = undefined
-					_playing_demo = false
-					_tick = 0
+		// Parse tick buffer
+		if _recording_demo {
+			buffer_write(_demo_buffer, buffer_u32, _tick_size)
+			
+			var _pos = buffer_tell(_demo_buffer)
+			
+			buffer_copy(_tick_buffer, 0, _tick_size, _demo_buffer, _pos)
+			buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
+		}
+		
+		buffer_seek(_tick_buffer, buffer_seek_start, 0)
+		
+		while buffer_tell(_tick_buffer) < _tick_size {
+			switch buffer_read(_tick_buffer, buffer_u8) {
+				case TickPackets.ACTIVATE: {
+					var _slot = buffer_read(_tick_buffer, buffer_u8)
+					
+					with _players[_slot] {
+						if not player_activate(self) {
+							if __show_reconnect_caption {
+								var _device = input_player_get_gamepad_type(_slot)
+								
+								if _device == "unknown" {
+									_device = "no controller"
+								}
+								
+								show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({_device})")
+							} else {
+								__show_reconnect_caption = true
+							}
+						}
+					}
 					
 					break
 				}
 				
-				var _pos = buffer_tell(_demo_buffer)
-				
-				buffer_copy(_demo_buffer, _pos, _tick_size, _tick_buffer, 0)
-				buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
-				buffer_resize(_tick_buffer, _tick_size)
-			} else if _is_master {
-				// Local input
-				var i = 0
-				var _mouse_dx = mouse_dx
-				var _mouse_dy = mouse_dy
-				
-				repeat ds_list_size(_players_active) {
-					with _players_active[| i++] {
-						var j = slot
-						var _input_up_down, _input_left_right, _input_flags, _dx, _dy
-						
-						if _in_netgame and j > 0 {
-							_input_up_down = input[PlayerInputs.UP_DOWN]
-							_input_left_right = input[PlayerInputs.LEFT_RIGHT]
-							
-							_input_flags = player_input_to_flags(
-								input[PlayerInputs.JUMP],
-								input[PlayerInputs.INTERACT],
-								input[PlayerInputs.ATTACK],
-								input[PlayerInputs.INVENTORY_UP],
-								input[PlayerInputs.INVENTORY_LEFT],
-								input[PlayerInputs.INVENTORY_DOWN],
-								input[PlayerInputs.INVENTORY_RIGHT],
-								input[PlayerInputs.AIM]
-							)
-							
-							_dx = 0
-							_dy = 0
-							
-							with net {
-								while ds_queue_size(input_queue) {
-									_input_up_down = ds_queue_dequeue(input_queue)
-									_input_left_right = ds_queue_dequeue(input_queue)
-									_input_flags = ds_queue_dequeue(input_queue)
-									_dx += ds_queue_dequeue(input_queue)
-									_dy += ds_queue_dequeue(input_queue)
-								}
-							}
-						} else {
-							// Main
-							var _move_range = input_check("walk", j) ? 64 : 127
-							
-							_input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
-							_input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
-							
-							_input_flags = player_input_to_flags(
-								input_check("jump", j),
-								input_check("interact", j),
-								input_check("attack", j),
-								input_check("inventory_up", j),
-								input_check("inventory_left", j),
-								input_check("inventory_down", j),
-								input_check("inventory_right", j),
-								input_check("aim", j)
-							)
-							
-							// Camera
-							var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
-							var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
-							var _dx_angle, _dy_angle
-							
-							with _config {
-								_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
-								_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
-								
-								if j == 0 and _mouse_focused {
-									_dx_factor += _mouse_dx * in_mouse_x
-									_dy_factor += _mouse_dy * in_mouse_y
-								}
-							}
-							
-							_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-							_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+				case TickPackets.DEACTIVATE: {
+					var _slot = buffer_read(_tick_buffer, buffer_u8)
+					
+					with _players[_slot] {
+						if not player_deactivate(self) {
+							show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
 						}
-						
-						buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
-						buffer_write(_tick_buffer, buffer_u8, j)
-						buffer_write(_tick_buffer, buffer_s8, _input_up_down)
-						buffer_write(_tick_buffer, buffer_s8, _input_left_right)
-						buffer_write(_tick_buffer, buffer_u8, _input_flags)
-						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
-						buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768)
 					}
+					
+					break
 				}
 				
-				if _in_netgame or _recording_demo {
-					with _level {
-						if name != "lvlTitle" and (time % 15) == 0 {
-							var _checksum = 0
-							
-							with Thing {
-								_checksum += 1 + floor(x) + floor(y) + floor(z)
-							}
-							
-							buffer_write(_tick_buffer, buffer_u8, TickPackets.CHECKSUM)
-							buffer_write(_tick_buffer, buffer_u8, abs(time + _checksum) % 256)
-						}
+				case TickPackets.INPUT: {
+					var _slot = buffer_read(_tick_buffer, buffer_u8)
+					
+					with _players[_slot] {
+						array_copy(input_previous, 0, input, 0, PlayerInputs.__SIZE)
+						input[PlayerInputs.UP_DOWN] = buffer_read(_tick_buffer, buffer_s8)
+						input[PlayerInputs.LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s8)
+						
+						var _input_flags = buffer_read(_tick_buffer, buffer_u8)
+						
+						input[PlayerInputs.JUMP] = (_input_flags & PIFlags.JUMP) != 0
+						input[PlayerInputs.INTERACT] = (_input_flags & PIFlags.INTERACT) != 0
+						input[PlayerInputs.ATTACK] = (_input_flags & PIFlags.ATTACK) != 0
+						input[PlayerInputs.INVENTORY_UP] = (_input_flags & PIFlags.INVENTORY_UP) != 0
+						input[PlayerInputs.INVENTORY_LEFT] = (_input_flags & PIFlags.INVENTORY_LEFT) != 0
+						input[PlayerInputs.INVENTORY_DOWN] = (_input_flags & PIFlags.INVENTORY_DOWN) != 0
+						input[PlayerInputs.INVENTORY_RIGHT] = (_input_flags & PIFlags.INVENTORY_RIGHT) != 0
+						input[PlayerInputs.AIM] = (_input_flags & PIFlags.AIM) != 0
+						input[PlayerInputs.AIM_LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s16)
+						input[PlayerInputs.AIM_UP_DOWN] = buffer_read(_tick_buffer, buffer_s16)
 					}
+					
+					break
 				}
 				
-				_tick_size = buffer_tell(_tick_buffer)
-				
-				if _in_netgame {
-					var b = net_buffer_create(true, NetHeaders.HOST_TICK)
-					var _pos = buffer_tell(b)
+				case TickPackets.LEVEL: {
+					var _name = buffer_read(_tick_buffer, buffer_string)
+					var _area = buffer_read(_tick_buffer, buffer_u32)
+					var _tag = buffer_read(_tick_buffer, buffer_s32)
 					
-					buffer_copy(_tick_buffer, 0, _tick_size, b, _pos)
-					_netgame.send_others(b, _pos + _tick_size)
+					if _level != undefined {
+						_level.goto(_name, _area, _tag)
+					}
+					
+					_game_tick = 0
+					
+					break
 				}
-			} else {
-				with _netgame {
-					var _time = current_time
+				
+				case TickPackets.CHECKSUM: {
+					var _checksum = buffer_read(_tick_buffer, buffer_u8)
 					
-					delay += _time - ds_queue_dequeue(tick_queue)
-					timestamp = _time
+					if not _is_master or _playing_demo {
+						var _clientsum = 0
+						
+						with Thing {
+							_clientsum += 1 + floor(x) + floor(y) + floor(z)
+						}
+						
+						_clientsum = abs(_level.time + _clientsum) % 256
+						
+						if _checksum != _clientsum {
+							show_caption($"[c_red]Desync! ({_clientsum} =/= {_checksum})", infinity)
+						}
+					}
 					
-					var _relay = ds_queue_dequeue(tick_queue)
-					
-					_tick_size = buffer_get_size(_relay)
-					buffer_copy(_relay, 0, _tick_size, _tick_buffer, 0)
-					buffer_delete(_relay);
-					--tick_count
+					break
 				}
-			}
-			
-			// Parse tick buffer
-			if _recording_demo {
-				buffer_write(_demo_buffer, buffer_u32, _tick_size)
 				
-				var _pos = buffer_tell(_demo_buffer)
-				
-				buffer_copy(_tick_buffer, 0, _tick_size, _demo_buffer, _pos)
-				buffer_seek(_demo_buffer, buffer_seek_relative, _tick_size)
-			}
-			
-			buffer_seek(_tick_buffer, buffer_seek_start, 0)
-			
-			while buffer_tell(_tick_buffer) < _tick_size {
-				switch buffer_read(_tick_buffer, buffer_u8) {
-					case TickPackets.ACTIVATE: {
-						var _slot = buffer_read(_tick_buffer, buffer_u8)
-						
-						with _players[_slot] {
-							if not player_activate(self) {
-								if __show_reconnect_caption {
-									var _device = input_player_get_gamepad_type(_slot)
-									
-									if _device == "unknown" {
-										_device = "no controller"
-									}
-									
-									show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({_device})")
-								} else {
-									__show_reconnect_caption = true
-								}
-							}
-						}
-						
-						break
+				case TickPackets.SIGNAL: {
+					var _slot = buffer_read(_tick_buffer, buffer_u8)
+					var _sender = _slot < INPUT_MAX_PLAYERS ? _players[_slot] : undefined
+					var _name = buffer_read(_tick_buffer, buffer_string)
+					var _argc = buffer_read(_tick_buffer, buffer_u8)
+					var _args = global.signal_args
+					
+					array_resize(_args, _argc)
+					
+					var i = 0
+					
+					repeat _argc {
+						_args[i++] = buffer_read_dynamic(_tick_buffer)
 					}
 					
-					case TickPackets.DEACTIVATE: {
-						var _slot = buffer_read(_tick_buffer, buffer_u8)
-						
-						with _players[_slot] {
-							if not player_deactivate(self) {
-								show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
-							}
-						}
-						
-						break
-					}
+					var _handlers = global.handlers
 					
-					case TickPackets.INPUT: {
-						var _slot = buffer_read(_tick_buffer, buffer_u8)
-						
-						with _players[_slot] {
-							array_copy(input_previous, 0, input, 0, PlayerInputs.__SIZE)
-							input[PlayerInputs.UP_DOWN] = buffer_read(_tick_buffer, buffer_s8)
-							input[PlayerInputs.LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s8)
-							
-							var _input_flags = buffer_read(_tick_buffer, buffer_u8)
-							
-							input[PlayerInputs.JUMP] = (_input_flags & PIFlags.JUMP) != 0
-							input[PlayerInputs.INTERACT] = (_input_flags & PIFlags.INTERACT) != 0
-							input[PlayerInputs.ATTACK] = (_input_flags & PIFlags.ATTACK) != 0
-							input[PlayerInputs.INVENTORY_UP] = (_input_flags & PIFlags.INVENTORY_UP) != 0
-							input[PlayerInputs.INVENTORY_LEFT] = (_input_flags & PIFlags.INVENTORY_LEFT) != 0
-							input[PlayerInputs.INVENTORY_DOWN] = (_input_flags & PIFlags.INVENTORY_DOWN) != 0
-							input[PlayerInputs.INVENTORY_RIGHT] = (_input_flags & PIFlags.INVENTORY_RIGHT) != 0
-							input[PlayerInputs.AIM] = (_input_flags & PIFlags.AIM) != 0
-							input[PlayerInputs.AIM_LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s16)
-							input[PlayerInputs.AIM_UP_DOWN] = buffer_read(_tick_buffer, buffer_s16)
-						}
-						
-						break
-					}
+					i = ds_list_size(_handlers)
 					
-					case TickPackets.LEVEL: {
-						var _name = buffer_read(_tick_buffer, buffer_string)
-						var _area = buffer_read(_tick_buffer, buffer_u32)
-						var _tag = buffer_read(_tick_buffer, buffer_s32)
-						
-						if _level != undefined {
-							_level.goto(_name, _area, _tag)
-						}
-						
-						_tick = 0
-						
-						break
-					}
-					
-					case TickPackets.CHECKSUM: {
-						var _checksum = buffer_read(_tick_buffer, buffer_u8)
-						
-						if not _is_master or _playing_demo {
-							var _clientsum = 0
-							
-							with Thing {
-								_clientsum += 1 + floor(x) + floor(y) + floor(z)
-							}
-							
-							_clientsum = abs(_level.time + _clientsum) % 256
-							
-							if _checksum != _clientsum {
-								show_caption($"[c_red]Desync! ({_clientsum} =/= {_checksum})", infinity)
-							}
-						}
-						
-						break
-					}
-					
-					case TickPackets.SIGNAL: {
-						var _slot = buffer_read(_tick_buffer, buffer_u8)
-						var _sender = _slot < INPUT_MAX_PLAYERS ? _players[_slot] : undefined
-						var _name = buffer_read(_tick_buffer, buffer_string)
-						var _argc = buffer_read(_tick_buffer, buffer_u8)
-						var _args = global.signal_args
-						
-						array_resize(_args, _argc)
-						
-						var i = 0
-						
-						repeat _argc {
-							_args[i++] = buffer_read_dynamic(_tick_buffer)
-						}
-						
-						var _handlers = global.handlers
-						
-						i = ds_list_size(_handlers)
-						
-						while i {
-							with _handlers[| --i] {
-								if ui_signalled != undefined {
-									catspeak_execute(ui_signalled, _sender, _name, _args)
-								}
+					while i {
+						with _handlers[| --i] {
+							if ui_signalled != undefined {
+								catspeak_execute(ui_signalled, _sender, _name, _args)
 							}
 						}
 					}
 				}
 			}
-			
-#region Game Loop
-			var i = ds_list_size(_players_active)
-			
-			while i {
-				with _players_active[| --i] {
-#region Force Aim
-					var _input_force_x = input[PlayerInputs.FORCE_LEFT_RIGHT]
-					
-					if not is_nan(_input_force_x) {
-						input[PlayerInputs.AIM_LEFT_RIGHT] = round(_input_force_x * PLAYER_AIM_DIRECT) % 32768
-						input[PlayerInputs.FORCE_LEFT_RIGHT] = NaN
-					}
-					
-					var _input_force_y = input[PlayerInputs.FORCE_UP_DOWN]
-					
-					if not is_nan(_input_force_y) {
-						input[PlayerInputs.AIM_UP_DOWN] = round(_input_force_y * PLAYER_AIM_DIRECT) % 32768
-						input[PlayerInputs.FORCE_UP_DOWN] = NaN
-					}
-#endregion
-					
-#region Area
-					if area != undefined {
-						with area {
-							if master != other {
-								break
-							}
-							
-							var _players_in_area = players
-							
-							// Add actors to actor collision grid
-							var _bump_grid = bump_grid
-							var _bump_lists = bump_lists
-							var _bump_x = bump_x
-							var _bump_y = bump_y
-							var _bump_width = ds_grid_width(_bump_grid)
-							var _bump_height = ds_grid_height(_bump_grid)
-							var _bump_max_x = _bump_width - 1
-							var _bump_max_y = _bump_height - 1
-							
-							ds_grid_clear(_bump_grid, false)
-							
-							var j = 0
-							
-							repeat ds_list_size(active_things) {
-								with active_things[| j++] {
-									if not f_bump or f_culled or f_frozen {
-										continue
-									}
-									
-									var _gx = (x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
-									var _gy = (y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
-									var _gr = bump_radius * COLLIDER_REGION_SIZE_INVERSE
-									
-									var _gx1 = clamp(floor(_gx - _gr), 0, _bump_max_x)
-									var _gy1 = clamp(floor(_gy - _gr), 0, _bump_max_y)
-									var _gx2 = clamp(ceil(_gx + _gr), 1, _bump_width)
-									var _gy2 = clamp(ceil(_gy + _gr), 1, _bump_height)
-									
-									var _gi = _gx1
-									
-									repeat _gx2 - _gx1 {
-										var _gj = _gy1
-										
-										repeat _gy2 - _gy1 {
-											var _list = _bump_lists[# _gi, _gj]
-											
-											if not _bump_grid[# _gi, _gj] {
-												_bump_grid[# _gi, _gj] = true
-												ds_list_clear(_list)
-											}
-											
-											ds_list_add(_list, self);
-											++_gj
-										}
-										
-										++_gi
-									}
-								}
-							}
-							
-							// Tick Things with Colliders first so that other
-							// Things that stick to them don't lag behind.
-							j = ds_list_size(tick_colliders)
-							
-							while j {
-								with tick_colliders[| --j] {
-									var _can_tick = true
-									
-									if cull_tick != infinity {
-										_can_tick = false
-										
-										var _ox = x
-										var _oy = y
-										var _od = cull_tick
-										var k = ds_list_size(_players_in_area)
-										
-										while k {
-											with _players_in_area[| --k] {
-												if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
-													_can_tick = true
-												}
-											}
-											
-											if _can_tick {
-												break
-											}
-										}
-									}
-									
-									if _can_tick {
-										f_culled = false
-										
-										if not f_frozen {
-											event_user(ThingEvents.TICK)
-										}
-									} else {
-										f_culled = true
-										
-										if f_cull_destroy {
-											destroy(false)
-										}
-									}
-								}
-							}
-							
-							j = ds_list_size(tick_things)
-							
-							while j {
-								with tick_things[| --j] {
-									var _can_tick = true
-									
-									if cull_tick != infinity {
-										_can_tick = false
-										
-										var _ox = x
-										var _oy = y
-										var _od = cull_tick
-										var k = ds_list_size(_players_in_area)
-										
-										while k {
-											with _players_in_area[| --k] {
-												if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
-													_can_tick = true
-												}
-											}
-											
-											if _can_tick {
-												break
-											}
-										}
-									}
-									
-									if _can_tick {
-										f_culled = false
-										
-										if not f_frozen {
-											event_user(ThingEvents.TICK)
-										}
-									} else {
-										f_culled = true
-										
-										if f_cull_destroy {
-											destroy(false)
-										}
-									}
-								}
-							}
-						}
-					}
-#endregion
-				}
-			}
-			
-			if _level != undefined {
-				++_level.time
-			}
-#endregion
 		}
 		
-		mouse_dx = 0
-		mouse_dy = 0
+#region Game Loop
+		var i = ds_list_size(_players_active)
+		
+		while i {
+			with _players_active[| --i] {
+#region Force Aim
+				var _input_force_x = input[PlayerInputs.FORCE_LEFT_RIGHT]
+				
+				if not is_nan(_input_force_x) {
+					input[PlayerInputs.AIM_LEFT_RIGHT] = round(_input_force_x * PLAYER_AIM_DIRECT) % 32768
+					input[PlayerInputs.FORCE_LEFT_RIGHT] = NaN
+				}
+				
+				var _input_force_y = input[PlayerInputs.FORCE_UP_DOWN]
+				
+				if not is_nan(_input_force_y) {
+					input[PlayerInputs.AIM_UP_DOWN] = round(_input_force_y * PLAYER_AIM_DIRECT) % 32768
+					input[PlayerInputs.FORCE_UP_DOWN] = NaN
+				}
+#endregion
+				
+#region Area
+				if area != undefined {
+					with area {
+						if master != other {
+							break
+						}
+						
+						var _players_in_area = players
+						
+						// Add actors to actor collision grid
+						var _bump_grid = bump_grid
+						var _bump_lists = bump_lists
+						var _bump_x = bump_x
+						var _bump_y = bump_y
+						var _bump_width = ds_grid_width(_bump_grid)
+						var _bump_height = ds_grid_height(_bump_grid)
+						var _bump_max_x = _bump_width - 1
+						var _bump_max_y = _bump_height - 1
+						
+						ds_grid_clear(_bump_grid, false)
+						
+						var j = 0
+						
+						repeat ds_list_size(active_things) {
+							with active_things[| j++] {
+								if not f_bump or f_culled or f_frozen {
+									continue
+								}
+								
+								var _gx = (x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
+								var _gy = (y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
+								var _gr = bump_radius * COLLIDER_REGION_SIZE_INVERSE
+								var _gx1 = clamp(floor(_gx - _gr), 0, _bump_max_x)
+								var _gy1 = clamp(floor(_gy - _gr), 0, _bump_max_y)
+								var _gx2 = clamp(ceil(_gx + _gr), 1, _bump_width)
+								var _gy2 = clamp(ceil(_gy + _gr), 1, _bump_height)
+								var _gi = _gx1
+								
+								repeat _gx2 - _gx1 {
+									var _gj = _gy1
+									
+									repeat _gy2 - _gy1 {
+										var _list = _bump_lists[# _gi, _gj]
+										
+										if not _bump_grid[# _gi, _gj] {
+											_bump_grid[# _gi, _gj] = true
+											ds_list_clear(_list)
+										}
+										
+										ds_list_add(_list, self);
+										++_gj
+									}
+									
+									++_gi
+								}
+							}
+						}
+						
+						// Tick Things with Colliders first so that other
+						// Things that stick to them don't lag behind.
+						j = ds_list_size(tick_colliders)
+						
+						while j {
+							with tick_colliders[| --j] {
+								var _can_tick = true
+								
+								if cull_tick != infinity {
+									_can_tick = false
+									
+									var _ox = x
+									var _oy = y
+									var _od = cull_tick
+									var k = ds_list_size(_players_in_area)
+									
+									while k {
+										with _players_in_area[| --k] {
+											if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
+												_can_tick = true
+											}
+										}
+										
+										if _can_tick {
+											break
+										}
+									}
+								}
+								
+								if _can_tick {
+									f_culled = false
+									
+									if not f_frozen {
+										event_user(ThingEvents.TICK)
+									}
+								} else {
+									f_culled = true
+									
+									if f_cull_destroy {
+										destroy(false)
+									}
+								}
+							}
+						}
+						
+						j = ds_list_size(tick_things)
+						
+						while j {
+							with tick_things[| --j] {
+								var _can_tick = true
+								
+								if cull_tick != infinity {
+									_can_tick = false
+									
+									var _ox = x
+									var _oy = y
+									var _od = cull_tick
+									var k = ds_list_size(_players_in_area)
+									
+									while k {
+										with _players_in_area[| --k] {
+											if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
+												_can_tick = true
+											}
+										}
+										
+										if _can_tick {
+											break
+										}
+									}
+								}
+								
+								if _can_tick {
+									f_culled = false
+									
+									if not f_frozen {
+										event_user(ThingEvents.TICK)
+									}
+								} else {
+									f_culled = true
+									
+									if f_cull_destroy {
+										destroy(false)
+									}
+								}
+							}
+						}
+					}
+				}
+#endregion
+			}
+		}
+		
+		if _level != undefined {
+			++_level.time
+		}
+#endregion
+		
 		input_clear_momentary(true)
 		_ticked = true;
-		--_tick
+		--_game_tick
 	}
 #endregion
 	
@@ -1948,18 +1938,20 @@ if _tick >= 1 {
 						var _input_aim = _input[PlayerInputs.AIM]
 						
 						// Tick in prediction mode
-						var _move_range = input_check("walk") ? 64 : 127
-						
-						_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
-						_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
-						_input[PlayerInputs.JUMP] = input_check("jump")
-						_input[PlayerInputs.INTERACT] = input_check("interact")
-						_input[PlayerInputs.ATTACK] = input_check("attack")
-						_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
-						_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
-						_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
-						_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
-						_input[PlayerInputs.AIM] = input_check("aim")
+						if not _block_input {
+							var _move_range = input_check("walk") ? 64 : 127
+							
+							_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+							_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+							_input[PlayerInputs.JUMP] = input_check("jump")
+							_input[PlayerInputs.INTERACT] = input_check("interact")
+							_input[PlayerInputs.ATTACK] = input_check("attack")
+							_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+							_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+							_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+							_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+							_input[PlayerInputs.AIM] = input_check("aim")
+						}
 						
 						var i = _delay
 						
@@ -2038,6 +2030,8 @@ if _tick >= 1 {
 		}
 	}
 #endregion
+	
+	_tick -= floor(_tick)
 }
 
 global.tick = _tick
