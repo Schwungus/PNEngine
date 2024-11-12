@@ -30,6 +30,7 @@
 		
 		"options": {
 			"title": "Options",
+			"name": "Name",
 			"language": "Language",
 			
 			"controls": {
@@ -68,8 +69,6 @@
 				"vid_antialias": "Antialiasing",
 				"vid_bloom": "Bloom",
 				"vid_lighting": "Lighting Quality",
-				"vid_shadow": "Shadow Mapping",
-				"vid_shadow_size": "Shadow Map Resolution",
 				"apply": "Apply Changes",
 			},
 			

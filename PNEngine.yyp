@@ -5592,6 +5592,7 @@
     {"id":{"name":"config_load","path":"scripts/config_load/config_load.yy",},},
     {"id":{"name":"config_reset","path":"scripts/config_reset/config_reset.yy",},},
     {"id":{"name":"config_save","path":"scripts/config_save/config_save.yy",},},
+    {"id":{"name":"config_set","path":"scripts/config_set/config_set.yy",},},
     {"id":{"name":"config_update","path":"scripts/config_update/config_update.yy",},},
     {"id":{"name":"console_save","path":"scripts/console_save/console_save.yy",},},
     {"id":{"name":"cross_product_3d_normalized","path":"scripts/cross_product_3d_normalized/cross_product_3d_normalized.yy",},},

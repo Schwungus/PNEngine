@@ -10,19 +10,19 @@ function proOptionsUI() : UI(undefined) constructor {
 #region Controls
 		new OUIMenu("options.controls.title", [
 			new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, global.config.in_invert_x, function (_value) {
-				global.config.in_invert_x = _value
+				config_set("in_invert_x", _value)
 			}),
 			
 			new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, global.config.in_invert_y, function (_value) {
-				global.config.in_invert_y = _value
+				config_set("in_invert_y", _value)
 			}),
 			
 			new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, global.config.in_pan_x - 1, function (_value) {
-				global.config.in_pan_x = -~_value
+				config_set("in_pan_x", -~_value)
 			}),
 			
 			new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, global.config.in_pan_y - 1, function (_value) {
-				global.config.in_pan_y = -~_value
+				config_set("in_pan_y", -~_value)
 			}),
 			
 			undefined,
@@ -51,9 +51,10 @@ function proOptionsUI() : UI(undefined) constructor {
 #region Video
 		new OUIMenu("options.video.title", [
 			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, 0, global.config.vid_fullscreen, function (_value) {
+				config_set("vid_fullscreen", _value)
+				
 				var _config = global.config
 				
-				_config.vid_fullscreen = _value
 				display_set(_value, _config.vid_width, _config.vid_height)
 			}),
 			
@@ -196,15 +197,13 @@ function proOptionsUI() : UI(undefined) constructor {
 						break
 				}
 				
-				with global.config {
-					vid_width = _width
-					vid_height = _height
-				}
+				config_set("vid_width", _width)
+				config_set("vid_height", _height)
 			}),
 			
 			new OUIOption("options.video.vid_max_fps", OUIValues.FRAMERATE, 1, function () {
 				var _fps = global.config.vid_max_fps
-				var _preset = 0
+				var _preset
 				
 				if _fps >= 240 {
 					_preset = 6
@@ -218,14 +217,17 @@ function proOptionsUI() : UI(undefined) constructor {
 					_preset = 2
 				} else if _fps >= 60 {
 					_preset = 1
+				} else {
+					_preset = 0
 				}
 				
 				return _preset
 			}(), function (_value) {
-				var _fps = 60
+				var _fps
 				
 				switch _value {
 					case 0: _fps = 30 break
+					default:
 					case 1: _fps = 60 break
 					case 2: _fps = 75 break
 					case 3: _fps = 120 break
@@ -234,30 +236,28 @@ function proOptionsUI() : UI(undefined) constructor {
 					case 6: _fps = 240 break
 				}
 				
-				global.config.vid_max_fps = _fps
+				config_set("vid_max_fps", _fps)
 				game_set_speed(_fps, gamespeed_fps)
 			}),
 			
 			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, 0, global.config.vid_vsync, function (_value) {
-				var _config = global.config
-				
-				_config.vid_vsync = _value
-				display_reset(_config.vid_antialias, _value)
+				config_set("vid_vsync", _value)
+				display_reset(global.config.vid_antialias, _value)
 			}),
 			
 			undefined,
 			
 			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, 1, global.config.vid_texture_filter, function (_value) {
-				global.config.vid_texture_filter = _value
+				config_set("vid_texture_filter", _value)
 			}),
 			
 			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, 1, global.config.vid_mipmap_filter, function (_value) {
-				global.config.vid_mipmap_filter = _value
+				config_set("vid_mipmap_filter", _value)
 			}),
 			
 			new OUIOption("options.video.vid_antialias", OUIValues.ANTIALIAS, 0, function () {
 				var _aa = global.config.vid_antialias
-				var _preset = 0
+				var _preset
 				
 				if _aa >= 8 {
 					_preset = 3
@@ -265,32 +265,33 @@ function proOptionsUI() : UI(undefined) constructor {
 					_preset = 2
 				} else if _aa >= 2 {
 					_preset = 1
+				} else {
+					_preset = 0
 				}
 				
 				return _preset
 			}(), function (_value) {
-				var _aa = 0
+				var _aa
 				
 				switch _value {
+					default: _aa = 0 break
 					case 1: _aa = 2 break
 					case 2: _aa = 4 break
 					case 3: _aa = 8 break
 				}
 				
-				var _config = global.config
-				
-				_config.vid_antialias = _aa
-				display_reset(_aa, _config.vid_vsync)
+				config_set("vid_antialias", _aa)
+				display_reset(_aa, global.config.vid_vsync)
 			}),
 			
 			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, 1, global.config.vid_bloom, function (_value) {
-				global.config.vid_bloom = _value
+				config_set("vid_bloom", _value)
 			}),
 			
 			undefined,
 			
 			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, 1, global.config.vid_lighting, function (_value) {
-				global.config.vid_lighting = _value
+				config_set("vid_lighting", _value)
 			}),
 			
 			undefined,
@@ -311,31 +312,33 @@ function proOptionsUI() : UI(undefined) constructor {
 				var _volume = _value * 0.05
 				
 				master_set_volume(_volume)
-				global.config.snd_volume = _volume
+				config_set("snd_volume", _volume)
 			}),
 			
 			new OUIOption("options.audio.snd_sound_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_sound_volume, 0, 1) * 20), function (_value) {
 				var _volume = _value * 0.05
 				
 				sound_set_volume(_volume)
-				global.config.snd_sound_volume = _volume
+				config_set("snd_sound_volume", _volume)
 			}),
 			
 			new OUIOption("options.audio.snd_music_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_music_volume, 0, 1) * 20), function (_value) {
 				var _volume = _value * 0.05
 				
 				music_set_volume(_volume)
-				global.config.snd_music_volume = _volume
+				config_set("snd_music_volume", _volume)
 			}),
 			
 			undefined,
 			
 			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, 0, global.config.snd_background, function (_value) {
-				global.config.snd_background = _value
+				config_set("snd_background", _value)
 			}),
 		]),
 		
 		undefined,
+		
+		"@@NAME@@",
 		
 		new OUIOption("options.language", OUIValues.LANGUAGE, function () {
 			var _osl = lexicon_get_os_locale()
@@ -374,7 +377,7 @@ function proOptionsUI() : UI(undefined) constructor {
 		}(), function (_value) {
 			var _language = global.oui_values[OUIValues.LANGUAGE][_value]
 			
-			global.config.language = _language
+			config_set("language", _language)
 			lexicon_language_set(_language)
 		}),
 		
@@ -422,6 +425,21 @@ function proOptionsUI() : UI(undefined) constructor {
 #endregion
 #endregion
 	
+	with main_menu {
+		var _name_pos = array_get_index(contents, "@@NAME@@")
+		
+		if net_active() {
+			contents[_name_pos] = new OUIInput("options.name", "Player", global.config.name, function (_value) {
+				_value = string_trim(_value)
+				config_set("name", _value)
+				
+				return _value
+			})
+		} else {
+			array_delete(contents, _name_pos, 1)
+		}
+	}
+	
 	menu = main_menu
 	focus = undefined
 	force_option = -1
@@ -448,7 +466,7 @@ function proOptionsUI() : UI(undefined) constructor {
 				exit
 			}
 			
-			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] {
+			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] and not input_keyboard_check(vk_space) {
 				play_sound(focus.confirm(keyboard_string) ? select_sound : fail_sound)
 				focus = undefined
 			}
@@ -551,7 +569,7 @@ function proOptionsUI() : UI(undefined) constructor {
 					_changed = true
 				} else if is_instanceof(_option, OUIBinding) {
 					with other {
-						static _ignore = [vk_escape, vk_backspace, 192]
+						static _ignore = [vk_escape, vk_backspace, 192, gp_start, gp_select]
 						
 						focus = _option
 						input_binding_scan_params_set(_ignore)

@@ -12,11 +12,7 @@ function config_load() {
 			var _cvar = _cvars[i++]
 			
 			if variable_struct_exists(_config, _cvar) {
-				var _value = _json[$ _cvar]
-				
-				if _value != undefined {
-					_config[$ _cvar] = _value
-				}
+				config_set(_cvar, _json[$ _cvar])
 			}
 		}
 	}

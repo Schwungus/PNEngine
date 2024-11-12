@@ -489,6 +489,44 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				
 				break
 			}
+			
+			case NetHeaders.CLIENT_RENAME: {
+				PACKET_FOR_HOST
+				
+				var _net = clients[? $"{_ip}:{_port}"]
+				
+				if _net == undefined {
+					break
+				}
+				
+				var _new = buffer_read(_buffer, buffer_string)
+				var _old = _net.name
+				
+				_net.name = _new
+				show_caption($"'{_old}' is now '{_new}'")
+				send_others(net_buffer_create(true, NetHeaders.PLAYER_RENAMED, buffer_u8, _net.slot, buffer_string, _new))
+				
+				break
+			}
+			
+			case NetHeaders.PLAYER_RENAMED: {
+				PACKET_FOR_CLIENT
+				
+				var _slot = buffer_read(_buffer, buffer_u8)
+				var _net = players[| _slot]
+				
+				if _net == undefined {
+					break
+				}
+				
+				var _new = buffer_read(_buffer, buffer_string)
+				var _old = _net.name
+				
+				_net.name = _new
+				show_caption($"'{_old}' is now '{_new}'")
+				
+				break
+			}
 		}
 	}
 }

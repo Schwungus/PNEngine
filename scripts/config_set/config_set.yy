@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"config_set",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"config_set",
+  "parent":{
+    "name":"User",
+    "path":"folders/Scripts/PNEngine/Configuration/User.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

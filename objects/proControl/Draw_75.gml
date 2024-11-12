@@ -293,7 +293,7 @@ if _console {
 	
 	var _input = keyboard_string
 	
-	if current_time % 1000 < 500 {
+	if (current_time % 1000) < 500 {
 		_input += "_"
 	}
 	

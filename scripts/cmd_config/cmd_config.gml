@@ -1,9 +1,9 @@
 function cmd_config(_args) {
-	var _parse_args = string_split(_args, " ", true)
+	var _parse_args = string_split(_args, " ", true, 1)
 	var n = array_length(_parse_args)
 	
 	if n < 1 {
-		print("Usage: config <name> <value> [refresh]")
+		print("Usage: config <name> [value]")
 		
 		exit
 	}
@@ -33,19 +33,5 @@ function cmd_config(_args) {
 		exit
 	}
 	
-	_config[$ _key] = _value
-	
-	if n > 2 {
-		var _update = false
-		
-		try {
-			_update = bool(_parse_args[2])
-		} catch (e) {
-			print($"! cmd_config: Invalid refresh argument ({e.longMessage})")
-		}
-		
-		if _update {
-			config_update()
-		}
-	}
+	config_set(_key, _value)
 }

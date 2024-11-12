@@ -389,6 +389,7 @@
     {"name":"color_to_vec5","order":3,"path":"scripts/color_to_vec5/color_to_vec5.yy",},
     {"name":"config_load","order":2,"path":"scripts/config_load/config_load.yy",},
     {"name":"config_save","order":3,"path":"scripts/config_save/config_save.yy",},
+    {"name":"config_set","order":4,"path":"scripts/config_set/config_set.yy",},
     {"name":"config_update","order":1,"path":"scripts/config_update/config_update.yy",},
     {"name":"cross_product_3d_normalized","order":2,"path":"scripts/cross_product_3d_normalized/cross_product_3d_normalized.yy",},
     {"name":"cross_product_3d","order":1,"path":"scripts/cross_product_3d/cross_product_3d.yy",},

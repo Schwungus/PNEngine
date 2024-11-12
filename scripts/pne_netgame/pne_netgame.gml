@@ -31,6 +31,10 @@ enum NetHeaders {
 	HOST_TICK,
 	CLIENT_READY,
 	
+	// Config
+	CLIENT_RENAME,
+	PLAYER_RENAMED,
+	
 	__SIZE,
 }
 
