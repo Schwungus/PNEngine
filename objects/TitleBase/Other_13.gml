@@ -2,7 +2,23 @@
 event_inherited()
 
 if menu != undefined and not locked {
-	var _change_option = input_check_opposing_pressed("up", "down", 0, true) + input_check_opposing_repeat("up", "down", 0, true, 3, 12)
+	if global.console {
+		exit
+	}
+	
+	var _ui = global.ui
+	
+	while _ui != undefined {
+		with _ui {
+			if f_blocking {
+				exit
+			}
+			
+			_ui = child
+		}
+	}
+	
+	var _change_option = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 3, 12)
 	
 	if _change_option != 0 and global.title_delete_state <= 1 {
 		var _previous = menu.option
@@ -38,7 +54,7 @@ if menu != undefined and not locked {
 	}
 	
 	// Select option
-	if input_check_pressed("jump") {
+	if input_check_pressed("ui_enter") {
 		var _curopt = menu.option
 		var _options = menu.options
 		var _option = _options[_curopt]

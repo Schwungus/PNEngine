@@ -963,102 +963,114 @@ if _tick >= 1 {
 	}
 	
 	// UI (non-deterministic)
-	while _ui_tick >= 1 {
+	if _ui_tick >= 1 {
 		var _skip_tick = false
 		
-		if _ui != undefined {
-			var _ui_input = global.ui_input
-			
-			_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 2, 12)
-			_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
-			_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
-			_ui_input[UIInputs.BACK] = input_check_pressed("pause")
-			
-			if _mouse_focused {
-				_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
-				_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
-				_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+		while _ui_tick >= 1 {
+			if _ui != undefined {
+				var _ui_input = global.ui_input
+				
+				if _block_input {
+					_ui_input[UIInputs.UP_DOWN] = 0
+					_ui_input[UIInputs.LEFT_RIGHT] = 0
+					_ui_input[UIInputs.CONFIRM] = false
+					_ui_input[UIInputs.BACK] = false
+					_ui_input[UIInputs.MOUSE_CONFIRM] = false
+				} else {
+					_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 2, 12)
+					_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
+					_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
+					_ui_input[UIInputs.BACK] = input_check_pressed("pause")
+					
+					if _mouse_focused {
+						_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
+						_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
+						_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+					} else {
+						_ui_input[UIInputs.MOUSE_CONFIRM] = false
+					}
+				}
+				
+				var _tick_target = _ui
+				
+				while true {
+					var _child = _tick_target.child
+					
+					if _child == undefined {
+						break
+					}
+					
+					_tick_target = _child
+				}
+				
+				with _tick_target {
+					if tick != undefined {
+						catspeak_execute(tick)
+					}
+					
+					if not exists and parent != undefined {
+						_tick_target = parent
+					}
+				}
+				
+				if _tick_target.exists and _tick_target.f_blocking {
+					_skip_tick = true
+				}
+				
+				// Extra check to prevent a crash when disconnecting
+				// through UI leave() method
+				if _in_netgame and not net_active() {
+					_in_netgame = false
+					_is_master = true
+					_skip_tick = true
+				}
 			} else {
-				_ui_input[UIInputs.MOUSE_CONFIRM] = false
-			}
-			
-			var _tick_target = _ui
-			
-			while true {
-				var _child = _tick_target.child
+				var _paused = false
 				
-				if _child == undefined {
-					break
-				}
-				
-				_tick_target = _child
-			}
-			
-			with _tick_target {
-				if tick != undefined {
-					catspeak_execute(tick)
-				}
-				
-				if not exists and parent != undefined {
-					_tick_target = parent
-				}
-			}
-			
-			if _tick_target.exists and _tick_target.f_blocking {
-				_skip_tick = true
-			}
-			
-			// Extra check to prevent a crash when disconnecting
-			// through UI leave() method
-			if _in_netgame and not net_active() {
-				_in_netgame = false
-				_is_master = true
-				_skip_tick = true
-			}
-		} else {
-			var _paused = false
-			
-			if input_check_pressed("pause") {
-				_paused = true
-				
-				if _in_netgame {
-					if _is_master {
-						with TitleBase {
-							if (menu != undefined and menu.from != undefined) or global.title_delete_state {
-								_paused = false
-								
-								break
+				if input_check_pressed("pause") {
+					_paused = true
+					
+					if _in_netgame {
+						if _is_master {
+							with TitleBase {
+								if (menu != undefined and menu.from != undefined) or global.title_delete_state {
+									_paused = false
+									
+									break
+								}
 							}
 						}
-					}
-				} else {
-					i = ds_list_size(_players_active)
-					
-					while i {
-						with _players_active[| --i] {
-							if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
-								break
+					} else {
+						i = ds_list_size(_players_active)
+						
+						while i {
+							with _players_active[| --i] {
+								if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
+									break
+								}
+								
+								if not instance_exists(thing) or get_state("frozen") {
+									_paused = false
+									
+									break
+								}
 							}
 							
-							if not instance_exists(thing) or get_state("frozen") {
-								_paused = false
-								
+							if not _paused {
 								break
 							}
 						}
-						
-						if not _paused {
-							break
-						}
 					}
+				}
+				
+				if _paused {
+					ui_create("Pause", {level: _level})
+					
+					_skip_tick = true
 				}
 			}
 			
-			if _paused {
-				ui_create("Pause", {level: _level})
-				
-				_skip_tick = true
-			}
+			--_ui_tick
 		}
 		
 		if _skip_tick {
@@ -1068,8 +1080,6 @@ if _tick >= 1 {
 				_game_tick = 0
 			}
 		}
-		
-		--_ui_tick
 	}
 	
 #region Netgame Pre-Processing
