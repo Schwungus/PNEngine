@@ -14,6 +14,7 @@ function net_destroy() {
 			ds_queue_destroy(tick_queue)
 		}
 		
+		ds_list_destroy(chat_log)
 		global.netgame = undefined
 	}
 	

@@ -29,7 +29,7 @@ function net_player_destroy(_scope) {
 			player.net = undefined
 			
 			/* if player.slot != 0 {
-				player_deactivate(player)
+				player_deactivate(player, false)
 			} */
 		}
 		

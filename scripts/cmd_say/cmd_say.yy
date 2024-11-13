@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"cmd_say",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"cmd_say",
+  "parent":{
+    "name":"Commands",
+    "path":"folders/Scripts/PNEngine/Debug/Commands.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

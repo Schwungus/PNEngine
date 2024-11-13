@@ -31,7 +31,7 @@ function net_disconnect() {
 			var _player = players[| --i]
 			
 			if _player != undefined {
-				player_deactivate(net_player_destroy(_player))
+				player_deactivate(net_player_destroy(_player), false)
 			}
 		}
 		

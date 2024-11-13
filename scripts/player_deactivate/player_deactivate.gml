@@ -1,4 +1,4 @@
-function player_deactivate(_scope) {
+function player_deactivate(_scope, _loud = true) {
 	with _scope {
 		if status != PlayerStatus.INACTIVE {
 			if slot == 0 {
@@ -25,12 +25,18 @@ function player_deactivate(_scope) {
 				}
 				
 				_in_area = true
-				show_caption($"[c_red]{lexicon_text("hud.caption.player.disconnect", -~slot)}")
+				
+				if _loud {
+					show_caption($"[c_red]{lexicon_text("hud.caption.player.disconnect", -~slot)}")
+				}
 			} else {
 				var _players_ready = global.players_ready
 				
 				ds_list_delete(_players_ready, ds_list_find_index(_players_ready, self))
-				show_caption($"[c_red]{lexicon_text("hud.caption.player.unready", -~slot)}")
+				
+				if _loud {
+					show_caption($"[c_red]{lexicon_text("hud.caption.player.unready", -~slot)}")
+				}
 			}
 			
 			status = PlayerStatus.INACTIVE

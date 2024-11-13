@@ -823,13 +823,55 @@ if _tick >= 1 {
 			_block_input = true
 		}
 	} else {
-		if input_check_pressed("debug_console") {
-			input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
-			global.console = true
-			keyboard_string = global.console_input
+		if _in_netgame and _netgame.chat {
+			if input_check_pressed("chat_previous") {
+				keyboard_string = _netgame.chat_previous
+			}
 			
-			if not _in_netgame {
-				fmod_channel_control_set_paused(global.world_channel_group, true)
+			if input_check_pressed("pause") {
+				_netgame.chat = false
+			} else if input_check_pressed("chat_submit") {
+				if cmd_say(keyboard_string) {
+					_netgame.chat_previous = keyboard_string
+				}
+				
+				_netgame.chat = false
+			}
+			
+			if not _netgame.chat {
+				input_verb_consume(all)
+			}
+			
+			_block_input = true
+		} else {
+			if input_check_pressed("debug_console") {
+				input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
+				global.console = true
+				keyboard_string = global.console_input
+				
+				if not _in_netgame {
+					fmod_channel_control_set_paused(global.world_channel_group, true)
+				}
+				
+				_block_input = true
+			} else if input_check_pressed("chat") and _in_netgame and not _netgame.chat {
+				var _top = _ui
+				
+				while _top != undefined {
+					var _child = _top.child
+					
+					if _child == undefined {
+						break
+					}
+					
+					_top = _child
+				}
+				
+				if _top == undefined or not _top.is_ancestor(proOptionsUI) or _top.focus == undefined {
+					_netgame.chat = true
+					keyboard_string = ""
+					_block_input = true
+				}
 			}
 		}
 	}
@@ -1027,7 +1069,7 @@ if _tick >= 1 {
 			} else {
 				var _paused = false
 				
-				if input_check_pressed("pause") {
+				if not _block_input and input_check_pressed("pause") {
 					_paused = true
 					
 					if _in_netgame {
@@ -1506,12 +1548,12 @@ if _tick >= 1 {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
 					with _players[_slot] {
-						if not player_activate(self) {
+						if not player_activate(self, _in_netgame) {
 							if __show_reconnect_caption {
 								var _device = input_player_get_gamepad_type(_slot)
 								
 								if _device == "unknown" {
-									_device = "no controller"
+									_device = "no gamepad"
 								}
 								
 								show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({_device})")
@@ -1528,7 +1570,7 @@ if _tick >= 1 {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
 					with _players[_slot] {
-						if not player_deactivate(self) {
+						if not player_deactivate(self, _in_netgame) {
 							show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
 						}
 					}

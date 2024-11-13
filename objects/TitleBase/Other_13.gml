@@ -18,6 +18,12 @@ if menu != undefined and not locked {
 		}
 	}
 	
+	var _netgame = global.netgame
+	
+	if _netgame != undefined and _netgame.chat {
+		exit
+	}
+	
 	var _change_option = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 3, 12)
 	
 	if _change_option != 0 and global.title_delete_state <= 1 {

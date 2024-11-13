@@ -34,7 +34,7 @@ function net_add_player(_index, _ip, _port) {
 			if _player != undefined {
 				_player.net = _net
 				player = _player
-				//player_activate(_player)
+				//player_activate(_player, false)
 			}
 		}
 		

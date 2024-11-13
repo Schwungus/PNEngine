@@ -21,7 +21,7 @@ function net_host(_port = DEFAULT_PORT) {
 			tick_acked = true
 			other.local_net = self
 			other.local_player = player
-			player_activate(player)
+			player_activate(player, false)
 		}
 		
 		time_source_start(ping_time_source)

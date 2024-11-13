@@ -70,7 +70,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_CHECK_CLIENT))
 				ds_map_add(clients, _key, undefined)
 				time_source_start(ports_time_source)
-				print($"proControl: Got valid connect request from client {_key}")
+				print($"net_process_packet: Got valid connect request from client {_key}")
 				
 				break
 			}
@@ -89,7 +89,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _version = buffer_read(_buffer, buffer_string)
 				
 				if _version != GM_version {
-					print($"! proControl: Client {_key} version doesn't match ({_version} =/= {GM_version}), blocking")
+					print($"! net_process_packet: Client {_key} version doesn't match ({_version} =/= {GM_version}), blocking")
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_VERSION"))
 					
 					break
@@ -100,14 +100,14 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _target_md15 = cmd_md15("", false)
 				
 				if _md15 != _target_md15 {
-					print($"! proControl: Client {_key} game hash doesn't match ({_md15} =/= {_target_md15}), blocking")
+					print($"! net_process_packet: Client {_key} game hash doesn't match ({_md15} =/= {_target_md15}), blocking")
 					send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_BLOCK_CLIENT, buffer_string, "NET_MODS"))
 					
 					break
 				}
 				
 				send_direct(_ip, _port, net_buffer_create(false, NetHeaders.HOST_ALLOW_CLIENT))
-				print($"proControl: Verified client {_key}")
+				print($"net_process_packet: Verified client {_key}")
 				
 				break
 			}
@@ -148,7 +148,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					
 					if not (_player == undefined or _player == _new_player) {
 						with _player {
-							print($"proControl: Sending info from Player {-~j} ({name})")
+							print($"net_process_packet: Sending info from Player {-~j} ({name})")
 							buffer_write(b, buffer_u8, j)
 							buffer_write(b, buffer_u8, player == undefined ? PlayerStatus.INACTIVE : player.status)
 							buffer_write(b, buffer_string, name)
@@ -165,10 +165,10 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _name = buffer_read(_buffer, buffer_string)
 				
 				_new_player.name = _name
-				player_activate(_new_player.player)
+				player_activate(_new_player.player, false)
 				send_others(net_buffer_create(true, NetHeaders.PLAYER_JOINED, buffer_u8, _slot, buffer_string, _name))
+				net_say($"{_name} joined", c_yellow)
 				game_update_status()
-				print($"proControl: Assigned client '{_name}' to player {-~_slot}")
 				
 				break
 			}
@@ -195,7 +195,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				
 				with _other {
 					buffer_write(b, buffer_u8, slot)
-					print($"proControl: Client '{name}' disconnected")
+					net_say($"{name} left", c_yellow)
 				}
 				
 				send_others(b)
@@ -230,7 +230,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					buffer_string, cmd_md15("", false)
 				))
 				
-				print("proControl: Found connection from server")
+				print("net_process_packet: Found connection from server")
 				
 				break
 			}
@@ -263,20 +263,20 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				time_source_stop(connect_time_source)
 				active = true
 				local_slot = buffer_read(_buffer, buffer_u8)
-				print($"proControl: Assigned as Player {-~local_slot}")
+				print($"net_process_packet: Assigned as Player {-~local_slot}")
 				
 				with net_add_player(local_slot, "127.0.0.1", 0) {
 					name = global.config.name
 					local = true
 					other.local_net = self
 					other.local_player = player
-					player_activate(player)
+					player_activate(player, false)
 				}
 				
 				repeat buffer_read(_buffer, buffer_u8) {
 					var _slot = buffer_read(_buffer, buffer_u8)
 					
-					print($"Getting info from Player {-~_slot}")
+					print($"net_process_packet: Getting info from Player {-~_slot}")
 					
 					with net_add_player(_slot, _slot ? "127.0.0.1" : _ip, _slot ? 0 : _port) {
 						var _status = buffer_read(_buffer, buffer_u8)
@@ -285,7 +285,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 						
 						if player != undefined {
 							player.status = _status
-							player_activate(player)
+							player_activate(player, false)
 						}
 					}
 				}
@@ -309,7 +309,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					}
 				}
 				
-				print($"Total players: {player_count} ({ds_list_size(_players_ready)} ready, {ds_list_size(_players_active)} active)")
+				print($"net_process_packet: {player_count} players total ({ds_list_size(_players_ready)} ready, {ds_list_size(_players_active)} active)")
 				
 				if connect_success_callback != undefined {
 					connect_success_callback()
@@ -329,12 +329,14 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					break
 				}
 				
+				var _name = buffer_read(_buffer, buffer_string) 
+				
 				with net_add_player(_slot, "127.0.0.1", 0) {
-					name = buffer_read(_buffer, buffer_string)
-					player_activate(player)
-					print($"proControl: Client '{name}' joined")
+					name = _name
+					player_activate(player, false)
 				}
 				
+				net_say($"{_name} joined", c_yellow)
 				game_update_status()
 				
 				break
@@ -371,7 +373,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _other = players[| _slot]
 				
 				if _other != undefined {
-					print($"proControl: Client '{_other.name}' left")
+					net_say($"{_other.name} left", c_yellow)
 					net_player_destroy(_other)
 				}
 				
@@ -391,7 +393,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 			
 			case NetHeaders.HOST_STATES_FLAGS: {
 				PACKET_FOR_CLIENT
-				print("proControl: Received save data from host")
+				print("net_process_packet: Received save data from host")
 				
 				var _players = global.players
 				var n = buffer_read(_buffer, buffer_u8)
@@ -452,7 +454,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _net = clients[? $"{_ip}:{_port}"]
 				
 				if _net != undefined {
-					print($"proControl: Got ready from Player {-~_net.slot} ({_net.name})")
+					print($"net_process_packet: Got ready from Player {-~_net.slot} ({_net.name})")
 					_net.ready = true
 				}
 				
@@ -468,7 +470,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					var _name = buffer_read(_buffer, buffer_string)
 					var _slot = _net.slot
 					
-					print($"proControl: Got signal '{_name}' from Player {-~_slot} ({_net.name})")
+					print($"net_process_packet: Got signal '{_name}' from Player {-~_slot} ({_net.name})")
 					
 					var _tick_buffer = inject_tick_packet()
 					
@@ -503,7 +505,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _old = _net.name
 				
 				_net.name = _new
-				show_caption($"'{_old}' is now '{_new}'")
+				net_say($"{_old} is now {_new}", c_yellow)
 				send_others(net_buffer_create(true, NetHeaders.PLAYER_RENAMED, buffer_u8, _net.slot, buffer_string, _new))
 				
 				break
@@ -523,7 +525,43 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				var _old = _net.name
 				
 				_net.name = _new
-				show_caption($"'{_old}' is now '{_new}'")
+				net_say($"{_old} is now {_new}", c_yellow)
+				
+				break
+			}
+			
+			case NetHeaders.CLIENT_SAY: {
+				PACKET_FOR_HOST
+				
+				var _net = clients[? $"{_ip}:{_port}"]
+				
+				if _net == undefined {
+					break
+				}
+				
+				var _message = buffer_read(_buffer, buffer_string)
+				
+				net_say($"<{_net.name}> {_message}")
+				global.ui_sounds.play(global.chat_sound)
+				send_others(net_buffer_create(true, NetHeaders.PLAYER_SAID, buffer_u8, _net.slot, buffer_string, _message))
+				
+				break
+			}
+			
+			case NetHeaders.PLAYER_SAID: {
+				PACKET_FOR_CLIENT
+				
+				var _slot = buffer_read(_buffer, buffer_u8)
+				var _net = players[| _slot]
+				
+				if _net == undefined {
+					break
+				}
+				
+				var _message = buffer_read(_buffer, buffer_string)
+				
+				net_say($"<{_net.name}> {_message}")
+				global.ui_sounds.play(global.chat_sound)
 				
 				break
 			}

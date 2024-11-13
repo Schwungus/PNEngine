@@ -800,12 +800,16 @@ with Catspeak {
 
 global.ui_font = scribble_fallback_font
 ui_font_name = ""
+global.chat_font = scribble_fallback_font
+global.chat_sound = undefined
 global.switch_sound = undefined
 global.select_sound = undefined
 global.fail_sound = undefined
 global.back_sound = undefined
 
 var _custom_ui_font = undefined
+var _custom_chat_font = undefined
+var _custom_chat_sound = "sndChat"
 var _custom_switch_sound = undefined
 var _custom_select_sound = undefined
 var _custom_fail_sound = undefined
@@ -961,6 +965,18 @@ repeat ds_map_size(_mods) {
 			_custom_ui_font = _ui_font
 		}
 		
+		var _chat_font = _info[$ "chat_font"]
+		
+		if is_string(_chat_font) {
+			_custom_chat_font = _chat_font
+		}
+		
+		var _chat_sound = _info[$ "chat_sound"]
+		
+		if is_string(_chat_sound) {
+			_custom_chat_sound = _chat_sound
+		}
+		
 		var _switch_sound = _info[$ "switch_sound"]
 		
 		if is_string(_switch_sound) {
@@ -1030,6 +1046,16 @@ if is_string(_custom_ui_font) {
 	ui_font_name = _font.name
 	_font.transient = true
 }
+
+if is_string(_custom_chat_font) {
+	var _font = _fonts.fetch(_custom_chat_font)
+	
+	global.chat_font = _font.font
+	_font.transient = true
+}
+
+global.chat_sound = global.sounds.fetch(_custom_chat_sound)
+global.chat_sound.transient = true
 
 if is_string(_custom_switch_sound) {
 	global.switch_sound = global.sounds.fetch(_custom_switch_sound)

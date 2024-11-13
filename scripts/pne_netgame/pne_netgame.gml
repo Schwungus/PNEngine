@@ -1,5 +1,6 @@
 #macro DEFAULT_PORT 7788
 #macro STALL_RATE 10
+#macro MAX_LINES 5
 
 enum NetHeaders {
 	// Internal
@@ -31,9 +32,11 @@ enum NetHeaders {
 	HOST_TICK,
 	CLIENT_READY,
 	
-	// Config
+	// Chat
 	CLIENT_RENAME,
 	PLAYER_RENAMED,
+	CLIENT_SAY,
+	PLAYER_SAID,
 	
 	__SIZE,
 }

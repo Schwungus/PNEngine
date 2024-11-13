@@ -80,9 +80,11 @@ function UI(_ui_script) constructor {
 	}
 	
 	static is_ancestor = function (_type) {
-		gml_pragma("forceinline")
+		if is_string(_type) {
+			return ui_script.is_ancestor(_type)
+		}
 		
-		return ui_script.is_ancestor(_type)
+		return is_instanceof(self, _type)
 	}
 	
 	static play_sound = function (_sound, _loop = false, _offset = 0, _pitch = 1) {

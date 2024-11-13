@@ -27,10 +27,11 @@ function Netgame() constructor {
 	tick_count = 0
 	ack_count = 0
 	stall_time = 0
-	load_level = undefined
-	load_area = undefined
-	load_tag = undefined
-	load_queue = false
+	
+	chat = false
+	chat_log = ds_list_create()
+	chat_fade = array_create(MAX_LINES, 0)
+	chat_previous = ""
 	
 	code = "NET_UNKNOWN"
 	connect_success_callback = undefined

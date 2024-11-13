@@ -19,9 +19,9 @@ function cmd_dend(_args) {
 				var _status = _devices[i]
 				
 				if _status == INPUT_STATUS.NEWLY_CONNECTED or _status == INPUT_STATUS.CONNECTED {
-					player_activate(_player)
+					player_activate(_player, false)
 				} else {
-					player_deactivate(_player)
+					player_deactivate(_player, false)
 				}
 				
 				++i

@@ -24,6 +24,8 @@ while _draw_target != undefined {
 }
 
 var _console = global.console
+var _netgame = global.netgame
+var _in_netgame = _netgame != undefined and _netgame.active
 var d = global.delta
 
 if _draw_target == undefined or _draw_target.f_draw_screen {
@@ -48,76 +50,70 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 			
 			if instance_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-			} else {
-				var _netgame = global.netgame
-				
-				if _netgame != undefined and _netgame.active and _netgame.local_player != undefined {
-					with _netgame.local_player {
+			} else if _in_netgame and _netgame.local_player != undefined {
+				with _netgame.local_player {
+					if instance_exists(camera) {
+						camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
+					}
+				}
+			} else switch _num_active {
+				case 1: {
+					with _players_active[| 0] {
 						if instance_exists(camera) {
 							camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 						}
 					}
-				} else {
-					switch _num_active {
-						case 1: {
-							with _players_active[| 0] {
-								if instance_exists(camera) {
-									camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-								}
+					
+					break
+				}
+				
+				case 2: {
+					_height *= 0.5
+					
+					var _y = 0
+					var i = 0
+					
+					repeat _num_active {
+						with _players_active[| i] {
+							if instance_exists(camera) {
+								camera.render(_width, _height, i == 0).DrawStretched(0, _y, 480, 135)
 							}
-							
-							break
 						}
 						
-						case 2: {
-							_height *= 0.5
-							
-							var _y = 0
-							var i = 0
-							
-							repeat _num_active {
-								with _players_active[| i] {
-									if instance_exists(camera) {
-										camera.render(_width, _height, i == 0).DrawStretched(0, _y, 480, 135)
-									}
-								}
-								
-								_y += 135;
-								++i
-							}
-							
-							break
-						}
-						
-						case 3:
-						case 4: {
-							_width *= 0.5
-							_height *= 0.5
-							
-							var _x = 0
-							var _y = 0
-							var i = 0
-							
-							repeat _num_active {
-								with _players_active[| i] {
-									if instance_exists(camera) {
-										camera.render(_width, _height, i == 0).DrawStretched(_x, _y, 240, 135)
-									}
-								}
-								
-								_x += 240
-								
-								if _x > _width {
-									_x = 0
-									_y += 135
-								}
-								
-								++i
-							}
-							
-							break
-						}
+						_y += 135;
+						++i
 					}
+					
+					break
+				}
+				
+				case 3:
+				case 4: {
+					_width *= 0.5
+					_height *= 0.5
+					
+					var _x = 0
+					var _y = 0
+					var i = 0
+					
+					repeat _num_active {
+						with _players_active[| i] {
+							if instance_exists(camera) {
+								camera.render(_width, _height, i == 0).DrawStretched(_x, _y, 240, 135)
+							}
+						}
+						
+						_x += 240
+						
+						if _x > _width {
+							_x = 0
+							_y += 135
+						}
+						
+						++i
+					}
+					
+					break
 				}
 			}
 		}
@@ -248,6 +244,84 @@ if instance_exists(proTransition) {
 	display_set_gui_size(480, 270)
 }
 
+if _in_netgame {
+	with _netgame {
+		draw_set_font(global.chat_font)
+		
+		var _time = current_time
+		
+		if chat {
+			var _input = keyboard_string
+			
+			if (_time % 1000) < 500 {
+				_input += "_"
+			}
+			
+			var _x = string_width(_input)
+			
+			_x = _x > 224 ? 240 - _x : 16
+			draw_text_color(_x - 1, 239, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x, 239, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x + 1, 239, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x - 1, 238, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x, 238, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x + 1, 238, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x - 1, 237, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x, 237, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text_color(_x + 1, 237, _input, c_black, c_black, c_black, c_black, 0.25)
+			draw_text(_x, 238, _input)
+		}
+		
+		draw_set_valign(fa_bottom)
+		
+		var _max_lines = (1 + chat) * MAX_LINES
+		var i = ds_list_size(chat_log)
+		var _y = 232
+		var _alpha = 1
+		var _shadow = 0.25
+		
+		while _max_lines and i {
+			var _message = chat_log[| i - 2]
+			var _color = chat_log[| i - 1]
+			var _show = true;
+			
+			--_max_lines
+			
+			if not chat {
+				var _fade_time = chat_fade[_max_lines]
+				
+				if _time >= _fade_time {
+					_show = false
+				} else {
+					var _fade = min(_fade_time - _time, 1000) * 0.001
+					
+					_alpha = _fade * 0.75
+					_shadow = _fade * 0.25
+				}
+			}
+			
+			if _show {
+				draw_text_ext_color(15, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(16, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(17, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(15, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(16, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(17, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(15, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(16, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(17, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
+				draw_text_ext_color(16, _y, _message, -1, 224, _color, _color, _color, _color, _alpha);
+				_y -= string_height_ext(_message, -1, 224) + 2
+			}
+			
+			i -= 2
+		}
+		
+		draw_set_valign(fa_top)
+		draw_set_font(-1)
+	}
+}
+
 if caption_time > 0 {
 	draw_set_alpha(0.5)
 	
@@ -306,14 +380,9 @@ if _console {
 
 if global.debug_fps {
 	var _fps = $"{fps} FPS"
-	var _netgame = global.netgame
 	
-	if _netgame != undefined {
-		with _netgame {
-			if active and not master {
-				_fps += $"\n{delay} ms"
-			}
-		}
+	if _in_netgame and not _netgame.master {
+		_fps += $"\n{_netgame.delay} ms"
 	}
 	
 	draw_set_alpha(0.5)

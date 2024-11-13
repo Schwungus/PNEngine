@@ -33,7 +33,7 @@ global.config_trigger = {
 				if master {
 					local_net.name = _value
 					send_others(net_buffer_create(true, NetHeaders.PLAYER_RENAMED, buffer_u8, 0, buffer_string, _value))
-					show_caption($"'{global.config.name}' is now '{_value}'")
+					net_say($"{global.config.name} is now {_value}", c_yellow)
 				} else {
 					send_host(net_buffer_create(true, NetHeaders.CLIENT_RENAME, buffer_string, _value))
 				}

@@ -5,48 +5,50 @@ function proOptionsUI() : UI(undefined) constructor {
 	fail_sound = global.fail_sound
 	back_sound = global.back_sound
 	
+#region Controls
+	controls_menu = new OUIMenu("options.controls.title", [
+		new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, global.config.in_invert_x, function (_value) {
+			config_set("in_invert_x", _value)
+		}),
+		
+		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, global.config.in_invert_y, function (_value) {
+			config_set("in_invert_y", _value)
+		}),
+		
+		new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, global.config.in_pan_x - 1, function (_value) {
+			config_set("in_pan_x", -~_value)
+		}),
+		
+		new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, global.config.in_pan_y - 1, function (_value) {
+			config_set("in_pan_y", -~_value)
+		}),
+		
+		undefined,
+		new OUIBinding("options.controls.up", "up"),
+		new OUIBinding("options.controls.left", "left"),
+		new OUIBinding("options.controls.down", "down"),
+		new OUIBinding("options.controls.right", "right"),
+		new OUIBinding("options.controls.walk", "walk"),
+		new OUIBinding("options.controls.jump", "jump"),
+		new OUIBinding("options.controls.interact", "interact"),
+		new OUIBinding("options.controls.attack", "attack"),
+		undefined,
+		new OUIBinding("options.controls.aim", "aim"),
+		new OUIBinding("options.controls.aim_up", "aim_up"),
+		new OUIBinding("options.controls.aim_left", "aim_left"),
+		new OUIBinding("options.controls.aim_down", "aim_down"),
+		new OUIBinding("options.controls.aim_right", "aim_right"),
+		undefined,
+		new OUIBinding("options.controls.inventory_up", "inventory_up"),
+		new OUIBinding("options.controls.inventory_left", "inventory_left"),
+		new OUIBinding("options.controls.inventory_down", "inventory_down"),
+		new OUIBinding("options.controls.inventory_right", "inventory_right"),
+	])
+#endregion
+	
 #region Main Menu
 	main_menu = new OUIMenu("options.title", [
-#region Controls
-		new OUIMenu("options.controls.title", [
-			new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, global.config.in_invert_x, function (_value) {
-				config_set("in_invert_x", _value)
-			}),
-			
-			new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, global.config.in_invert_y, function (_value) {
-				config_set("in_invert_y", _value)
-			}),
-			
-			new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, global.config.in_pan_x - 1, function (_value) {
-				config_set("in_pan_x", -~_value)
-			}),
-			
-			new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, global.config.in_pan_y - 1, function (_value) {
-				config_set("in_pan_y", -~_value)
-			}),
-			
-			undefined,
-			new OUIBinding("options.controls.up", "up"),
-			new OUIBinding("options.controls.left", "left"),
-			new OUIBinding("options.controls.down", "down"),
-			new OUIBinding("options.controls.right", "right"),
-			new OUIBinding("options.controls.walk", "walk"),
-			new OUIBinding("options.controls.jump", "jump"),
-			new OUIBinding("options.controls.interact", "interact"),
-			new OUIBinding("options.controls.attack", "attack"),
-			undefined,
-			new OUIBinding("options.controls.aim", "aim"),
-			new OUIBinding("options.controls.aim_up", "aim_up"),
-			new OUIBinding("options.controls.aim_left", "aim_left"),
-			new OUIBinding("options.controls.aim_down", "aim_down"),
-			new OUIBinding("options.controls.aim_right", "aim_right"),
-			undefined,
-			new OUIBinding("options.controls.inventory_up", "inventory_up"),
-			new OUIBinding("options.controls.inventory_left", "inventory_left"),
-			new OUIBinding("options.controls.inventory_down", "inventory_down"),
-			new OUIBinding("options.controls.inventory_right", "inventory_right"),
-		]),
-#endregion
+		controls_menu,
 		
 #region Video
 		new OUIMenu("options.video.title", [
@@ -440,6 +442,12 @@ function proOptionsUI() : UI(undefined) constructor {
 		}
 	}
 	
+	with controls_menu {
+		if net_active() {
+			array_push(contents, undefined, new OUIBinding("options.controls.chat", "chat"))
+		}
+	}
+	
 	menu = main_menu
 	focus = undefined
 	force_option = -1
@@ -638,7 +646,7 @@ function proOptionsUI() : UI(undefined) constructor {
 							_text = keyboard_string
 							
 							if (current_time % 1000) >= 500 {
-								_text += "|"
+								_text += "_"
 							}
 						} else {
 							_text = current_value
