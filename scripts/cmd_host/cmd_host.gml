@@ -37,7 +37,8 @@ function cmd_host(_args) {
 	}
 	
 	global.game_status = GameStatus.NETGAME
-	show_caption($"[c_lime]Hosting on port {_port}")
+	net_say($"Hosting on port {_port}", C_AB_GREEN)
+	net_say($"Press <{string_input("chat")}> to chat", C_AB_GREEN)
 	game_update_status()
 	
 	return true

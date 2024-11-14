@@ -42,7 +42,8 @@ function cmd_connect(_args) {
 		
 		global.game_status = GameStatus.NETGAME
 		proControl.load_state = LoadStates.NONE
-		show_caption($"[c_lime]Connected")
+		net_say($"Connected", C_AB_GREEN)
+		net_say($"Press <{string_input("chat")}> to chat", C_AB_GREEN)
 	}, function () {
 		if global.input_mode == INPUT_SOURCE_MODE.JOIN {
 			input_join_params_set(1, INPUT_MAX_PLAYERS, "leave", undefined, false)
