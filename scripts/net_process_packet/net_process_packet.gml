@@ -253,7 +253,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				PACKET_FOR_CLIENT
 				time_source_stop(connect_time_source)
 				time_source_start(timeout_time_source)
-				send_direct(_ip, _port, net_buffer_create(false, NetHeaders.CLIENT_SEND_INFO, buffer_string, global.config.name))
+				send_direct(_ip, _port, net_buffer_create(false, NetHeaders.CLIENT_SEND_INFO, buffer_string, global.config.name.value))
 				
 				break
 			}
@@ -266,7 +266,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 				print($"net_process_packet: Assigned as Player {-~local_slot}")
 				
 				with net_add_player(local_slot, "127.0.0.1", 0) {
-					name = global.config.name
+					name = global.config.name.value
 					local = true
 					other.local_net = self
 					other.local_player = player

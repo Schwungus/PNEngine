@@ -5605,6 +5605,7 @@
     {"id":{"name":"console_save","path":"scripts/console_save/console_save.yy",},},
     {"id":{"name":"cross_product_3d_normalized","path":"scripts/cross_product_3d_normalized/cross_product_3d_normalized.yy",},},
     {"id":{"name":"cross_product_3d","path":"scripts/cross_product_3d/cross_product_3d.yy",},},
+    {"id":{"name":"CVar","path":"scripts/CVar/CVar.yy",},},
     {"id":{"name":"display_set","path":"scripts/display_set/display_set.yy",},},
     {"id":{"name":"dq_build_identity","path":"scripts/dq_build_identity/dq_build_identity.yy",},},
     {"id":{"name":"dq_build_matrix","path":"scripts/dq_build_matrix/dq_build_matrix.yy",},},

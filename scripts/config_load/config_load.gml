@@ -1,7 +1,10 @@
 function config_load() {
-	config_reset()
+	struct_foreach(global.config, function (_name, _value) {
+		with _value {
+			set(default_value, false)
+		}
+	})
 	
-	var _config = global.config
 	var _json = json_load(CONFIG_PATH)
 	
 	if is_struct(_json) {
@@ -11,11 +14,11 @@ function config_load() {
 		repeat array_length(_cvars) {
 			var _cvar = _cvars[i++]
 			
-			if variable_struct_exists(_config, _cvar) {
-				config_set(_cvar, _json[$ _cvar])
-			}
+			config_set(_cvar, _json[$ _cvar], false)
 		}
 	}
+	
+	config_update()
 	
 	try {
 		_json = json_load(CONTROLS_PATH)

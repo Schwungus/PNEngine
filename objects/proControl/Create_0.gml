@@ -633,12 +633,12 @@ with Catspeak {
 	addFunction(
 		"get_world_shader", function () {
 			with global.config {
-				return (vid_lighting or vid_antialias) ? global.world_pixel_shader : global.world_shader
+				return (vid_lighting.value or vid_antialias.value) ? global.world_pixel_shader : global.world_shader
 			}
 		},
 		
 		"vid_texture_filter", function () {
-			return global.config.vid_texture_filter
+			return global.config.vid_texture_filter.value
 		},
 		
 		"Canvas", Canvas,

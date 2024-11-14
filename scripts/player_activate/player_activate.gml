@@ -24,7 +24,7 @@ function player_activate(_scope, _loud = true) {
 			return true
 		}
 		
-		print($"! player_activate: Player {slot} is already ready/active")
+		print($"! player_activate: Player {-~slot} is already ready/active")
 		
 		return false
 	}

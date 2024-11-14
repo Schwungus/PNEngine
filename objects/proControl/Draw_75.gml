@@ -398,7 +398,7 @@ if load_state != LoadStates.NONE and (load_level != undefined or load_state == L
 
 #region Audio
 #region Play Sound When Focused
-if not global.config.snd_background {
+if not global.config.snd_background.value {
 	if window_has_focus() {
 		if not global.audio_focus {
 			fmod_channel_control_set_volume(global.master_channel_group, global.master_volume)

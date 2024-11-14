@@ -16,7 +16,7 @@ function net_host(_port = DEFAULT_PORT) {
 		ack_count = 1
 		
 		with net_add_player(0, "127.0.0.1", _port) {
-			name = global.config.name
+			name = global.config.name.value
 			local = true
 			tick_acked = true
 			other.local_net = self

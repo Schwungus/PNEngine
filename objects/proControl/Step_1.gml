@@ -1339,12 +1339,12 @@ if _tick >= 1 {
 				var _dx_angle, _dy_angle
 				
 				with _config {
-					_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
-					_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+					_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
+					_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
 					
 					if _mouse_focused {
-						_dx_factor += other.mouse_dx * in_mouse_x
-						_dy_factor += other.mouse_dy * in_mouse_y
+						_dx_factor += other.mouse_dx * in_mouse_x.value
+						_dy_factor += other.mouse_dy * in_mouse_y.value
 					}
 				}
 				
@@ -1476,12 +1476,12 @@ if _tick >= 1 {
 						var _dx_angle, _dy_angle
 						
 						with _config {
-							_dx_angle = in_pan_x * (in_invert_x ? -1 : 1)
-							_dy_angle = in_pan_y * (in_invert_y ? -1 : 1)
+							_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
+							_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
 							
 							if j == 0 and _mouse_focused {
-								_dx_factor += _mouse_dx * in_mouse_x
-								_dy_factor += _mouse_dy * in_mouse_y
+								_dx_factor += _mouse_dx * in_mouse_x.value
+								_dy_factor += _mouse_dy * in_mouse_y.value
 							}
 						}
 						
@@ -1969,8 +1969,8 @@ if _tick >= 1 {
 				
 				var _input = input
 				var _delay = min(_netgame.delay * 0.03, STALL_RATE)
-				var _net_interp = _config.net_interp
-				var _net_interp_delay = _config.net_interp_delay
+				var _net_interp = _config.net_interp.value
+				var _net_interp_delay = _config.net_interp_delay.value
 				
 				if _has_thing {
 					with thing {
@@ -2094,7 +2094,7 @@ global.tick = _tick
 #region End Interpolation
 var i = ds_list_size(_interps)
 
-if _tick_inc >= 1 or _config.vid_max_fps <= (TICKRATE * _tick_scale) {
+if _tick_inc >= 1 or _config.vid_max_fps.value <= (TICKRATE * _tick_scale) {
 #region Interpolation OFF (FPS <= TICKRATE)
 	while i {
 		var _scope = _interps[| --i]

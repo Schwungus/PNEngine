@@ -18,7 +18,7 @@ function cmd_config(_args) {
 	}
 	
 	if n < 2 {
-		print(_config[$ _key])
+		print(_config[$ _key].value)
 		
 		exit
 	}

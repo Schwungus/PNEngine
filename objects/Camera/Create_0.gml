@@ -362,12 +362,16 @@ depth_from_world = function (_x, _y) {
 	return _depth_canvas.GetPixel(floor(_x), floor(_y))
 }
 
-render = function (_width, _height, _update_listener = false, _allow_sky = true, _allow_screen = true, _world_shader = (global.config.vid_lighting or global.config.vid_antialias) ? global.world_pixel_shader : global.world_shader) {
+render = function (_width, _height, _update_listener = false, _allow_sky = true, _allow_screen = true, _world_shader = undefined) {
 	++global.camera_layer
 	
 	if global.camera_layer == 1 {
 		gpu_set_cullmode(cull_counterclockwise)
 	}
+	
+	var _config = global.config
+	
+	_world_shader ??= (_config.vid_lighting.value or _config.vid_antialias.value) ? global.world_pixel_shader : global.world_shader
 	
 	if instance_exists(child) {
 		var _render = child.render(_width, _height, _update_listener, _allow_sky, _allow_screen, _world_shader);
@@ -434,9 +438,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	
 	var _time = current_time * 0.001
 	var _gpu_tex_filter = gpu_get_tex_filter()
-	var _config = global.config
 	
-	gpu_set_tex_filter(_config.vid_texture_filter)
+	gpu_set_tex_filter(_config.vid_texture_filter.value)
 	global.batch_camera = self
 	
 	var _active_things, _thing_count
@@ -473,7 +476,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		global.u_wind.set(wind_strength, wind_direction[0], wind_direction[1], wind_direction[2])
 		global.u_light_data.set(light_data)
 		global.u_time.set(_time)
-		global.u_mipmap_filter.set(_config.vid_mipmap_filter)
+		global.u_mipmap_filter.set(_config.vid_mipmap_filter.value)
 		
 		if model != undefined {
 			model.draw()
@@ -541,7 +544,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		gpu_set_cullmode(cull_noculling)
 		
 		// Bloom
-		if _config.vid_bloom {
+		if _config.vid_bloom.value {
 			gpu_set_blendenable(false)
 			global.bloom_pass_shader.set()
 			global.u_threshold.set(0.85)
