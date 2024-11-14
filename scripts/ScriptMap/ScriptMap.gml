@@ -153,14 +153,15 @@ function ScriptMap() : AssetMap() constructor {
 								
 								main = parent.main
 								load = parent.load
-								player_connected = parent.player_connected
-								player_disconnected = parent.player_disconnected
+								on_register = parent.on_register
+								on_start = parent.on_start
 								player_activated = parent.player_activated
 								player_deactivated = parent.player_deactivated
 								level_started = parent.level_started
-								area_changed = parent.area_changed
+								level_loading = parent.level_loading
 								area_activated = parent.area_activated
 								area_deactivated = parent.area_deactivated
+								area_changed = parent.area_changed
 								ui_signalled = parent.ui_signalled
 							}
 						}
@@ -410,8 +411,6 @@ function ScriptMap() : AssetMap() constructor {
 			main = _main
 			load = _globals[$ "load"]
 			
-			var _is_mixin = false
-			
 			if is_instanceof(self, ThingScript) {
 				create = _globals[$ "create"]
 				on_destroy = _globals[$ "on_destroy"]
@@ -423,11 +422,12 @@ function ScriptMap() : AssetMap() constructor {
 				draw_screen = _globals[$ "draw_screen"]
 				draw_gui = _globals[$ "draw_gui"]
 			} else if is_instanceof(self, HandlerScript) {
-				player_connected = _globals[$ "player_connected"]
-				player_disconnected = _globals[$ "player_disconnected"]
+				on_register = _globals[$ "on_register"]
+				on_start = _globals[$ "on_start"]
 				player_activated = _globals[$ "player_activated"]
 				player_deactivated = _globals[$ "player_deactivated"]
 				level_started = _globals[$ "level_started"]
+				level_loading = _globals[$ "level_loading"]
 				area_changed = _globals[$ "area_changed"]
 				area_activated = _globals[$ "area_activated"]
 				area_deactivated = _globals[$ "area_deactivated"]
@@ -440,7 +440,6 @@ function ScriptMap() : AssetMap() constructor {
 				draw_screen = _globals[$ "draw_screen"]
 			} else if is_instanceof(self, MixinScript) {
 				create = _globals[$ "create"]
-				_is_mixin = true
 			} else if is_instanceof(self, UIScript) {
 				create = _globals[$ "create"]
 				clean_up = _globals[$ "clean_up"]

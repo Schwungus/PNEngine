@@ -728,6 +728,7 @@
     {"name":"pne_collision","order":1,"path":"scripts/pne_collision/pne_collision.yy",},
     {"name":"pne_debug","order":1,"path":"scripts/pne_debug/pne_debug.yy",},
     {"name":"pne_demos","order":9,"path":"scripts/pne_demos/pne_demos.yy",},
+    {"name":"pne_handlers","order":13,"path":"scripts/pne_handlers/pne_handlers.yy",},
     {"name":"pne_lights","order":11,"path":"scripts/pne_lights/pne_lights.yy",},
     {"name":"pne_players","order":1,"path":"scripts/pne_players/pne_players.yy",},
     {"name":"pne_shaders","order":2,"path":"scripts/pne_shaders/pne_shaders.yy",},

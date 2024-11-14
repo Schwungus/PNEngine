@@ -118,7 +118,7 @@ function Player() constructor {
 	
 	static set_area = function (_id, _tag = ThingTags.NONE) {
 		/* Move away from the current area.
-	
+		
 		   If this player was the master of the area, the smallest indexed
 		   player will become the next one. Otherwise the master will be
 		   undefined and the area will stop ticking. */
@@ -200,6 +200,15 @@ function Player() constructor {
 			area = undefined
 		}
 		
+		var _player = self
+		var _area = area
+		
+		HANDLER_FOREACH_START
+			if area_changed != undefined {
+				catspeak_execute(area_changed, _player, _area)
+			}
+		HANDLER_FOREACH_END
+		
 		return true
 	}
 	
@@ -269,5 +278,13 @@ function Player() constructor {
 		gml_pragma("forceinline")
 		
 		return net == undefined or net.local
+	}
+	
+	static get_name = function () {
+		if net == undefined {
+			return $"Player {-~slot}"
+		}
+		
+		return net.name
 	}
 }

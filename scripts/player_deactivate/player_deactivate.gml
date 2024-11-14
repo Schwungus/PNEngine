@@ -7,16 +7,14 @@ function player_deactivate(_scope, _loud = true) {
 				return false
 			}
 			
-			var _in_area = false
+			HANDLER_FOREACH_START
+				if player_deactivated != undefined {
+					catspeak_execute(player_deactivated, _scope)
+				}
+			HANDLER_FOREACH_END
 			
 			if status == PlayerStatus.ACTIVE {
 				var _players_active = global.players_active
-				
-				/*if ds_list_size(_players_active) <= 1 {
-					print("! Player.deactivate: Cannot deactivate with one player remaining")
-					
-					return false
-				}*/
 				
 				ds_list_delete(_players_active, ds_list_find_index(_players_active, self))
 				
@@ -24,7 +22,7 @@ function player_deactivate(_scope, _loud = true) {
 					thing.destroy()
 				}
 				
-				_in_area = true
+				set_area(undefined)
 				
 				if _loud {
 					show_caption($"[c_red]{lexicon_text("hud.caption.player.disconnect", -~slot)}")
@@ -40,10 +38,6 @@ function player_deactivate(_scope, _loud = true) {
 			}
 			
 			status = PlayerStatus.INACTIVE
-			
-			if _in_area {
-				set_area(undefined)
-			}
 			
 			return true
 		}

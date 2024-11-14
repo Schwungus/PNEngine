@@ -160,6 +160,12 @@ function Area() constructor {
 		}
 		
 		active = true
+		
+		HANDLER_FOREACH_START
+			if area_activated != undefined {
+				catspeak_execute(area_activated, other)
+			}
+		HANDLER_FOREACH_END
 	}
 	
 	/// @func add(type, [x], [y], [z], [angle], [tag], [special])
@@ -389,6 +395,12 @@ function Area() constructor {
 		if ds_list_size(players) {
 			exit
 		}
+		
+		HANDLER_FOREACH_START
+			if area_deactivated != undefined {
+				catspeak_execute(area_deactivated, other)
+			}
+		HANDLER_FOREACH_END
 		
 		master = undefined
 		

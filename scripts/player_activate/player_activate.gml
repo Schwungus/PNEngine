@@ -15,6 +15,12 @@ function player_activate(_scope, _loud = true) {
 			
 			ds_list_add(global.players_ready, self)
 			
+			HANDLER_FOREACH_START
+				if player_activated != undefined {
+					catspeak_execute(player_activated, _scope)
+				}
+			HANDLER_FOREACH_END
+			
 			return true
 		}
 		

@@ -502,6 +502,12 @@ switch load_state {
 			transition_load(transition_script != undefined ? transition_script.name : object_index)
 		}
 		
+		HANDLER_FOREACH_START
+			if level_loading != undefined {
+				catspeak_execute(level_loading, _level)
+			}
+		HANDLER_FOREACH_END
+		
 		_images.end_batch()
 		load_state = LoadStates.FINISH
 		
@@ -578,6 +584,12 @@ switch load_state {
 				}
 			}
 		}
+		
+		HANDLER_FOREACH_START
+			if level_started != undefined {
+				catspeak_execute(level_started, _level)
+			}
+		HANDLER_FOREACH_END
 		
 		if global.demo_write and global.demo_buffer == undefined {
 			var _demo_buffer = buffer_create(1, buffer_grow, 1)
@@ -1569,10 +1581,8 @@ if _tick >= 1 {
 				case TickPackets.DEACTIVATE: {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
-					with _players[_slot] {
-						if not player_deactivate(self, _in_netgame) {
-							show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
-						}
+					if not player_deactivate(_players[_slot], _in_netgame) {
+						show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
 					}
 					
 					break
@@ -1652,17 +1662,11 @@ if _tick >= 1 {
 						_args[i++] = buffer_read_dynamic(_tick_buffer)
 					}
 					
-					var _handlers = global.handlers
-					
-					i = ds_list_size(_handlers)
-					
-					while i {
-						with _handlers[| --i] {
-							if ui_signalled != undefined {
-								catspeak_execute(ui_signalled, _sender, _name, _args)
-							}
+					HANDLER_FOREACH_START
+						if ui_signalled != undefined {
+							catspeak_execute(ui_signalled, _sender, _name, _args)
 						}
-					}
+					HANDLER_FOREACH_END
 				}
 			}
 		}
@@ -1839,9 +1843,8 @@ if _tick >= 1 {
 			}
 		}
 		
-		if _level != undefined {
-			++_level.time
-		}
+		// Assume that "_level" is never undefined.
+		++_level.time
 #endregion
 		
 		input_clear_momentary(true)

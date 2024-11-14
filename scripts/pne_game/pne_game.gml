@@ -50,7 +50,6 @@ global.inject_tick_buffer = false
 global.mouse_focused = false
 
 global.interps = ds_list_create()
-global.handlers = ds_list_create()
 
 global.saves = ds_list_create()
 global.save_name = "Debug"

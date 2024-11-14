@@ -855,6 +855,7 @@ repeat _loaded {
 }
 
 var _key = ds_map_find_first(_mods)
+var _handlers = global.handlers
 
 repeat ds_map_size(_mods) {
 	_mod = _mods[? _key]
@@ -904,7 +905,6 @@ repeat ds_map_size(_mods) {
 		
 		if is_array(_handefs) {
 			var _scripts = global.scripts
-			var _handlers = global.handlers
 			
 			i = 0
 			
@@ -912,9 +912,18 @@ repeat ds_map_size(_mods) {
 				var _hname = force_type(_handefs[i++], "string")
 				var _handler_script = _scripts.fetch(_hname)
 				
-				if _handler_script != undefined {
+				if _handler_script != undefined and not ds_map_exists(_handlers, _hname) {
 					_handler_script.transient = true
-					ds_list_add(_handlers, new Handler(_handler_script))
+					
+					var _handler = new Handler(_handler_script)
+					
+					_handlers[? _hname] = _handler
+					
+					with _handler {
+						if on_register != undefined {
+							catspeak_execute(on_register)
+						}
+					}
 				}
 			}
 		}
@@ -1006,6 +1015,17 @@ repeat ds_map_size(_mods) {
 }
 	
 global.flags[FlagGroups.GLOBAL].clear()
+_key = ds_map_find_first(_handlers)
+
+repeat ds_map_size(_handlers) {
+	with _handlers[? _key] {
+		if on_start != undefined {
+			catspeak_execute(on_start)
+		}
+	}
+	
+	_key = ds_map_find_next(_handlers, _key)
+}
 #endregion
 
 #region Language
