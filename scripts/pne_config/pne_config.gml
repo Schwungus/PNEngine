@@ -7,13 +7,16 @@
 #macro DEMOS_PATH game_save_id + "demos/"
 #macro CONFIG_PATH game_save_id + "config.json"
 #macro CONTROLS_PATH game_save_id + "controls.json"
+
 global.config = {
 	// DEBUG
 	data_path: new CVar("data/", is_string),
 	
 	// USER
 	name: new CVar("Player", is_string, function (_batch) {
-		if not struct_exists(global, "netgame") {
+		if not variable_global_exists("netgame") {
+			print("! pne_config: 'name' updated before init")
+			
 			exit
 		}
 		
