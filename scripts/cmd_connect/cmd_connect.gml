@@ -44,6 +44,7 @@ function cmd_connect(_args) {
 		proControl.load_state = LoadStates.NONE
 		net_say($"Connected", C_AB_GREEN)
 		net_say($"Press <{string_input("chat")}> to chat", C_AB_GREEN)
+		show_caption("", 0)
 	}, function () {
 		if global.input_mode == INPUT_SOURCE_MODE.JOIN {
 			input_join_params_set(1, INPUT_MAX_PLAYERS, "leave", undefined, false)
@@ -73,7 +74,7 @@ function cmd_connect(_args) {
 	input_join_params_set(1, INPUT_MAX_PLAYERS, undefined, undefined, false)
 	input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
 	proControl.load_state = LoadStates.CONNECT
-	show_caption($"Connecting to {_ip}:{_port}...", infinity)
+	show_caption($"Connecting to {_ip}:{_port}...", 10 * TICKRATE)
 	
 	return true
 }
