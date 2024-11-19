@@ -61,7 +61,7 @@ y_start = y
 z_start = 0
 x_previous = x
 y_previous = y
-z_previous = z
+z_previous = 0
 angle = 0
 angle_start = 0
 angle_previous = 0
@@ -80,12 +80,11 @@ max_fly_speed = -infinity
 
 radius = 8
 bump_radius = undefined
-hold_radius = undefined
-interact_radius = undefined
 height = 16
 floor_ray = raycast_data_create()
 wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
+bump_cells = undefined
 
 predict_host = undefined
 
@@ -120,7 +119,6 @@ f_cull_destroy = false
 f_garbage = false
 f_frozen = false
 f_destroyed = false
-f_bump = false
 f_bump_passive = false
 f_bump_avoid = false
 f_bump_intercept = false
@@ -215,6 +213,128 @@ play_voice = function (_sound) {
 	}
 	
 	voice = _sound
+}
+
+set_position = function (_x, _y = y, _z = z, _no_interp = false) {
+	var _moved = not f_predicting and (x != _x or y != _y)
+	
+	x = _x
+	y = _y
+	z = _z
+	
+	if _no_interp {
+		if model != undefined {
+			model.move(_x, _y, _z)
+		}
+		
+		interp_skip("sx")
+		interp_skip("sy")
+		interp_skip("sz")
+	} else if model != undefined {
+		with model {
+			x = _x
+			y = _y
+			z = _z
+		}
+	}
+	
+	if _moved and bump_cells != undefined {
+		update_bump()
+	}
+}
+
+set_size = function (_radius, _height = height, _test = false) {
+	var _resized = radius != _radius or height != _height
+	
+	radius = _radius
+	height = _height
+	// TODO: Clipping and testing
+	
+	return _resized
+}
+
+set_bump = function (_bump) {
+	if _bump {
+		if bump_cells == undefined {
+			bump_cells = ds_stack_create()
+			update_bump()
+			
+			return true
+		}
+	} else if bump_cells != undefined {
+		repeat ds_stack_size(bump_cells) {
+			var _cell = ds_stack_pop(bump_cells)
+			
+			ds_list_delete(_cell, ds_list_find_index(_cell, self))
+		}
+		
+		ds_stack_destroy(bump_cells)
+		bump_cells = undefined
+		
+		return true
+	}
+	
+	return false
+}
+
+set_bump_size = function (_radius) {
+	if bump_radius != _radius {
+		bump_radius = _radius
+		
+		if bump_cells != undefined {
+			update_bump()
+		}
+		
+		return true
+	}
+	
+	return false
+}
+
+get_bump_radius = function () {
+	gml_pragma("forceinline")
+	
+	return bump_radius ?? radius
+}
+
+update_bump = function () {
+	repeat ds_stack_size(bump_cells) {
+		var _cell = ds_stack_pop(bump_cells)
+		
+		ds_list_delete(_cell, ds_list_find_index(_cell, self))
+	}
+	
+	var _bump_grid = area.bump_grid
+	var _bump_x = area.bump_x
+	var _bump_y = area.bump_y
+	var _bump_width = ds_grid_width(_bump_grid)
+	var _bump_height = ds_grid_height(_bump_grid)
+	var _bump_max_x = _bump_width - 1
+	var _bump_max_y = _bump_height - 1
+	
+	var _gx = (x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
+	var _gy = (y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
+	var _gr = (bump_radius ?? radius) * COLLIDER_REGION_SIZE_INVERSE
+	var _gx1 = clamp(floor(_gx - _gr), 0, _bump_max_x)
+	var _gy1 = clamp(floor(_gy - _gr), 0, _bump_max_y)
+	var _gx2 = clamp(ceil(_gx + _gr), 1, _bump_width)
+	var _gy2 = clamp(ceil(_gy + _gr), 1, _bump_height)
+	var _gi = _gx1
+	var _gny = _gy2 - _gy1
+	
+	repeat _gx2 - _gx1 {
+		var _gj = _gy1
+		
+		repeat _gny {
+			var _cell = _bump_grid[# _gi, _gj]
+			
+			ds_list_add(_cell, self)
+			ds_stack_push(bump_cells, _cell);
+			++_gj
+		}
+		
+		++_gi
+	}
 }
 
 jump = function (_spd) {
@@ -352,17 +472,16 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 	_y2 = _result[RaycastData.Y]
 	_z2 = _result[RaycastData.Z]
 	
-	var _bump_grid, _bump_lists, _bump_x1, _bump_y1
+	var _bump_grid, _bump_x1, _bump_y1
 	
 	with area {
 		_bump_grid = bump_grid
-		_bump_lists = bump_lists
 		_bump_x1 = bump_x
 		_bump_y1 = bump_y
 	}
 	
-	var _width = ds_grid_width(_bump_lists)
-	var _height = ds_grid_height(_bump_lists)
+	var _width = ds_grid_width(_bump_grid)
+	var _height = ds_grid_height(_bump_grid)
 	var _bump_x2 = _bump_x1 + (_width * COLLIDER_REGION_SIZE)
 	var _bump_y2 = _bump_y1 + (_height * COLLIDER_REGION_SIZE)
 	
@@ -420,11 +539,11 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 			continue
 		}
 		
-		var _region = _bump_lists[# _gx, _gy]
+		var _region = _bump_grid[# _gx, _gy]
 		var i = ds_list_size(_region)
 		
 		while i {
-			// Check this region to see if we're intersecting any Things.
+			// Check this cell to see if we're intersecting any Things.
 			var _thing = _region[| --i]
 			
 			if _thing == self or not _thing.f_bump_intercept or ((_hflags & HitscanFlags.IGNORE_HOLDER) and _thing.holding == self) or ((_hflags & HitscanFlags.IGNORE_MASTER) and instance_exists(master) and _thing == master) {
@@ -434,13 +553,15 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 			var _tx, _ty, _tx1, _ty1, _tz1, _tx2, _ty2, _tz2
 			
 			with _thing {
+				var _bump_radius = bump_radius ?? radius
+				
 				_tx = x
 				_ty = y
-				_tx1 = _tx - bump_radius
-				_ty1 = _ty - bump_radius
+				_tx1 = _tx - _bump_radius
+				_ty1 = _ty - _bump_radius
 				_tz1 = z - height
-				_tx2 = _tx + bump_radius
-				_ty2 = _ty + bump_radius
+				_tx2 = _tx + _bump_radius
+				_ty2 = _ty + _bump_radius
 				_tz2 = z
 			}
 			
@@ -550,44 +671,71 @@ receive_damage = function (_amount, _type = "Normal", _from = noone, _source = _
 }
 
 bump_avoid = function (_from, _amount = 1) {
-	var _px = _from.x
-	var _py = _from.y
-	var _pr = _from.bump_radius
-	var _len = ((bump_radius + _pr) - point_distance(_px, _py, x, y)) + math_get_epsilon()
+	var _px, _py, _pr
+	
+	with _from {
+		_px = x
+		_py = y
+		_pr = bump_radius ?? radius
+	}
+	
+	var _len = (((bump_radius ?? radius) + _pr) - point_distance(_px, _py, x, y)) + math_get_epsilon()
 	var _dir = point_direction(_px, _py, x, y)
 	
 	var _lx = lengthdir_x(_len, _dir)
 	var _ly = lengthdir_y(_len, _dir)
+	var _new_x = x
+	var _new_y = y
+	var _new_z = z
 	
 	if m_collision != MCollision.NONE {
-		var _z = z - (height * 0.5)
-		var _raycast = raycast(x, y, _z, x + _lx + lengthdir_x(radius, _dir), y + _ly + lengthdir_y(radius, _dir), _z, CollisionFlags.BODY)
+		var _z = _new_z - (height * 0.5)
+		
+		var _raycast = raycast(
+			_new_x,
+			_new_y,
+			_z,
+			_new_x + _lx + lengthdir_x(radius, _dir),
+			_new_y + _ly + lengthdir_y(radius, _dir),
+			_z,
+			CollisionFlags.BODY
+		)
 		
 		if _raycast[RaycastData.HIT] {
 			_dir = point_direction(0, 0, _raycast[RaycastData.NX], _raycast[RaycastData.NY])
-			_lx = (_raycast[RaycastData.X] - x) + lengthdir_x(radius, _dir)
-			_ly = (_raycast[RaycastData.Y] - y) + lengthdir_y(radius, _dir)
+			_lx = (_raycast[RaycastData.X] - _new_x) + lengthdir_x(radius, _dir)
+			_ly = (_raycast[RaycastData.Y] - _new_y) + lengthdir_y(radius, _dir)
 		}
 		
 		_lx *= _amount
 		_ly *= _amount
-		x += _lx
-		y += _ly
+		_new_x += _lx
+		_new_y += _ly
 		
 		// Stick to the ground so we don't slip off of slopes
 		if f_grounded {
-			_raycast = raycast(x, y, _z, x, y, z + point_distance(0, 0, _lx, _ly), CollisionFlags.BODY)
+			_raycast = raycast(
+				_new_x,
+				_new_y,
+				_z,
+				_new_x,
+				_new_y,
+				_new_z + point_distance(0, 0, _lx, _ly),
+				CollisionFlags.BODY
+			)
 			
 			if _raycast[RaycastData.HIT] {
-				z = _raycast[RaycastData.Z]
+				_new_z = _raycast[RaycastData.Z]
 			}
 		}
 	} else {
 		_lx *= _amount
 		_ly *= _amount
-		x += _lx
-		y += _ly
+		_new_x += _lx
+		_new_y += _ly
 	}
+	
+	set_position(_new_x, _new_y, _new_z)
 	
 	return abs(_lx) != 0 or abs(_ly) != 0
 }
@@ -601,11 +749,10 @@ grid_iterate = function (_type, _distance, _include_self = false) {
 grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 	static results = []
 	
-	var _bump_grid, _bump_lists, _bump_x, _bump_y
+	var _bump_grid, _bump_x, _bump_y
 	
 	with area {
 		_bump_grid = bump_grid
-		_bump_lists = bump_lists
 		_bump_x = bump_x
 		_bump_y = bump_y
 	}
@@ -626,24 +773,23 @@ grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 	
 	var _found = 0
 	var i = _gx1
+	var _gny = _gy2 - _gy1
 	
 	repeat _gx2 - _gx1 {
 		var j = _gy1
 		
-		repeat _gy2 - _gy1 {
-			if _bump_grid[# i, j] {
-				var _list = _bump_lists[# i, j]
-				var k = 0
+		repeat _gny {
+			var _list = _bump_grid[# i, j]
+			var k = 0
+			
+			repeat ds_list_size(_list) {
+				var _thing = _list[| k]
 				
-				repeat ds_list_size(_list) {
-					var _thing = _list[| k]
-					
-					if instance_exists(_thing) and (_thing != self or _include_self) and _thing.is_ancestor(_type) {
-						results[_found++] = _thing
-					}
-					
-					++k
+				if instance_exists(_thing) and (_thing != self or _include_self) and _thing.is_ancestor(_type) {
+					results[_found++] = _thing
 				}
+				
+				++k
 			}
 			
 			++j
@@ -784,13 +930,10 @@ do_interact = function (_thing) {
 }
 
 enter_from = function (_thing) {
-	x = _thing.x
-	y = _thing.y
-	z = _thing.z
+	set_position(_thing.x, _thing.y, _thing.z, true)
 	angle = _thing.angle
 	
 	if model != undefined {
-		model.move(x, y, z)
 		model.rotate(angle, 0, 0)
 	}
 	
@@ -824,9 +967,7 @@ holder_unheld = function (_to, _tossed, _forced) {
 }
 
 holder_attach_holdable = function (_holding) {
-	_holding.x = x
-	_holding.y = y
-	_holding.z = z - height
+	_holding.set_position(x, y, z - height)
 }
 
 holdable_held = function (_from, _forced) {

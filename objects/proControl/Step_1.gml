@@ -459,19 +459,19 @@ switch load_state {
 								/* The size of the bump grid is based on the leftmost and rightmost
 									area thing positions. Any Things outside of this grid will have
 									their region clamped accordingly. */
-								var _width = ceil(abs(_bump_x2 - _bump_x1) * COLLIDER_REGION_SIZE_INVERSE)
-								var _height = ceil(abs(_bump_y2 - _bump_y1) * COLLIDER_REGION_SIZE_INVERSE)
-								
-								ds_grid_resize(bump_grid, _width, _height)
-								ds_grid_resize(bump_lists, _width, _height)
+								ds_grid_resize(
+									bump_grid,
+									ceil(abs(_bump_x2 - _bump_x1) * COLLIDER_REGION_SIZE_INVERSE),
+									ceil(abs(_bump_y2 - _bump_y1) * COLLIDER_REGION_SIZE_INVERSE)
+								)
 								
 								var i = 0
 								
-								repeat ds_grid_width(bump_lists) {
+								repeat ds_grid_width(bump_grid) {
 									var j = 0
 									
-									repeat ds_grid_height(bump_lists) {
-										bump_lists[# i, j++] = ds_list_create()
+									repeat ds_grid_height(bump_grid) {
+										bump_grid[# i, j++] = ds_list_create()
 									}
 									
 									++i
@@ -481,7 +481,7 @@ switch load_state {
 								bump_y = _bump_y1
 							} else {
 								// This level has no Things, set defaults
-								bump_lists[# 0, 0] = ds_list_create()
+								bump_grid[# 0, 0] = ds_list_create()
 							}
 						}
 					} else {
@@ -1410,7 +1410,8 @@ if _tick >= 1 {
 			buffer_resize(_tick_buffer, _tick_size)
 		} else if _is_master {
 			// Local input
-			var i = 0
+			i = 0
+			
 			var _mouse_dx = mouse_dx
 			var _mouse_dy = mouse_dy
 			
@@ -1560,7 +1561,7 @@ if _tick >= 1 {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
 					with _players[_slot] {
-						if not player_activate(self, _in_netgame) {
+						if not player_activate(self, not _in_netgame) {
 							if __show_reconnect_caption {
 								var _device = input_player_get_gamepad_type(_slot)
 								
@@ -1581,7 +1582,7 @@ if _tick >= 1 {
 				case TickPackets.DEACTIVATE: {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
-					if not player_deactivate(_players[_slot], _in_netgame) {
+					if not player_deactivate(_players[_slot], not _in_netgame) {
 						show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
 					}
 					
@@ -1655,8 +1656,7 @@ if _tick >= 1 {
 					var _args = global.signal_args
 					
 					array_resize(_args, _argc)
-					
-					var i = 0
+					i = 0
 					
 					repeat _argc {
 						_args[i++] = buffer_read_dynamic(_tick_buffer)
@@ -1672,7 +1672,7 @@ if _tick >= 1 {
 		}
 		
 #region Game Loop
-		var i = ds_list_size(_players_active)
+		i = ds_list_size(_players_active)
 		
 		while i {
 			with _players_active[| --i] {
@@ -1701,52 +1701,15 @@ if _tick >= 1 {
 						
 						var _players_in_area = players
 						
-						// Add actors to actor collision grid
-						var _bump_grid = bump_grid
-						var _bump_lists = bump_lists
-						var _bump_x = bump_x
-						var _bump_y = bump_y
-						var _bump_width = ds_grid_width(_bump_grid)
-						var _bump_height = ds_grid_height(_bump_grid)
-						var _bump_max_x = _bump_width - 1
-						var _bump_max_y = _bump_height - 1
+						// Thing pre-processing
+						var j = ds_list_size(active_things)
 						
-						ds_grid_clear(_bump_grid, false)
-						
-						var j = 0
-						
-						repeat ds_list_size(active_things) {
-							with active_things[| j++] {
-								if not f_bump or f_culled or f_frozen {
-									continue
-								}
-								
-								var _gx = (x - _bump_x) * COLLIDER_REGION_SIZE_INVERSE
-								var _gy = (y - _bump_y) * COLLIDER_REGION_SIZE_INVERSE
-								var _gr = bump_radius * COLLIDER_REGION_SIZE_INVERSE
-								var _gx1 = clamp(floor(_gx - _gr), 0, _bump_max_x)
-								var _gy1 = clamp(floor(_gy - _gr), 0, _bump_max_y)
-								var _gx2 = clamp(ceil(_gx + _gr), 1, _bump_width)
-								var _gy2 = clamp(ceil(_gy + _gr), 1, _bump_height)
-								var _gi = _gx1
-								
-								repeat _gx2 - _gx1 {
-									var _gj = _gy1
-									
-									repeat _gy2 - _gy1 {
-										var _list = _bump_lists[# _gi, _gj]
-										
-										if not _bump_grid[# _gi, _gj] {
-											_bump_grid[# _gi, _gj] = true
-											ds_list_clear(_list)
-										}
-										
-										ds_list_add(_list, self);
-										++_gj
-									}
-									
-									++_gi
-								}
+						while j {
+							with active_things[| --j] {
+								x_previous = x
+								y_previous = y
+								z_previous = z
+								angle_previous = angle
 							}
 						}
 						
@@ -2008,7 +1971,7 @@ if _tick >= 1 {
 							_input[PlayerInputs.AIM] = input_check("aim")
 						}
 						
-						var i = _delay
+						i = _delay
 						
 						while i >= _net_interp_delay {
 							event_user(ThingEvents.TICK);
@@ -2052,8 +2015,7 @@ if _tick >= 1 {
 						}
 						
 						f_predicting = true
-						
-						var i = _delay
+						i = _delay
 						
 						while i >= _net_interp_delay {
 							event_user(ThingEvents.TICK);

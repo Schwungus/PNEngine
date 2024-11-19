@@ -69,9 +69,7 @@ if _targets {
 		
 		var _nr = _range <= 0 ?  0 : range / _range
 		
-		x = _x - (_range_x * _nr)
-		y = _y - (_range_y * _nr)
-		z = _z + (_range_z * _nr)
+		set_position(_x - (_range_x * _nr), _y - (_range_y * _nr), _z + (_range_z * _nr))
 	} else {
 		range = lerp(range, _range, 0.25)
 		
@@ -80,9 +78,7 @@ if _targets {
 		var _range_y = lengthdir_y(range, yaw) * _nz
 		var _range_z = lengthdir_y(range, pitch)
 		
-		x = _x - _range_x
-		y = _y - _range_y
-		z = _z + _range_z
+		set_position(_x - _range_x, _y - _range_y, _z + _range_z)
 	}
 }
 
@@ -173,9 +169,11 @@ if not f_predicting {
 			var _fov_c = path[# _idx, CameraPathData.FOV]
 			var _fov_n = path[# _idx_next, CameraPathData.FOV]
 			
-			x = 0.5 * (((_x_p - 2 * _x_c + _x_n) * _pos + 2 * (_x_c - _x_p)) * _pos + _x_p + _x_c)
-			y = 0.5 * (((_y_p - 2 * _y_c + _y_n) * _pos + 2 * (_y_c - _y_p)) * _pos + _y_p + _y_c)
-			z = 0.5 * (((_z_p - 2 * _z_c + _z_n) * _pos + 2 * (_z_c - _z_p)) * _pos + _z_p + _z_c)
+			set_position(
+				0.5 * (((_x_p - 2 * _x_c + _x_n) * _pos + 2 * (_x_c - _x_p)) * _pos + _x_p + _x_c),
+				0.5 * (((_y_p - 2 * _y_c + _y_n) * _pos + 2 * (_y_c - _y_p)) * _pos + _y_p + _y_c),
+				0.5 * (((_z_p - 2 * _z_c + _z_n) * _pos + 2 * (_z_c - _z_p)) * _pos + _z_p + _z_c)
+			)
 			
 			yaw = 0.5 * (((_yaw_p - 2 * _yaw_c + _yaw_n) * _pos + 2 * (_yaw_c - _yaw_p)) * _pos + _yaw_p + _yaw_c)
 			pitch = 0.5 * (((_pitch_p - 2 * _pitch_c + _pitch_n) * _pos + 2 * (_pitch_c - _pitch_p)) * _pos + _pitch_p + _pitch_c)
@@ -217,9 +215,11 @@ if not f_predicting {
 				d = mb == ma ? 0 : (path_elapsed - ma) / (mb - ma)
 			}
 			
-			x = lerp(path[# a, CameraPathData.X], path[# b, CameraPathData.X], d)
-			y = lerp(path[# a, CameraPathData.Y], path[# b, CameraPathData.Y], d)
-			z = lerp(path[# a, CameraPathData.Z], path[# b, CameraPathData.Z], d)
+			set_position(
+				lerp(path[# a, CameraPathData.X], path[# b, CameraPathData.X], d),
+				lerp(path[# a, CameraPathData.Y], path[# b, CameraPathData.Y], d),
+				lerp(path[# a, CameraPathData.Z], path[# b, CameraPathData.Z], d)
+			)
 			
 			yaw = lerp_angle(path[# a, CameraPathData.YAW], path[# b, CameraPathData.YAW], d)
 			pitch = lerp_angle(path[# a, CameraPathData.PITCH], path[# b, CameraPathData.PITCH], d)

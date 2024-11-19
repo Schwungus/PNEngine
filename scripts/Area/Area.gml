@@ -26,7 +26,6 @@ function Area() constructor {
 	bump_x = 0
 	bump_y = 0
 	bump_grid = ds_grid_create(1, 1)
-	bump_lists = ds_grid_create(1, 1)
 	
 	clear_color = undefined
 	ambient_color = undefined
@@ -457,20 +456,19 @@ function Area() constructor {
 		ds_list_destroy(particles)
 		ds_list_destroy(players)
 		sounds.destroy()
-		ds_grid_destroy(bump_grid)
 		i = 0
 		
-		repeat ds_grid_width(bump_lists) {
+		repeat ds_grid_width(bump_grid) {
 			var j = 0
 			
-			repeat ds_grid_height(bump_lists) {
-				ds_list_destroy(bump_lists[# i, j++])
+			repeat ds_grid_height(bump_grid) {
+				ds_list_destroy(bump_grid[# i, j++])
 			}
 			
 			++i
 		}
 		
-		ds_grid_destroy(bump_lists)
+		ds_grid_destroy(bump_grid)
 		ds_list_destroy(lights)
 	}
 	

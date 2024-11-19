@@ -72,7 +72,7 @@ if m_shadow != MShadow.NONE and shadow_ray[RaycastData.HIT] {
 			matrix_set(matrix_world, _mwp)
 		}
 	} else {
-		var _radius = shadow_radius * 2.285714285714286 // 2 * (32 / 28)
+		var _radius = (shadow_radius ?? radius) * 2.285714285714286 // 2 * (32 / 28)
 		
 		batch_set_properties()
 		batch_floor_ext(imgShadow, 0, _radius, _radius, sshadow_x, sshadow_y, sshadow_z - 0.0625, shadow_ray[RaycastData.NX], shadow_ray[RaycastData.NY], shadow_ray[RaycastData.NZ], c_black, 0.5)

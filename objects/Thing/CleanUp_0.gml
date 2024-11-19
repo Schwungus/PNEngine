@@ -27,6 +27,16 @@ if area_thing != undefined {
 	area_thing.thing = noone
 }
 
+if bump_cells != undefined {
+	repeat ds_stack_size(bump_cells) {
+		var _cell = ds_stack_pop(bump_cells)
+		
+		ds_list_delete(_cell, ds_list_find_index(_cell, self))
+	}
+	
+	ds_stack_destroy(bump_cells)
+}
+
 if area != undefined {
 	var _active_things = area.active_things
 	

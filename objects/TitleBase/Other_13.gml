@@ -180,8 +180,6 @@ if menu != undefined and not locked {
 						_checkpoint[2] = tag
 						global.title_loaded = true
 						
-						var _netgame = global.netgame
-						
 						if _netgame != undefined and _netgame.master {
 							var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
 							

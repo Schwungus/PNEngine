@@ -1,15 +1,8 @@
 /// @description Tick
 var _ticking = not f_predicting
 
-if _ticking {
-	x_previous = x
-	y_previous = y
-	z_previous = z
-	angle_previous = angle
-	
-	if tick_start != undefined {
-		catspeak_execute(tick_start)
-	}
+if _ticking and tick_start != undefined {
+	catspeak_execute(tick_start)
 }
 
 // Source: https://github.com/YoYoGames/GameMaker-HTML5/blob/37ebef72db6b238b892bb0ccc60184d4c4ba5d12/scripts/yyInstance.js#L1157
@@ -32,77 +25,89 @@ if f_gravity and not f_grounded {
 var _held = instance_exists(holder)
 
 // Thing collision
-if _ticking and not _held and f_bump {
-	var _bump_lists = area.bump_lists
-	var _gx = clamp(floor((x - area.bump_x) * COLLIDER_REGION_SIZE_INVERSE), 0, ds_grid_width(_bump_lists) - 1)
-	var _gy = clamp(floor((y - area.bump_y) * COLLIDER_REGION_SIZE_INVERSE), 0, ds_grid_height(_bump_lists) - 1)
-	var _list = _bump_lists[# _gx, _gy]
-	var i = ds_list_size(_list)
+if _ticking and not _held and bump_cells != undefined {
+	var _bump_stack = global.bump_stack
+	var _bump_grid = area.bump_grid
+	
+	var _cell = _bump_grid[#
+		clamp(floor((x - area.bump_x) * COLLIDER_REGION_SIZE_INVERSE), 0, ds_grid_width(_bump_grid) - 1),
+		clamp(floor((y - area.bump_y) * COLLIDER_REGION_SIZE_INVERSE), 0, ds_grid_height(_bump_grid) - 1)
+	]
+	
+	var i = ds_list_size(_cell)
 	
 	while i {
-		var _thing = _list[| --i]
+		ds_stack_push(_bump_stack, _cell[| --i])
+	}
+	
+	var _bump_radius = bump_radius ?? radius
+	
+	repeat ds_stack_size(_bump_stack) {
+		var _thing = ds_stack_pop(_bump_stack)
 		
-		if instance_exists(_thing) and _thing != self and not instance_exists(_thing.holder) {
-			var _tx, _ty, _tz, _th
+		if _thing == self or _thing.holder == self {
+			continue
+		}
+		
+		var _tx, _ty, _tz, _th
+		
+		with _thing {
+			_tx = x
+			_ty = y
+			_tz = z
+			_th = height
+		}
+		
+		// Bounding box check
+		if z > (_tz - _th) and (z - height) < _tz
+			and point_distance(x, y, _tx, _ty) < _bump_radius + (_thing.bump_radius ?? _thing.radius) {
+			var _result_me = catspeak_execute(bump_check, _thing, false)
 			
-			with _thing {
-				_tx = x
-				_ty = y
-				_tz = z
-				_th = height
+			if not instance_exists(self) {
+				exit
 			}
 			
-			// Bounding box check
-			if z > (_tz - _th) and (z - height) < _tz
-			   and point_distance(x, y, _tx, _ty) < bump_radius + _thing.bump_radius {
-				var _result_me = catspeak_execute(bump_check, _thing, false)
-				
-				if not instance_exists(self) {
-					exit
-				}
-				
-				if _result_me == 0 or not instance_exists(_thing) {
+			if _result_me == 0 or not instance_exists(_thing) {
+				continue
+			}
+			
+			var _result_from
+			
+			with _thing {
+				_result_from = catspeak_execute(bump_check, other, true)
+			}
+			
+			if not instance_exists(self) {
+				exit
+			}
+			
+			if _result_from == 0 or not instance_exists(_thing) or f_bump_passive or _thing.f_bump_passive {
+				continue
+			}
+			
+			// Avoid this Thing if all these conditions are met
+			var _pusher, _pushed, _pusher_result, _pushed_result
+			
+			if _thing.f_bump_avoid
+				and (f_bump_heavy or point_distance(0, 0, x_speed, y_speed) > point_distance(0, 0, _thing.x_speed, _thing.y_speed)) {
+				_pusher = self
+				_pushed = _thing
+				_pusher_result = _result_me
+				_pushed_result = _result_from
+			} else {
+				if not f_bump_avoid {
+					// None of the Things can avoid each other
 					continue
 				}
 				
-				var _result_from
-				
-				with _thing {
-					_result_from = catspeak_execute(bump_check, other, true)
-				}
-				
-				if not instance_exists(self) {
-					exit
-				}
-				
-				if _result_from == 0 or not instance_exists(_thing) or f_bump_passive or _thing.f_bump_passive {
-					continue
-				}
-				
-				// Avoid this Thing if all these conditions are met
-				var _pusher, _pushed, _pusher_result, _pushed_result
-				
-				if _thing.f_bump_avoid
-				   and (f_bump_heavy or point_distance(0, 0, x_speed, y_speed) > point_distance(0, 0, _thing.x_speed, _thing.y_speed)) {
-					_pusher = self
-					_pushed = _thing
-					_pusher_result = _result_me
-					_pushed_result = _result_from
-				} else {
-					if not f_bump_avoid {
-						// None of the Things can avoid each other
-						continue
-					}
-					
-					_pusher = _thing
-					_pushed = self
-					_pusher_result = _result_from
-					_pushed_result = _result_me
-				}
-				
-				if not _pushed.bump_avoid(_pusher, _pusher_result) and _pusher.f_bump_avoid and (not _pusher.f_bump_heavy or _pushed.f_bump_heavy) {
-					_pusher.bump_avoid(_pushed, _pushed_result)
-				}
+				_pusher = _thing
+				_pushed = self
+				_pusher_result = _result_from
+				_pushed_result = _result_me
+			}
+			
+			if not _pushed.bump_avoid(_pusher, _pusher_result) and _pusher.f_bump_avoid and (not _pusher.f_bump_heavy or _pushed.f_bump_heavy) {
+				_pusher.bump_avoid(_pushed, _pushed_result)
 			}
 		}
 	}
@@ -115,76 +120,100 @@ if _held {
 	ceiling_ray[RaycastData.HIT] = false
 	f_grounded = false
 } else {
+	var _new_x = x
+	var _new_y = y
+	var _new_z = z
+	
 	switch m_collision {
-		default:
-			x += x_speed
-			y += y_speed
-			z += z_speed
+		default: {
+			_new_x += x_speed
+			_new_y += y_speed
+			_new_z += z_speed
 			floor_ray[RaycastData.HIT] = false
 			wall_ray[RaycastData.HIT] = false
 			ceiling_ray[RaycastData.HIT] = false
 			f_grounded = false
 			
 			break
+		}
 	
 		case MCollision.NORMAL: {
 			var _half_height = height * 0.5
-			var _center_z = z - _half_height
+			var _center_z = _new_z - _half_height
 			
 			// Check the ground first so we don't clip through moving colliders
-			var _raycast = raycast(x, y, _center_z, x, y, z, CollisionFlags.BODY)
+			var _raycast = raycast(_new_x, _new_y, _center_z, _new_x, _new_y, _new_z, CollisionFlags.BODY)
 			
 			if _raycast[RaycastData.HIT] {
-				z = _raycast[RaycastData.Z]
+				_new_z = _raycast[RaycastData.Z]
 			}
 			
 			// X-axis
 			if raycast(
-				x + min(0.1, x_speed) - radius, 
-				y, 
+				_new_x + min(0, x_speed) - radius, 
+				_new_y, 
 				_center_z, 
-				x + max(-0.1, x_speed) + radius, 
-				y, 
+				_new_x + max(0, x_speed) + radius, 
+				_new_y, 
 				_center_z, 
 				CollisionFlags.BODY, 
 				CollisionLayers.ALL, 
 				wall_ray)[RaycastData.HIT] {
 				var _hit_x = wall_ray[RaycastData.X]
 				
-				x = _hit_x + (_hit_x < x ? radius : -radius)
-				x_speed = 0
+				if _hit_x < _new_x {
+					_new_x = _hit_x + radius
+					x_speed = max(x_speed, 0)
+				} else {
+					_new_x = _hit_x - radius
+					x_speed = min(x_speed, 0)
+				}
 			}
-		
-			x += x_speed
-		
+			
+			_new_x += x_speed
+			
 			// Y-axis
 			_raycast = raycast(
-				x, 
-				y + min(0.1, y_speed) - radius, 
+				_new_x, 
+				_new_y + min(0, y_speed) - radius, 
 				_center_z, 
-				x, 
-				y + max(-0.1, y_speed) + radius, 
+				_new_x, 
+				_new_y + max(0, y_speed) + radius, 
 				_center_z, 
 				CollisionFlags.BODY, 
 				CollisionLayers.ALL)
-		
+			
 			if _raycast[RaycastData.HIT] {
 				array_copy(wall_ray, 0, _raycast, 0, RaycastData.__SIZE)
-			
+				
 				var _hit_y = _raycast[RaycastData.Y]
+				
+				if _hit_y < _new_y {
+					_new_y = _hit_y + radius
+					y_speed = max(y_speed, 0)
+				} else {
+					_new_y = _hit_y - radius
+					y_speed = min(y_speed, 0)
+				}
+			}
 			
-				y = _hit_y + (_hit_y < y ? radius : -radius)
-				y_speed = 0
-			}
-		
-			y += y_speed
-		
+			_new_y += y_speed
+			
 			// Ceiling
-			if raycast(x, y, z - _half_height, x, y, z + z_speed - height, CollisionFlags.BODY, CollisionLayers.ALL, ceiling_ray)[RaycastData.HIT] {
-				z = ceiling_ray[RaycastData.Z] + height
-				z_speed = 0
+			if raycast(
+				_new_x,
+				_new_y,
+				_center_z,
+				_new_x,
+				_new_y,
+				_new_z + z_speed - height,
+				CollisionFlags.BODY,
+				CollisionLayers.ALL,
+				ceiling_ray)[RaycastData.HIT] {
+				_new_z = ceiling_ray[RaycastData.Z] + height
+				z_speed = max(z_speed, 0)
 			}
-		
+			
 			// Floor
 			var _extra_z = 0
 			
@@ -197,8 +226,17 @@ if _held {
 				last_prop = noone
 			}
 			
-			if raycast(x, y, z - _half_height, x, y, z + z_speed + _extra_z + math_get_epsilon(), CollisionFlags.BODY, CollisionLayers.ALL, floor_ray)[RaycastData.HIT] {
-				z = floor_ray[RaycastData.Z]
+			if raycast(
+				_new_x,
+				_new_y,
+				_new_z - _half_height,
+				_new_x,
+				_new_y,
+				_new_z + z_speed + _extra_z + math_get_epsilon(),
+				CollisionFlags.BODY,
+				CollisionLayers.ALL,
+				floor_ray)[RaycastData.HIT] {
+				_new_z = floor_ray[RaycastData.Z]
 				z_speed = 0
 				
 				// Stick to movers
@@ -206,11 +244,11 @@ if _held {
 				
 				if instance_exists(_thing) and _ticking {
 					if _thing.f_collider_stick {
-						var _pos = matrix_transform_vertex(_thing.collider.delta_matrix, x, y, z)
+						var _pos = matrix_transform_vertex(_thing.collider.delta_matrix, _new_x, _new_y, _new_z)
 						
-						x = _pos[0]
-						y = _pos[1]
-						//z = _pos[2]
+						_new_x = _pos[0]
+						_new_y = _pos[1]
+						//_new_z = _pos[2]
 						
 						var _diff = angle_difference(_thing.angle, _thing.angle_previous)
 						
@@ -234,8 +272,8 @@ if _held {
 				if ((_flags & CollisionFlags.SLIPPERY) or floor_ray[RaycastData.NZ] >= -0.5) and not (_flags & CollisionFlags.STICKY) {
 					var _dir = darctan2(-floor_ray[RaycastData.NY], floor_ray[RaycastData.NX])
 					
-					x += dcos(_dir)
-					y -= dsin(_dir)
+					_new_x += dcos(_dir)
+					_new_y -= dsin(_dir)
 					f_grounded = false
 				} else {
 					f_grounded = true
@@ -244,11 +282,13 @@ if _held {
 				f_grounded = false
 			}
 			
-			z += z_speed
+			_new_z += z_speed
 			
 			break
 		}
 	}
+	
+	set_position(_new_x, _new_y, _new_z)
 }
 
 if _ticking {
@@ -259,9 +299,7 @@ if _ticking {
 	var _is_holding = instance_exists(holding) 
 	
 	if _is_holding {
-		holding.x = x
-		holding.y = y
-		holding.z = z - height
+		holding.set_position(x, y, z - height)
 		holding.angle = angle
 		holding.set_speed(0)
 		holding.z_speed = 0
@@ -292,12 +330,7 @@ if _ticking {
 			_update_collider = true
 		}
 		
-		with _model {
-			x = _x
-			y = _y
-			z = _z
-			tick()
-		}
+		_model.tick()
 		
 		if _update_collider {
 			collider.set_matrix(_model.tick_matrix)

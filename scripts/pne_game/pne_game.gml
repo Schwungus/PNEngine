@@ -56,6 +56,8 @@ global.save_name = "Debug"
 global.title_start = true
 global.title_delete_state = 0
 global.title_loaded = false
+
+global.bump_stack = ds_stack_create()
 #endregion
 
 #region Levels

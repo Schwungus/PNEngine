@@ -184,16 +184,11 @@ start_path = function (_time, _quadratic = false, _loop = false) {
 	path_loop = _loop
 	path_active = true
 	
-	x = path[# 0, CameraPathData.X]
-	y = path[# 0, CameraPathData.Y]
-	z = path[# 0, CameraPathData.Z]
+	set_position(path[# 0, CameraPathData.X], path[# 0, CameraPathData.Y], path[# 0, CameraPathData.Z], true)
 	yaw = path[# 0, CameraPathData.YAW]
 	pitch = path[# 0, CameraPathData.PITCH]
 	roll = path[# 0, CameraPathData.ROLL]
 	fov = path[# 0, CameraPathData.FOV]
-	interp_skip("sx")
-	interp_skip("sy")
-	interp_skip("sz")
 	interp_skip("syaw")
 	interp_skip("spitch")
 	interp_skip("sroll")

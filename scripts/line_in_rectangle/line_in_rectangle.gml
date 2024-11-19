@@ -6,31 +6,27 @@ enum LineBoxClip {
 	TOP = 8,
 }
 
-function line_in_rectangle(_lx1, _ly1, _lx2, _ly2, _x1, _y1, _x2, _y2) {
-	function __line_in_rectangle_get_outcode(_x, _y, _x1, _y1, _x2, _y2) {
-		gml_pragma("forceinline")
-		
-		var _code = LineBoxClip.INSIDE
-		
-		if _x < _x1 { // to the left of clip window
-			_code |= LineBoxClip.LEFT
-		} else {
-			if _x > _x2 { // to the right of clip window
-				_code |= LineBoxClip.RIGHT
-			}
-		}
-		
-		if _y < _y1 { // below the clip window
-			_code |= LineBoxClip.BOTTOM
-		} else {
-			if _y > _y2 { // above the clip window
-				_code |= LineBoxClip.TOP
-			}
-		}
-		
-		return _code
+function __line_in_rectangle_get_outcode(_x, _y, _x1, _y1, _x2, _y2) {
+	gml_pragma("forceinline")
+	
+	var _code = LineBoxClip.INSIDE
+	
+	if _x < _x1 { // to the left of clip window
+		_code |= LineBoxClip.LEFT
+	} else if _x > _x2 { // to the right of clip window
+		_code |= LineBoxClip.RIGHT
 	}
 	
+	if _y < _y1 { // below the clip window
+		_code |= LineBoxClip.BOTTOM
+	} else if _y > _y2 { // above the clip window
+		_code |= LineBoxClip.TOP
+	}
+	
+	return _code
+}
+
+function line_in_rectangle(_lx1, _ly1, _lx2, _ly2, _x1, _y1, _x2, _y2) {
 	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
 	var _out1 = __line_in_rectangle_get_outcode(_lx1, _ly1, _x1, _y1, _x2, _y2)
 	var _out2 = __line_in_rectangle_get_outcode(_lx2, _ly2, _x1, _y1, _x2, _y2)
@@ -67,21 +63,19 @@ function line_in_rectangle(_lx1, _ly1, _lx2, _ly2, _x1, _y1, _x2, _y2) {
 		if _out & LineBoxClip.TOP { // point is above the clip window
 			_x = _lx1 + (_lx2 - _lx1) * (_y2 - _ly1) * d
 			_y = _y2
+		} else if _out & LineBoxClip.BOTTOM { // point is below the clip window
+			_x = _lx1 + (_lx2 - _lx1) * (_y1 - _ly1) * d
+			_y = _y1
 		} else {
-			if _out & LineBoxClip.BOTTOM { // point is below the clip window
-				_x = _lx1 + (_lx2 - _lx1) * (_y1 - _ly1) * d
-				_y = _y1
+			d = 1 / (_lx2 - _lx1)
+			
+			if _out & LineBoxClip.RIGHT { // point is to the right of clip window
+				_y = _ly1 + (_ly2 - _ly1) * (_x2 - _lx1) * d
+				_x = _x2
 			} else {
-				d = 1 / (_lx2 - _lx1)
-				
-				if _out & LineBoxClip.RIGHT { // point is to the right of clip window
-					_y = _ly1 + (_ly2 - _ly1) * (_x2 - _lx1) * d
-					_x = _x2
-				} else {
-					if _out & LineBoxClip.LEFT { // point is to the left of clip window
-						_y = _ly1 + (_ly2 - _ly1) * (_x1 - _lx1) * d
-						_x = _x1
-					}
+				if _out & LineBoxClip.LEFT { // point is to the left of clip window
+					_y = _ly1 + (_ly2 - _ly1) * (_x1 - _lx1) * d
+					_x = _x1
 				}
 			}
 		}
