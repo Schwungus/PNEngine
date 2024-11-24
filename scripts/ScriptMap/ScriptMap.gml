@@ -375,8 +375,20 @@ function ScriptMap() : AssetMap() constructor {
 		
 		file_text_close(_script_file)
 		
-		var _hir = Catspeak.parseString(_code)
-		var _main = Catspeak.compile(_hir)
+		var _hir, _main
+		
+		try {
+			_hir = Catspeak.parseString(_code)
+		} catch (e) {
+			show_error($"!!! ScriptMap: Error while parsing script '{_name}'\n\n{e.longMessage}", true)
+		}
+		
+		try {
+			_main = Catspeak.compile(_hir)
+		} catch (e) {
+			show_error($"!!! ScriptMap: Error while compiling script '{_name}'\n\n{e.longMessage}", true)
+		}
+		
 		var _globals = catspeak_globals(_main)
 		
 		var _imports = _script.imports
