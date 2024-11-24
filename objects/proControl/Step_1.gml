@@ -714,7 +714,9 @@ var _ui = global.ui
 var _mouse_focused = global.mouse_focused
 
 if _mouse_focused {
-	if not _console and not global.debug_overlay and window_has_focus() and _ui == undefined {
+	if not _console and not global.debug_overlay
+	   and window_has_focus()
+	   and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
 		mouse_dx += window_mouse_get_delta_x()
 		mouse_dy += window_mouse_get_delta_y()
 	} else {
@@ -725,7 +727,9 @@ if _mouse_focused {
 		mouse_dy = 0
 	}
 } else {
-	if not _console and not global.debug_overlay and window_has_focus() and _ui == undefined {
+	if not _console and not global.debug_overlay
+	   and window_has_focus()
+	   and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
 		window_mouse_set_locked(true)
 		global.mouse_focused = true
 		_mouse_focused = true

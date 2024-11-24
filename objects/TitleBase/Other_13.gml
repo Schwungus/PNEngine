@@ -10,7 +10,7 @@ if menu != undefined and not locked {
 	
 	while _ui != undefined {
 		with _ui {
-			if f_blocking {
+			if f_blocking or f_block_input {
 				exit
 			}
 			
