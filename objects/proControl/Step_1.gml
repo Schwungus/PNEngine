@@ -1019,6 +1019,7 @@ if _tick >= 1 {
 	// UI (non-deterministic)
 	if _ui_tick >= 1 {
 		var _skip_tick = false
+		var _skip_input = false
 		
 		while _ui_tick >= 1 {
 			if _ui != undefined {
@@ -1067,8 +1068,12 @@ if _tick >= 1 {
 					}
 				}
 				
-				if _tick_target.exists and _tick_target.f_blocking {
-					_skip_tick = true
+				if _tick_target.exists {
+					if _tick_target.f_blocking {
+						_skip_tick = true
+					} else if _tick_target.f_block_input {
+						_skip_input = true
+					}
 				}
 				
 				// Extra check to prevent a crash when disconnecting
@@ -1125,6 +1130,10 @@ if _tick >= 1 {
 			}
 			
 			--_ui_tick
+		}
+		
+		if _skip_input {
+			_block_input = true
 		}
 		
 		if _skip_tick {
