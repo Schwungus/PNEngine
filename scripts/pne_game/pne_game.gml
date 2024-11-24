@@ -96,9 +96,11 @@ enum ThingTags {
 
 enum DamageResults {
 	NONE,
-	MISSED,
-	BLOCKED,
-	DAMAGED,
-	FATAL,
+	HIT = 1 << 0,
+	MISSED = 1 << 1,
+	BLOCKED = 1 << 2,
+	ABSORBED = 1 << 3,
+	DAMAGED = 1 << 4,
+	FATAL = 1 << 5,
 }
 #endregion

@@ -452,8 +452,10 @@ with Catspeak {
 		"HSF_IGNORE_MASTER", HitscanFlags.IGNORE_MASTER,
 		
 		"DMG_NONE", DamageResults.NONE,
+		"DMG_HIT", DamageResults.HIT,
 		"DMG_MISSED", DamageResults.MISSED,
 		"DMG_BLOCKED", DamageResults.BLOCKED,
+		"DMG_ABSORBED", DamageResults.ABSORBED,
 		"DMG_DAMAGED", DamageResults.DAMAGED,
 		"DMG_FATAL", DamageResults.FATAL,
 		
@@ -964,7 +966,16 @@ repeat ds_map_size(_mods) {
 			var _static = force_type_fallback(_flags[$ "static"], "struct")
 			
 			if is_struct(_static) {
-				global.flags[FlagGroups.STATIC].copy(_static)
+				var _static_flags = global.flags[FlagGroups.STATIC]
+				var _names = struct_get_names(_static)
+				
+				i = 0
+				
+				repeat struct_names_count(_static) {
+					_key = _names[i]
+					_static_flags[? _key] = _static[$ _key];
+					++i
+				}
 			}
 		}
 		
