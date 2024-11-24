@@ -966,7 +966,7 @@ repeat ds_map_size(_mods) {
 			var _static = force_type_fallback(_flags[$ "static"], "struct")
 			
 			if is_struct(_static) {
-				var _static_flags = global.flags[FlagGroups.STATIC]
+				var _static_flags = global.flags[FlagGroups.STATIC].flags
 				var _names = struct_get_names(_static)
 				
 				i = 0
