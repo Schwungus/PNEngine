@@ -8,7 +8,11 @@
       }
     },
     "aff0f052-c04f-4ea7-9c53-c10ef775761d": null,
-    "56095c61-1b68-47e5-8371-cd33dc182612": null,
+    "56095c61-1b68-47e5-8371-cd33dc182612": {
+      "Default": {
+        "value": "C:\\\\Program Files (x86)\\\\FMOD SoundSystem\\\\fmodstudioapi20225linux"
+      }
+    },
     "b6788195-a70c-47ef-9e3a-71d3164e6811": null,
     "87fb1cc8-413d-4d16-adc8-4d5ab4bdda24": null,
     "76beba25-6577-4c2d-a634-c3cff691891e": null,
@@ -21,7 +25,11 @@
     "5ab86468-990a-4add-a836-8da80a081c12": null,
     "c91aefca-e289-4cfe-bf9c-9c431dc97779": null,
     "4431c4d8-772d-4c85-a494-1f6491aa37ff": null,
-    "0b9245eb-e6d6-4763-87c8-5fc0e4f67b65": null,
+    "0b9245eb-e6d6-4763-87c8-5fc0e4f67b65": {
+      "Default": {
+        "value": "False"
+      }
+    },
     "fa3cd3b9-9573-46f8-b93e-6b3978afbe3f": null,
     "3038610d-8497-4444-8d59-ef7b8739e6cd": null,
     "93876551-db41-470b-b263-0c58da96bf0c": null,
