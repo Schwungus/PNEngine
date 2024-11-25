@@ -127,7 +127,7 @@ function UI(_ui_script) constructor {
 					}
 					
 					// Flags
-					global.flags[FlagGroups.GLOBAL].write(b)
+					global.global_flags.write(b)
 					send_others(b)
 					global.title_loaded = true
 				}

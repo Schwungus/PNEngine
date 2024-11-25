@@ -113,7 +113,7 @@ function cmd_demo(_args) {
 	var _area = buffer_read(_demo_buffer, buffer_u32)
 	var _tag = buffer_read(_demo_buffer, buffer_s32)
 	
-	global.flags[FlagGroups.GLOBAL].read(_demo_buffer)
+	global.global_flags.read(_demo_buffer)
 	global.demo_buffer = _demo_buffer
 	global.game_status = GameStatus.DEMO
 	

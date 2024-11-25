@@ -22,8 +22,7 @@ function Player() constructor {
 			return noone
 		}
 		
-		var _flags = global.flags
-		var _type = force_type(_flags[FlagGroups.LOCAL].get("player_class") ?? (_flags[FlagGroups.GLOBAL].get("player_class") ?? get_state("player_class")), "string")
+		var _type = force_type(global.local_flags.get("player_class") ?? (global.global_flags.get("player_class") ?? get_state("player_class")), "string")
 		var _spawn = noone
 		
 		// Pick a spawn furthest from all players.

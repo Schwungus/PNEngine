@@ -36,7 +36,7 @@ function cmd_level(_args) {
 					}
 					
 					// Flags
-					global.flags[FlagGroups.GLOBAL].write(b)
+					global.global_flags.write(b)
 					send_others(b)
 				}
 			}

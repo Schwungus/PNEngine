@@ -1,5 +1,4 @@
-function Flags(_id) constructor {
-	slot = _id
+function Flags() constructor {
 	flags = ds_map_create()
 	
 	static get = function (_key) {
@@ -32,11 +31,7 @@ function Flags(_id) constructor {
 	}
 	
 	static clear = function () {
-		if slot == FlagGroups.GLOBAL {
-			ds_map_copy(flags, global.default_flags)
-		} else {
-			ds_map_clear(flags)
-		}
+		ds_map_clear(flags)
 		
 		return true
 	}
@@ -68,3 +63,5 @@ function Flags(_id) constructor {
 		}
 	}
 }
+
+global.local_flags = new Flags()

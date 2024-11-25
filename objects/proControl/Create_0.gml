@@ -410,12 +410,10 @@ with Catspeak {
 #endregion
 	
 #region Level
-	var _flags = global.flags
-	
 	addConstant(
-		"GLOBAL", _flags[FlagGroups.GLOBAL],
-		"LOCAL", _flags[FlagGroups.LOCAL],
-		"STATIC", _flags[FlagGroups.STATIC],
+		"GLOBAL", global.global_flags,
+		"LOCAL", global.local_flags,
+		"STATIC", global.static_flags,
 		
 		"CP_LEVEL", 0,
 		"CP_AREA", 1,
@@ -966,7 +964,7 @@ repeat ds_map_size(_mods) {
 			var _static = force_type_fallback(_flags[$ "static"], "struct")
 			
 			if is_struct(_static) {
-				var _static_flags = global.flags[FlagGroups.STATIC].flags
+				var _static_flags = global.static_flags.flags
 				var _names = struct_get_names(_static)
 				
 				i = 0
@@ -1025,7 +1023,7 @@ repeat ds_map_size(_mods) {
 	_key = ds_map_find_next(_mods, _key)
 }
 	
-global.flags[FlagGroups.GLOBAL].clear()
+global.global_flags.clear()
 _key = ds_map_find_first(_handlers)
 
 repeat ds_map_size(_handlers) {

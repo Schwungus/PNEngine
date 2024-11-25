@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"Flags",
+  "%Name":"GlobalFlags",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Flags",
+  "name":"GlobalFlags",
   "parent":{
     "name":"Flags",
     "path":"folders/Scripts/PNEngine/Game/Flags.yy",

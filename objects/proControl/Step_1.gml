@@ -80,7 +80,7 @@ switch load_state {
 			exit
 		}
 		
-		global.flags[FlagGroups.LOCAL].clear()
+		global.local_flags.clear()
 		global.level = new Level()
 		catspeak_collect()
 		gc_collect()
@@ -207,17 +207,16 @@ switch load_state {
 			var _copy_flags = force_type_fallback(_json[$ "flags"], "struct")
 			
 			if _copy_flags != undefined {
-				var _flags = global.flags
 				var _copy_global = force_type_fallback(_copy_flags[$ "global"], "struct")
 				
 				if _copy_global != undefined {
-					_flags[FlagGroups.GLOBAL].copy(_copy_global)
+					global.global_flags.copy(_copy_global)
 				}
 				
 				var _copy_local = force_type_fallback(_copy_flags[$ "local"], "struct")
 				
 				if _copy_local != undefined {
-					_flags[FlagGroups.LOCAL].copy(_copy_local)
+					global.local_flags.copy(_copy_local)
 				}
 			}
 			
@@ -635,7 +634,7 @@ switch load_state {
 			buffer_write(_demo_buffer, buffer_string, load_level)
 			buffer_write(_demo_buffer, buffer_u32, load_area)
 			buffer_write(_demo_buffer, buffer_s32, load_tag)
-			global.flags[FlagGroups.GLOBAL].write(_demo_buffer)
+			global.global_flags.write(_demo_buffer)
 			global.demo_buffer = _demo_buffer
 			print("proControl: Recording demo")
 		}

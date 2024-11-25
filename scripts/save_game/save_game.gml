@@ -58,7 +58,7 @@ function save_game() {
 	buffer_write(_buffer, buffer_s32, _checkpoint[2])
 	
 	// Flags
-	global.flags[FlagGroups.GLOBAL].write(_buffer)
+	global.global_flags.write(_buffer)
 	
 	// Output
 	buffer_resize(_buffer, buffer_tell(_buffer))

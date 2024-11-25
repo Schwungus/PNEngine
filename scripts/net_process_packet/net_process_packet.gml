@@ -404,7 +404,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					_players[_slot].read_states(_buffer)
 				}
 				
-				global.flags[FlagGroups.GLOBAL].read(_buffer)
+				global.global_flags.read(_buffer)
 				
 				break
 			}
