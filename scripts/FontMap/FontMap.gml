@@ -5,95 +5,98 @@ function FontMap() : AssetMap() constructor {
 		}
 		
 		var _path = "fonts/" + _name
-		var _font_file = mod_find_file(_path + ".ttf")
+		var _font_file = mod_find_file(_path + ".*", ".json")
 		
 		if _font_file == "" {
-			_font_file = mod_find_file(_path + ".png")
+			print($"! FontMap.load: '{_name}' not found")
+			
+			exit
 		}
 		
-		if _font_file == "" {
-			print("! FontMap.load: '{0}' not found", _name)
-		} else {
-			var _font
+		var _font
+		var _ext = filename_ext(_font_file)
+		
+		if _ext == ".ttf" {
+			// True Typeface Font (unstable)
+			var _size = 8
+			var _bold = false
+			var _italics = false
+			var _first = 32
+			var _last = 128
+			var _sdf = false
+			var _sdf_spread = 8
 			
-			if filename_ext(_font_file) == ".ttf" {
-				// True Typeface Font (unstable)
-				var _size = 8
-				var _bold = false
-				var _italics = false
-				var _first = 32
-				var _last = 128
-				var _sdf = false
-				var _sdf_spread = 8
-				
-				var _json = json_load(mod_find_file(_path + ".json"))
-				
-				if is_struct(_json) {
-					_size = force_type_fallback(_json[$ "size"], "number", 8)
-					_bold = force_type_fallback(_json[$ "bold"], "bool", false)
-					_italics = force_type_fallback(_json[$ "italics"], "bool", false)
-					_first = force_type_fallback(_json[$ "first"], "number", 32)
-					_last = force_type_fallback(_json[$ "last"], "number", 128)
-					_sdf = force_type_fallback(_json[$ "sdf"], "bool", false)
-					_sdf_spread = force_type_fallback(_json[$ "sdf_spread"], "number", 8)
-				}
-				
-				_font = new Font()
-				
-				var _font_id = font_add(_font_file, _size, _bold, _italics, _first, _last)
-				var _font_name = font_get_name(_font_id)
-				
-				// TODO: Forcefully shove TTF fonts down Scribble's throat
-				//		 without crashing it.
-				
-				if _sdf {
-					font_enable_sdf(_font_id, true)
-					font_sdf_spread(_font_id, _sdf_spread)
-				}
-				
-				_font.name = _name
-				_font.font = _font_id
-			} else {
-				// Sprite Font
-				var _sprite
-				var _frames = 1
-				var _proportional = true
-				var _space = 1
-				var _first = 32
-				var _map = undefined
-				
-				var _json = json_load(mod_find_file(_path + ".json"))
-				
-				if is_struct(_json) {
-					_frames = force_type_fallback(_json[$ "frames"], "number", 1)
-					_proportional = force_type_fallback(_json[$ "proportional"], "bool", true)
-					_space = force_type_fallback(_json[$ "space"], "number", 1)
-					_first = force_type_fallback(_json[$ "first"], "string", 32)
-					
-					if is_string(_first) {
-						_first = ord(_first)
-					}
-					
-					_map = force_type_fallback(_json[$ "map"], "string")
-				}
-				
-				_sprite = sprite_add(_font_file, _frames, false, false, 0, 0)
-				sprite_collision_mask(_sprite, true, 0, 0, 0, 0, 0, bboxkind_precise, 255)
-				_font = new Font()
-				
-				var _font_id = _map != undefined ? font_add_sprite_ext(_sprite, _map, _proportional, _space) : font_add_sprite(_sprite, _first, _proportional, _space)
-				var _font_name = font_get_name(_font_id)
-				
-				scribble_glyph_set(_font_name, " ", SCRIBBLE_GLYPH.FONT_HEIGHT, 1, true)
-				scribble_font_rename(_font_name, _name)
-				_font.name = _name
-				_font.sprite = _sprite
-				_font.font = _font_id
+			var _json = json_load(mod_find_file(_path + ".json"))
+			
+			if is_struct(_json) {
+				_size = force_type_fallback(_json[$ "size"], "number", 8)
+				_bold = force_type_fallback(_json[$ "bold"], "bool", false)
+				_italics = force_type_fallback(_json[$ "italics"], "bool", false)
+				_first = force_type_fallback(_json[$ "first"], "number", 32)
+				_last = force_type_fallback(_json[$ "last"], "number", 128)
+				_sdf = force_type_fallback(_json[$ "sdf"], "bool", false)
+				_sdf_spread = force_type_fallback(_json[$ "sdf_spread"], "number", 8)
 			}
 			
-			ds_map_add(assets, _name, _font)
-			print("FontMap.load: Added '{0}' ({1})", _name, _font)
+			_font = new Font()
+			
+			var _font_id = font_add(_font_file, _size, _bold, _italics, _first, _last)
+			var _font_name = font_get_name(_font_id)
+			
+			// TODO: Forcefully shove TTF fonts down Scribble's throat without
+			//       crashing it.
+			
+			if _sdf {
+				font_enable_sdf(_font_id, true)
+				font_sdf_spread(_font_id, _sdf_spread)
+			}
+			
+			_font.name = _name
+			_font.font = _font_id
+		} else if _ext == ".png" {
+			// Sprite Font
+			var _sprite
+			var _frames = 1
+			var _proportional = true
+			var _space = 1
+			var _first = 32
+			var _map = undefined
+			
+			var _json = json_load(mod_find_file(_path + ".json"))
+			
+			if is_struct(_json) {
+				_frames = force_type_fallback(_json[$ "frames"], "number", 1)
+				_proportional = force_type_fallback(_json[$ "proportional"], "bool", true)
+				_space = force_type_fallback(_json[$ "space"], "number", 1)
+				_first = force_type_fallback(_json[$ "first"], "string", 32)
+				
+				if is_string(_first) {
+					_first = ord(_first)
+				}
+				
+				_map = force_type_fallback(_json[$ "map"], "string")
+			}
+			
+			_sprite = sprite_add(_font_file, _frames, false, false, 0, 0)
+			sprite_collision_mask(_sprite, true, 0, 0, 0, 0, 0, bboxkind_precise, 255)
+			_font = new Font()
+			
+			var _font_id = _map != undefined ? font_add_sprite_ext(_sprite, _map, _proportional, _space) : font_add_sprite(_sprite, _first, _proportional, _space)
+			var _font_name = font_get_name(_font_id)
+			
+			scribble_glyph_set(_font_name, " ", SCRIBBLE_GLYPH.FONT_HEIGHT, 1, true)
+			scribble_font_rename(_font_name, _name)
+			_font.name = _name
+			_font.sprite = _sprite
+			_font.font = _font_id
+		} else {
+			print($"! FontMap.load: '{_name}' is not a PNG or TTF file")
+			
+			exit
 		}
+		
+		ds_map_add(assets, _name, _font)
+		print($"FontMap.load: Added '{_name}' ({_font})")
 	}
 	
 	static get_font = function (_name) {

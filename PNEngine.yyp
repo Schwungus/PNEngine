@@ -4749,6 +4749,7 @@
     {"$GMIncludedFile":"","%Name":"tools.png","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images/imgHologram","name":"tools.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"imgHUD.json","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images","name":"imgHUD.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"imgHUD.png","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images","name":"imgHUD.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"null.json","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images/imgIcon","name":"null.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"null.png","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images/imgIcon","name":"null.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"side.png","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images/imgLift","name":"side.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"top.png","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/images/imgLift","name":"top.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
