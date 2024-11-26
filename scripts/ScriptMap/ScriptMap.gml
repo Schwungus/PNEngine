@@ -17,7 +17,11 @@ function ScriptMap() : AssetMap() constructor {
 				}
 				
 				if load != undefined {
-					load(_special)
+					try {
+						load(_special)
+					} catch (e) {
+						show_error($"!!! ScriptMap.load: Error while loading assets from script '{_name}': {e.longMessage}", true)
+					}
 				}
 			}
 			
@@ -460,7 +464,11 @@ function ScriptMap() : AssetMap() constructor {
 			}
 			
 			if load != undefined {
-				load(_special)
+				try {
+					load(_special)
+				} catch (e) {
+					show_error($"!!! ScriptMap.load: Error while loading assets from script '{_name}': {e.longMessage}", true)
+				}
 			}
 		}
 		
