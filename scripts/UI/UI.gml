@@ -82,7 +82,7 @@ function UI(_ui_script) constructor {
 	
 	static is_ancestor = function (_type) {
 		if is_string(_type) {
-			return ui_script.is_ancestor(_type)
+			return ui_script != undefined and ui_script.is_ancestor(_type)
 		}
 		
 		return is_instanceof(self, _type)
