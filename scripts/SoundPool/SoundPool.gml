@@ -27,7 +27,16 @@ function SoundPool() constructor {
 		var _id, _final_pitch
 		
 		with _sound {
-			_id = asset
+			_id = asset 
+			
+			if is_array(_id) {
+				_id = _id[irandom(array_length(_id) - 1)]
+			}
+			
+			if _id == undefined {
+				return undefined
+			}
+			
 			_final_pitch = pitch_low == pitch_high ? pitch_low : random_range(pitch_low, pitch_high)
 		}
 		
@@ -58,7 +67,16 @@ function SoundPool() constructor {
 		var _id, _final_pitch
 		
 		with _sound {
-			_id = asset
+			_id = asset 
+			
+			if is_array(_id) {
+				_id = _id[irandom(array_length(_id) - 1)]
+			}
+			
+			if _id == undefined {
+				return undefined
+			}
+			
 			_final_pitch = pitch_low == pitch_high ? pitch_low : random_range(pitch_low, pitch_high)
 		}
 		

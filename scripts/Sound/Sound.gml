@@ -5,6 +5,14 @@ function Sound() : Asset() constructor {
 	pitch_low = 1
 	
 	static destroy = function () {
-		fmod_sound_release(asset)
+		if is_array(asset) {
+			var i = array_length(asset)
+			
+			while i {
+				fmod_sound_release(asset[--i])
+			}
+		} else {
+			fmod_sound_release(asset)
+		}
 	}
 }
