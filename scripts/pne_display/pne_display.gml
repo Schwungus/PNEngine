@@ -39,6 +39,7 @@ global.current_shader = undefined
 global.camera_active = noone
 global.camera_demo = noone
 global.camera_man = noone
+global.camera_man_freeze = true
 global.camera_layer = 0
 #endregion
 

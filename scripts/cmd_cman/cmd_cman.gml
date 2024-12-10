@@ -10,6 +10,8 @@ function cmd_cman(_args) {
 		exit
 	}
 	
+	global.camera_man_freeze = string_trim(_args) == "" ? true : bool(_args)
+	
 	// Create cameraman from active camera
 	var _camera_active = global.camera_active
 	

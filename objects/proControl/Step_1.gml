@@ -1035,8 +1035,12 @@ if _tick >= 1 {
 					_ui_input[UIInputs.BACK] = false
 					_ui_input[UIInputs.MOUSE_CONFIRM] = false
 				} else {
-					_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 2, 12)
-					_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, 2, 12)
+					var _delta = 1 / max(_tick_inc, 1)
+					var _repeat = 2 * _delta
+					var _prerep = 12 * _delta
+					
+					_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, _repeat, _prerep)
+					_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, _repeat, _prerep)
 					_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
 					_ui_input[UIInputs.BACK] = input_check_pressed("pause")
 					
@@ -1126,10 +1130,17 @@ if _tick >= 1 {
 				}
 				
 				if _paused {
-					ui_create("Pause", {level: _level})
+					var _pause = ui_create("Pause", {level: _level})
 					
-					_skip_tick = true
+					if ui_exists(_pause) and _pause.f_blocking {
+						_skip_tick = true
+					}
 				}
+			}
+			
+			// Try to clear momentary input if game ticks are skipped
+			if _skip_tick and not _in_netgame {
+				input_clear_momentary(true)
 			}
 			
 			--_ui_tick
@@ -1394,10 +1405,22 @@ if _tick >= 1 {
 #endregion
 	
 	var _ticked = false
+	var _camera_man = global.camera_man
+	var _has_camera_man = thing_exists(_camera_man)
+	var _camera_man_freeze = global.camera_man_freeze
 	
 	COLLECT_DESTROYED_START
 	
 	while _game_tick >= 1 {
+#region Cameraman (non-deterministic)
+		if _has_camera_man and _camera_man_freeze {
+			input_clear_momentary(true);
+			--_game_tick
+			
+			continue
+		}
+#endregion
+		
 		// Write to tick buffer
 		if global.inject_tick_buffer {
 			global.inject_tick_buffer = false

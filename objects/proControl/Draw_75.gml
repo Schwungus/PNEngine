@@ -122,7 +122,13 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 
 #region Update Particles & Draw GUI
 	var _dead_particles = global.dead_particles
-	var _particle_step = not (global.freeze_step or (global.netgame == undefined and (_console or (_draw_target != undefined and _draw_target.f_blocking))) or _has_camera_man)
+	
+	var _particle_step = not (
+		global.freeze_step
+		or (global.netgame == undefined and (_console or (_draw_target != undefined and _draw_target.f_blocking)))
+		or (_has_camera_man and global.camera_man_freeze)
+	)
+	
 	var _gui_priority = global.gui_priority
 	var i = 0
 	
