@@ -66,7 +66,7 @@ do_maneuver = function () {
 
 do_attack = function () {
 	if not f_predicting {
-		if instance_exists(holding) and not holding.f_holdable_in_hand {
+		if thing_exists(holding) and not holding.f_holdable_in_hand {
 			do_unhold(true)
 		
 			exit
@@ -110,7 +110,7 @@ respawn = function () {
 	gml_pragma("forceinline")
 	
 	if player == undefined {
-		instance_destroy()
+		destroy(false)
 		
 		return noone
 	}

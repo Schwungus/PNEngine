@@ -4,11 +4,11 @@ if global.camera_active == self {
 	global.camera_active = noone
 }
 
-if instance_exists(child) {
+if thing_exists(child) {
 	child.parent = noone
 }
 
-if instance_exists(parent) {
+if thing_exists(parent) {
 	parent.child = noone
 }
 

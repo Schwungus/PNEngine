@@ -3,8 +3,8 @@ function cmd_cman(_args) {
 	
 	var _camera_man = global.camera_man
 	
-	if instance_exists(_camera_man) {
-		instance_destroy(_camera_man, false)
+	if thing_exists(_camera_man) {
+		_camera_man.destroy(false)
 		global.camera_man = noone
 		
 		exit
@@ -13,7 +13,7 @@ function cmd_cman(_args) {
 	// Create cameraman from active camera
 	var _camera_active = global.camera_active
 	
-	if instance_exists(_camera_active) {
+	if thing_exists(_camera_active) {
 		with _camera_active.resolve() {
 			global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
 		}
@@ -28,7 +28,7 @@ function cmd_cman(_args) {
 	repeat INPUT_MAX_PLAYERS {
 		var _camera = _players[i++].camera
 		
-		if instance_exists(_camera) {
+		if thing_exists(_camera) {
 			with _camera.resolve() {
 				global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
 			}

@@ -109,11 +109,11 @@ with listener_up {
 resolve = function () {
 	var _camera_active = global.camera_active
 	
-	if instance_exists(_camera_active) and _camera_active.area == area {
+	if thing_exists(_camera_active) and _camera_active.area == area {
 		return _camera_active
 	}
 	
-	if instance_exists(child) {
+	if thing_exists(child) {
 		return child.resolve()
 	}
 	
@@ -245,13 +245,13 @@ lerp_from = function (_camera, _time, _type = CameraLerpTypes.LINEAR) {
 }
 	
 set_child = function (_camera) {
-	if instance_exists(child) {
+	if thing_exists(child) {
 		child.parent = noone
 	}
 	
 	child = _camera
 	
-	if instance_exists(_camera) {
+	if thing_exists(_camera) {
 		_camera.parent = self
 	}
 }
@@ -368,7 +368,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	
 	_world_shader ??= (_config.vid_lighting.value or _config.vid_antialias.value) ? global.world_pixel_shader : global.world_shader
 	
-	if instance_exists(child) {
+	if thing_exists(child) {
 		var _render = child.render(_width, _height, _update_listener, _allow_sky, _allow_screen, _world_shader);
 		
 		--global.camera_layer
@@ -444,7 +444,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		if _allow_sky {
 			draw_clear_alpha(clear_color[4], clear_color[3])
 			
-			if instance_exists(sky) and sky.model != undefined {
+			if thing_exists(sky) and sky.model != undefined {
 				_sky = sky
 				gpu_set_zwriteenable(false)
 				global.sky_shader.set()

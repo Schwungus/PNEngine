@@ -163,7 +163,24 @@ is_ancestor = function (_type) {
 destroy = function (_natural = true) {
 	gml_pragma("forceinline")
 	
-	instance_destroy(self, _natural)
+	if f_destroyed {
+		return
+	}
+	
+	if _natural {
+		if area_thing != undefined {
+			if f_disposable {
+				area_thing.disposed = true
+			}
+		}
+		
+		if on_destroy != undefined {
+			catspeak_execute(on_destroy)
+		}
+	}
+	
+	ds_list_add(global.destroyed_things, self)
+	f_destroyed = true
 }
 
 play_sound = function (_sound, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
@@ -546,7 +563,7 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 			// Check this cell to see if we're intersecting any Things.
 			var _thing = _region[| --i]
 			
-			if _thing == self or not _thing.f_bump_intercept or ((_hflags & HitscanFlags.IGNORE_HOLDER) and _thing.holding == self) or ((_hflags & HitscanFlags.IGNORE_MASTER) and instance_exists(master) and _thing == master) {
+			if _thing == self or not _thing.f_bump_intercept or ((_hflags & HitscanFlags.IGNORE_HOLDER) and _thing.holding == self) or ((_hflags & HitscanFlags.IGNORE_MASTER) and thing_exists(master) and _thing == master) {
 				continue
 			}
 			
@@ -600,7 +617,7 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 				_exres = catspeak_execute(hitscan_intercept, other, _x1, _y1, _z1, _x2, _y2, _z2, _flags)
 			}
 			
-			if not (_exres and instance_exists(_thing)) {
+			if not (_exres and thing_exists(_thing)) {
 				continue
 			}
 			
@@ -661,7 +678,7 @@ do_sequence = function (_sequence) {
 receive_damage = function (_amount, _type = "Normal", _from = noone, _source = _from) {
 	var _result = catspeak_execute(damage_received, _from, _source, _amount, _type)
 	
-	if instance_exists(_from) {
+	if thing_exists(_from) {
 		with _from {
 			catspeak_execute(damage_dealt, other, _source, _amount, _type, _result)
 		}
@@ -785,7 +802,7 @@ grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 			repeat ds_list_size(_list) {
 				var _thing = _list[| k]
 				
-				if instance_exists(_thing) and (_thing != self or _include_self) and _thing.is_ancestor(_type) {
+				if thing_exists(_thing) and (_thing != self or _include_self) and _thing.is_ancestor(_type) {
 					results[_found++] = _thing
 				}
 				
@@ -856,7 +873,7 @@ check_sight_2d = function (_thing, _yaw, _fov, _raycast = false) {
 }
 
 do_hold = function (_thing, _forced = false) {
-	if not instance_exists(_thing) {
+	if not thing_exists(_thing) {
 		return false
 	}
 	
@@ -866,7 +883,7 @@ do_hold = function (_thing, _forced = false) {
 	
 	var _holder = _thing.holder
 	
-	if instance_exists(_holder) and (not _holder.do_unhold(false, _forced) and not _forced) {
+	if thing_exists(_holder) and (not _holder.do_unhold(false, _forced) and not _forced) {
 		return false
 	}
 	
@@ -890,7 +907,7 @@ do_hold = function (_thing, _forced = false) {
 }
 
 do_unhold = function (_tossed = false, _forced = false) {
-	if not instance_exists(holding) {
+	if not thing_exists(holding) {
 		return true
 	}
 	
@@ -916,7 +933,7 @@ do_unhold = function (_tossed = false, _forced = false) {
 }
 
 do_interact = function (_thing) {
-	if not instance_exists(_thing) {
+	if not thing_exists(_thing) {
 		return false
 	}
 	

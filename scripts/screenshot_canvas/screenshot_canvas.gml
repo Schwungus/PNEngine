@@ -10,24 +10,24 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 	var _num_active = ds_list_size(_players_active)
 	var _camera_man = global.camera_man
 	
-	if instance_exists(_camera_man) {
+	if thing_exists(_camera_man) {
 		_camera_man.render(_width, _height, true).Draw(0, 0)
 	} else {
 		var _camera_active = global.camera_active
 		
-		if instance_exists(_camera_active) {
+		if thing_exists(_camera_active) {
 			_camera_active.render(_width, _height, true).Draw(0, 0)
 		} else {
 			var _camera_demo = global.camera_demo
 			
-			if instance_exists(_camera_demo) {
+			if thing_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).Draw(0, 0)
 			} else {
 				var _netgame = global.netgame
 				
 				if _netgame != undefined and _netgame.active and _netgame.local_player != undefined {
 					with _netgame.local_player {
-						if instance_exists(camera) {
+						if thing_exists(camera) {
 							camera.render(_width, _height, true).Draw(0, 0)
 						}
 					}
@@ -35,7 +35,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 					switch _num_active {
 						case 1: {
 							with _players_active[| 0] {
-								if instance_exists(camera) {
+								if thing_exists(camera) {
 									camera.render(_width, _height, true).Draw(0, 0)
 								}
 							}
@@ -51,7 +51,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 							
 							repeat _num_active {
 								with _players_active[| i] {
-									if instance_exists(camera) {
+									if thing_exists(camera) {
 										camera.render(_width, _height, i == 0).Draw(0, _y)
 									}
 								}
@@ -74,7 +74,7 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 							
 							repeat _num_active {
 								with _players_active[| i] {
-									if instance_exists(camera) {
+									if thing_exists(camera) {
 										camera.render(_width, _height, i == 0).Draw(_x, _y)
 									}
 								}

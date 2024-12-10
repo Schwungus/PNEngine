@@ -2,7 +2,7 @@ function player_deactivate(_scope, _loud = true) {
 	with _scope {
 		if status != PlayerStatus.INACTIVE {
 			if slot == 0 {
-				print("! Player.deactivate: Player 1 cannot be deactivated")
+				print("! player_deactivate: Player 1 cannot be deactivated")
 				
 				return false
 			}
@@ -18,7 +18,7 @@ function player_deactivate(_scope, _loud = true) {
 				
 				ds_list_delete(_players_active, ds_list_find_index(_players_active, self))
 				
-				if instance_exists(thing) {
+				if thing_exists(thing) {
 					thing.destroy()
 				}
 				
@@ -42,7 +42,7 @@ function player_deactivate(_scope, _loud = true) {
 			return true
 		}
 		
-		print("! Player.deactivate: Player is already inactive")
+		print("! player_deactivate: Player is already inactive")
 		
 		return false
 	}

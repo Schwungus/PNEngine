@@ -15,18 +15,6 @@ function Level() constructor {
 	
 	time = 0
 	
-	/// @desc Destroys the contents of the level, allowing it to be removed.
-	static destroy = function () {
-		repeat ds_map_size(areas) {
-			var _key = ds_map_find_first(areas)
-			
-			areas[? _key].destroy()
-			ds_map_delete(areas, _key)
-		}
-		
-		ds_map_destroy(areas)
-	}
-	
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
 		set_tick_scale(1)
 		

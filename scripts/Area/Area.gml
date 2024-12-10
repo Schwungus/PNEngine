@@ -35,138 +35,6 @@ function Area() constructor {
 	wind_direction = undefined
 	gravity = 0.3
 	
-	/// @desc Attempts to activate the area.
-	static activate = function () {
-		if active {
-			exit
-		}
-		
-		var i = 0
-		
-		repeat array_length(things) {
-			var _element = things[i++]
-			
-			if _element.disposed or instance_exists(_element.thing) {
-				continue
-			}
-			
-			var _level, _area, _type, _x, _y, _z, _angle, _tag, _special, _persistent, _disposable
-			
-			with _element {
-				_level = level
-				_area = area
-				_type = type
-				_x = x
-				_y = y
-				_z = z
-				_angle = angle
-				_tag = tag
-				_special = special
-				_persistent = persistent
-				_disposable = disposable
-			}
-			
-			var _thing = noone
-			
-			if is_string(_type) {
-				var _idx = asset_get_index(_type)
-				
-				if object_exists(_idx) {
-					if not object_is_ancestor(_type, Thing) {
-						print($"! Area.add: Tried to add non-Thing '{_type}'")
-						
-						continue
-					}
-					
-					if string_starts_with(_type, "pro") {
-						print($"! Area.add: Tried to add protected Thing '{_type}'")
-						
-						continue
-					}
-					
-					_thing = instance_create_depth(_x, _y, 0, _idx)
-				}
-			} else {
-				if object_exists(_type) {
-					if not object_is_ancestor(_type, Thing) {
-						print($"! Area.add: Tried to add non-Thing '{_type}'")
-						
-						continue
-					}
-					
-					_thing = instance_create_depth(_x, _y, 0, _type)
-				}
-			}
-			
-			if _thing == noone {
-				var _thing_script = global.scripts.get(_type)
-				
-				if _thing_script == undefined {
-					instance_destroy(_thing, false)
-					print($"! Area.add: Unknown Thing '{_type}'")
-					
-					continue
-				}
-				
-				_thing = instance_create_depth(_x, _y, 0, _thing_script.internal_parent)
-				
-				with _thing {
-					thing_script = _thing_script
-					create = _thing_script.create
-					on_destroy = _thing_script.on_destroy
-					clean_up = _thing_script.clean_up
-					tick_start = _thing_script.tick_start
-					tick = _thing_script.tick
-					tick_end = _thing_script.tick_end
-					draw = _thing_script.draw
-					draw_screen = _thing_script.draw_screen
-					draw_gui = _thing_script.draw_gui
-				}
-			}
-			
-			with _thing {
-				_thing = self
-				level = _level
-				area = _area
-				area_thing = _element
-				
-				z = _z
-				z_start = _z
-				z_previous = _z
-				angle = _angle
-				angle_start = _angle
-				angle_previous = _angle
-				tag = _tag
-				special = _special
-				f_persistent = _persistent
-				f_disposable = _disposable
-				f_new = true
-			}
-			
-			ds_list_add(active_things, _thing)
-		}
-		
-		i = ds_list_size(active_things)
-		
-		while i {
-			with active_things[| --i] {
-				if f_new and not f_created {
-					event_user(ThingEvents.CREATE)
-					f_created = true
-					ds_list_add(collider != undefined ? other.tick_colliders : other.tick_things, self)
-				}
-			}
-		}
-		
-		active = true
-		
-		HANDLER_FOREACH_START
-			if area_activated != undefined {
-				catspeak_execute(area_activated, other)
-			}
-		HANDLER_FOREACH_END
-	}
-	
 	/// @func add(type, [x], [y], [z], [angle], [tag], [special])
 	/// @desc Creates a new Thing.
 	static add = function (_type, _x = 0, _y = 0, _z = 0, _angle = 0, _tag = 0, _special = undefined) {
@@ -246,7 +114,7 @@ function Area() constructor {
 		}
 		
 		// Failsafe, Things can get destroyed while being created
-		if not instance_exists(_thing) {
+		if not thing_exists(_thing) {
 			return noone
 		}
 		
@@ -385,93 +253,6 @@ function Area() constructor {
 		return _result
 	}
 	
-	/// @desc Attempts to deactivate the area, clearing everything in the process.
-	static deactivate = function () {
-		if not active {
-			exit
-		}
-		
-		if ds_list_size(players) {
-			exit
-		}
-		
-		HANDLER_FOREACH_START
-			if area_deactivated != undefined {
-				catspeak_execute(area_deactivated, other)
-			}
-		HANDLER_FOREACH_END
-		
-		master = undefined
-		
-		var _cant_deactivate = false
-		var i = ds_list_size(active_things)
-		
-		while i {
-			var _thing = active_things[| --i]
-			
-			if not instance_exists(_thing) {
-				ds_list_delete(active_things, i)
-				
-				continue
-			}
-			
-			if _thing.f_persistent {
-				_thing.f_new = false
-				_cant_deactivate = true
-				print($"! Area.deactivate: Cannot deactivate Thing {i} ({_thing.get_name()})")
-				
-				continue
-			}
-			
-			instance_destroy(_thing, false)
-		}
-		
-		if _cant_deactivate {
-			print($"! Area.deactivate: Tried to deactivate area {slot} with {ds_list_size(active_things)} Things remaining")
-			
-			exit
-		}
-		
-		ds_list_clear(particles)
-		sounds.clear()
-		active = false
-	}
-	
-	static destroy = function () {
-		var i = ds_list_size(active_things)
-		
-		while i {
-			var _thing = active_things[| --i]
-			
-			if instance_exists(_thing) {
-				instance_destroy(_thing, false)
-			} else {
-				ds_list_delete(active_things, i)
-			}
-		}
-		
-		ds_list_destroy(active_things)
-		ds_list_destroy(tick_things)
-		ds_list_destroy(tick_colliders)
-		ds_list_destroy(particles)
-		ds_list_destroy(players)
-		sounds.destroy()
-		i = 0
-		
-		repeat ds_grid_width(bump_grid) {
-			var j = 0
-			
-			repeat ds_grid_height(bump_grid) {
-				ds_list_destroy(bump_grid[# i, j++])
-			}
-			
-			++i
-		}
-		
-		ds_grid_destroy(bump_grid)
-		ds_list_destroy(lights)
-	}
-	
 	static find = function (_type) {
 		var i = ds_list_size(active_things)
 		
@@ -544,7 +325,9 @@ function Area() constructor {
 			var i = 0
 			
 			repeat ds_list_size(active_things) {
-				if active_things[| i++].is_ancestor(_thing) {
+				var _element = active_things[| i++]
+				
+				if not _element.f_destroyed and _element.is_ancestor(_thing) {
 					return true
 				}
 			}
@@ -556,7 +339,7 @@ function Area() constructor {
 			return array_length(find_tag(_thing)) > 0
 		}
 		
-		return instance_exists(_thing)
+		return thing_exists(_thing)
 	}
 	
 	static player_count = function () {

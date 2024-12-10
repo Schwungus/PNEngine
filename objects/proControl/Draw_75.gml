@@ -36,30 +36,30 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 	var _players_active = global.players_active
 	var _num_active = ds_list_size(_players_active)
 	var _camera_man = global.camera_man
-	var _has_camera_man = instance_exists(_camera_man)
+	var _has_camera_man = thing_exists(_camera_man)
 	
 	if _has_camera_man {
 		_camera_man.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 	} else {
 		var _camera_active = global.camera_active
 		
-		if instance_exists(_camera_active) {
+		if thing_exists(_camera_active) {
 			_camera_active.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 		} else {
 			var _camera_demo = global.camera_demo
 			
-			if instance_exists(_camera_demo) {
+			if thing_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 			} else if _in_netgame and _netgame.local_player != undefined {
 				with _netgame.local_player {
-					if instance_exists(camera) {
+					if thing_exists(camera) {
 						camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 					}
 				}
 			} else switch _num_active {
 				case 1: {
 					with _players_active[| 0] {
-						if instance_exists(camera) {
+						if thing_exists(camera) {
 							camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
 						}
 					}
@@ -75,7 +75,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 					
 					repeat _num_active {
 						with _players_active[| i] {
-							if instance_exists(camera) {
+							if thing_exists(camera) {
 								camera.render(_width, _height, i == 0).DrawStretched(0, _y, 480, 135)
 							}
 						}
@@ -98,7 +98,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 					
 					repeat _num_active {
 						with _players_active[| i] {
-							if instance_exists(camera) {
+							if thing_exists(camera) {
 								camera.render(_width, _height, i == 0).DrawStretched(_x, _y, 240, 135)
 							}
 						}

@@ -2,14 +2,14 @@
 var _draw_model = false
 var _model
 
-if not instance_exists(holder) or not f_holdable_in_hand {
+if not thing_exists(holder) or not f_holdable_in_hand {
 	_model = model
 	
 	if _model != undefined {
 		_draw_model = true
 		_model.draw()
 	
-		if instance_exists(holding) and holding.f_holdable_in_hand {
+		if thing_exists(holding) and holding.f_holdable_in_hand {
 			var _hold_bone = _model.hold_bone
 			
 			if _hold_bone != -1 {

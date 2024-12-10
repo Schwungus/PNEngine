@@ -29,7 +29,7 @@ if is_struct(special) {
 		
 		if not is_string(_model_name) {
 			print($"! Prop.create: Invalid model name '{_model}', expected string")
-			instance_destroy(self, false)
+			destroy(false)
 			
 			exit
 		}
@@ -38,7 +38,7 @@ if is_struct(special) {
 		
 		if _model == undefined {
 			print($"! Prop.create: Model '{_model_name}' not found")
-			instance_destroy(self, false)
+			destroy(false)
 			
 			exit
 		}
@@ -75,7 +75,7 @@ if is_struct(special) {
 } else {
 	if model == undefined {
 		print("! Prop.create: Special properties invalid or not found")
-		instance_destroy(self, false)
+		destroy(false)
 		
 		exit
 	}

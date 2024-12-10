@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"thing_exists",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"thing_exists",
+  "parent":{
+    "name":"Game",
+    "path":"folders/Scripts/PNEngine/Game.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

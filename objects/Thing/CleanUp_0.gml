@@ -1,8 +1,8 @@
-if instance_exists(holding) {
+if thing_exists(holding) {
 	do_unhold(false, true)
 }
 
-if instance_exists(holder) {
+if thing_exists(holder) {
 	holder.do_unhold(false, true)
 }
 

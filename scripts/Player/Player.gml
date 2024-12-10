@@ -60,13 +60,13 @@ function Player() constructor {
 			}
 		}
 		
-		if instance_exists(_spawn) {
+		if thing_exists(_spawn) {
 			var _player_pawn = noone
 			
 			with _spawn {
 				_player_pawn = area.add(_type, x, y, z, angle, tag, special)
 				
-				if not instance_exists(_player_pawn) {
+				if not thing_exists(_player_pawn) {
 					return noone
 				}
 				
@@ -86,18 +86,18 @@ function Player() constructor {
 				}
 			}
 			
-			if instance_exists(_player_pawn) {
+			if thing_exists(_player_pawn) {
 				var _respawned = false
 				
-				if instance_exists(thing) {
-					instance_destroy(thing, false)
+				if thing_exists(thing) {
+					thing.destroy(false)
 					_respawned = true
 				}
 				
 				thing = _player_pawn
 				
-				if instance_exists(camera) {
-					instance_destroy(camera, false)
+				if thing_exists(camera) {
+					camera.destroy(false)
 				}
 				
 				camera = _player_pawn.camera
@@ -131,12 +131,12 @@ function Player() constructor {
 			while i {
 				var _thing = _active_things[| --i]
 				
-				if instance_exists(_thing) {
+				if thing_exists(_thing) {
 					_thing.player_left(self)
 				}
 			}
 			
-			if instance_exists(thing) {
+			if thing_exists(thing) {
 				thing.destroy(false)
 			}
 			
@@ -158,7 +158,7 @@ function Player() constructor {
 				}
 			}
 			
-			_current_area.deactivate()
+			area_deactivate(_current_area)
 		}
 		
 		/* Move to the new area.
@@ -173,7 +173,7 @@ function Player() constructor {
 					
 					master ??= _newcomer
 					ds_list_add(players, _newcomer)
-					activate()
+					area_activate(self)
 					_newcomer.respawn()
 					
 					var i = ds_list_size(active_things)
@@ -186,7 +186,7 @@ function Player() constructor {
 					
 					var _pawn = _newcomer.thing
 					
-					if instance_exists(_pawn) {
+					if thing_exists(_pawn) {
 						var _entrances = find_tag(_tag)
 						
 						if array_length(_entrances) {

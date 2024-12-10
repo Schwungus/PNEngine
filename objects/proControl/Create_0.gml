@@ -473,7 +473,7 @@ with Catspeak {
 		"CLERP_EASE_OUT", CameraLerpTypes.EASE_OUT
 	)
 	
-	addFunction("thing_exists", instance_exists)
+	addFunction("thing_exists", thing_exists)
 #endregion
 	
 #region Collision

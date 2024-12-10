@@ -51,7 +51,7 @@ switch load_state {
 			_music_instances[| 0].destroy()
 		}
 		
-		global.level.destroy()
+		level_destroy(global.level)
 		
 		var _players = global.players
 		
@@ -1111,7 +1111,7 @@ if _tick >= 1 {
 									break
 								}
 								
-								if not instance_exists(thing) or get_state("frozen") {
+								if not thing_exists(thing) or get_state("frozen") {
 									_paused = false
 									
 									break
@@ -1394,6 +1394,8 @@ if _tick >= 1 {
 #endregion
 	
 	var _ticked = false
+	
+	COLLECT_DESTROYED_START
 	
 	while _game_tick >= 1 {
 		// Write to tick buffer
@@ -1743,7 +1745,7 @@ if _tick >= 1 {
 									
 									while k {
 										with _players_in_area[| --k] {
-											if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
+											if thing_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
 												_can_tick = true
 											}
 										}
@@ -1786,7 +1788,7 @@ if _tick >= 1 {
 									
 									while k {
 										with _players_in_area[| --k] {
-											if instance_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
+											if thing_exists(thing) and point_distance(thing.x, thing.y, _ox, _oy) < _od {
 												_can_tick = true
 											}
 										}
@@ -1817,6 +1819,8 @@ if _tick >= 1 {
 #endregion
 			}
 		}
+		
+		COLLECT_DESTROYED_END
 		
 		// Assume that "_level" is never undefined.
 		++_level.time

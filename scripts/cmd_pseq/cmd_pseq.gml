@@ -19,7 +19,7 @@ function cmd_pseq(_args) {
 	
 	var _pawn = global.players[_slot].thing
 	
-	if instance_exists(_pawn) {
+	if thing_exists(_pawn) {
 		_pawn.do_sequence(_parse_args[1])
 	}
 }

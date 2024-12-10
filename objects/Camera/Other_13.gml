@@ -19,7 +19,7 @@ if _targets {
 			_y += _key[1]
 			_z += _key[2]
 		} else {
-			if instance_exists(_key) {
+			if thing_exists(_key) {
 				_x += _key.x
 				_y += _key.y
 				_z += _key.z
@@ -100,7 +100,7 @@ if _pois {
 			_y += _key[1]
 			_z += _key[2]
 		} else {
-			if instance_exists(_key) {
+			if thing_exists(_key) {
 				_x += _key.x
 				_y += _key.y
 				_z += _key.z

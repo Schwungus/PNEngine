@@ -22,7 +22,7 @@ if f_gravity and not f_grounded {
 	z_speed = clamp(z_speed + (area.gravity * grav), max_fly_speed, max_fall_speed)
 }
 
-var _held = instance_exists(holder)
+var _held = thing_exists(holder)
 
 // Thing collision
 if _ticking and not _held and bump_cells != undefined {
@@ -63,11 +63,11 @@ if _ticking and not _held and bump_cells != undefined {
 			and point_distance(x, y, _tx, _ty) < _bump_radius + (_thing.bump_radius ?? _thing.radius) {
 			var _result_me = catspeak_execute(bump_check, _thing, false)
 			
-			if not instance_exists(self) {
+			if not thing_exists(self) {
 				exit
 			}
 			
-			if _result_me == 0 or not instance_exists(_thing) {
+			if _result_me == 0 or not thing_exists(_thing) {
 				continue
 			}
 			
@@ -77,11 +77,11 @@ if _ticking and not _held and bump_cells != undefined {
 				_result_from = catspeak_execute(bump_check, other, true)
 			}
 			
-			if not instance_exists(self) {
+			if not thing_exists(self) {
 				exit
 			}
 			
-			if _result_from == 0 or not instance_exists(_thing) or f_bump_passive or _thing.f_bump_passive {
+			if _result_from == 0 or not thing_exists(_thing) or f_bump_passive or _thing.f_bump_passive {
 				continue
 			}
 			
@@ -221,7 +221,7 @@ if _held {
 				_extra_z += point_distance(0, 0, x_speed, y_speed)
 			}
 			
-			if instance_exists(last_prop) {
+			if thing_exists(last_prop) {
 				_extra_z += abs(last_prop.collider.delta_matrix[14]) + clamp(z_speed, -1, 0) + 1
 				last_prop = noone
 			}
@@ -242,7 +242,7 @@ if _held {
 				// Stick to movers
 				var _thing = floor_ray[RaycastData.THING]
 				
-				if instance_exists(_thing) and _ticking {
+				if thing_exists(_thing) and _ticking {
 					if _thing.f_collider_stick {
 						var _pos = matrix_transform_vertex(_thing.collider.delta_matrix, _new_x, _new_y, _new_z)
 						
@@ -296,7 +296,7 @@ if _ticking {
 		catspeak_execute(tick)
 	}
 	
-	var _is_holding = instance_exists(holding) 
+	var _is_holding = thing_exists(holding) 
 	
 	if _is_holding {
 		holding.set_position(x, y, z - height)

@@ -13,7 +13,7 @@ if f_unique {
 	}
 	
 	if area.count(_type) > 1 {
-		instance_destroy(self, false)
+		destroy(false)
 		
 		exit
 	}

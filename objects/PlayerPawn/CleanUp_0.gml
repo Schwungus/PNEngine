@@ -10,6 +10,6 @@ if player != undefined {
 	}
 }
 
-if instance_exists(camera) {
+if thing_exists(camera) {
 	camera.destroy(false)
 }
