@@ -172,6 +172,7 @@ function ImageMap() : AssetMap() constructor {
 				var _mipmaps = []
 				
 				// Highest LOD (the texture itself)
+				var _root_page = _variant.GetTexturePage(0)
 				var i = 0
 				
 				repeat _frames {
@@ -193,10 +194,23 @@ function ImageMap() : AssetMap() constructor {
 				}
 				
 				// The rest
+				var _last_valid = _variant
+				
 				i = 0
 				
 				repeat _n_lods {
-					var _lod = collage.GetImageInfo(_mipdefs[i++].name + ":" + _vkey)
+					var _lkey = _mipdefs[i++].name + ":" + _vkey
+					var _lod = collage.GetImageInfo(_lkey)
+					
+					// Collage doesn't have individual clumping, so this is a
+					// failsafe.
+					if _lod.GetTexturePage(0) == _root_page {
+						_last_valid = _lod
+					} else {
+						print($"! ImageMap.post_batch: LOD '{_lkey}' not in same page as root '{_ikey}'")
+						_lod = _last_valid
+					}
+					
 					var j = 0
 					
 					repeat _frames {
