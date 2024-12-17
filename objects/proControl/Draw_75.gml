@@ -9,8 +9,6 @@ if load_state != LoadStates.NONE and instance_exists(proTransition) {
 }
 
 #region Rendering
-draw_clear(c_black)
-
 var _draw_target = global.ui
 
 while _draw_target != undefined {
@@ -271,7 +269,7 @@ if _in_netgame {
 		
 		draw_set_valign(fa_bottom)
 		
-		var _max_lines = (1 + chat) * MAX_LINES
+		var _max_lines = -~chat * MAX_LINES
 		var i = ds_list_size(chat_log)
 		var _y = 232
 		var _alpha = 1

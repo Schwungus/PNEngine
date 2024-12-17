@@ -42,7 +42,7 @@ function player_deactivate(_scope, _loud = true) {
 			return true
 		}
 		
-		print("! player_deactivate: Player is already inactive")
+		print($"! player_deactivate: Player {-~slot} is already inactive")
 		
 		return false
 	}

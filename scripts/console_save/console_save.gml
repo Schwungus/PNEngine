@@ -13,7 +13,7 @@ function console_save(_prefix, _context = "") {
 	buffer_write(_log, buffer_text, "[PNENGINE]\n\n")
 	buffer_write(_log, buffer_text, "Executable Version: " + GM_version + "\n")
 	buffer_write(_log, buffer_text, "Runtime Version: " + GM_runtime_version + "\n")
-	buffer_write(_log, buffer_text, "Build Date: " + global.build_date + "\n")
+	buffer_write(_log, buffer_text, "Build Date: " + date_datetime_string(GM_build_date) + "\n")
 	
 	var _build_type = "GMS2 " + (code_is_compiled() ? "YYC" : "VM")
 	

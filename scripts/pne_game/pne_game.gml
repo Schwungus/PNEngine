@@ -1,7 +1,3 @@
-#region Version Control
-global.build_date = date_datetime_string(GM_build_date)
-#endregion
-
 #region Game State
 enum GameStatus {
 	DEFAULT,
@@ -73,12 +69,6 @@ global.destroyed_things = ds_list_create()
 #endregion
 
 #region Levels
-enum FlagGroups {
-	GLOBAL,
-	LOCAL,
-	STATIC,
-}
-
 global.checkpoint = ["lvlTitle", 0, ThingTags.NONE]
 global.level = new Level()
 #endregion

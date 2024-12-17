@@ -38,7 +38,6 @@ show_debug_overlay(false)
 #macro CMD_NO_DEMO_WRITE if global.demo_write { print("Cannot use this command during demo I/O."); exit }
 
 global.console = false
-global.console_buffer = false
 
 // Initialize the console log now if anything prior to this script hasn't sent
 // any debug messages

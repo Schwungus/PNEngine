@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"CVar",
   "parent":{
-    "name":"Configuration",
-    "path":"folders/Scripts/PNEngine/Configuration.yy",
+    "name":"User",
+    "path":"folders/Scripts/PNEngine/Configuration/User.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
