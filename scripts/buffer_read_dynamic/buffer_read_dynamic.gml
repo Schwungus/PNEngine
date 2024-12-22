@@ -21,7 +21,7 @@ function buffer_read_dynamic(_buffer) {
 			return _array
 		}
 		
-		case NetDataTypes.BOOL: return buffer_read(_buffer, buffer_bool)
+		case NetDataTypes.BOOL: return bool(buffer_read(_buffer, buffer_bool))
 		case NetDataTypes.INT32: return buffer_read(_buffer, buffer_s32)
 		
 		case NetDataTypes.STRUCT: {
