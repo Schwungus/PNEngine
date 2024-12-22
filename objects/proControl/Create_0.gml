@@ -862,6 +862,7 @@ repeat ds_map_size(_mods) {
 	
 	// Failsafe for Linux
 	if _mod == undefined {
+		print($"! proControl: Invalid mod key '{_key}'")
 		_key = ds_map_find_next(_mods, _key)
 		
 		continue
@@ -937,8 +938,9 @@ repeat ds_map_size(_mods) {
 			i = 0
 			
 			repeat struct_names_count(_states) {
-				_key = _names[i]
-				_default_states[? _key] = _states[$ _key];
+				var __key = _names[i]
+				
+				_default_states[? __key] = _states[$ __key];
 				++i
 			}
 		}
@@ -955,8 +957,9 @@ repeat ds_map_size(_mods) {
 				i = 0
 				
 				repeat struct_names_count(_global) {
-					_key = _names[i]
-					_default_flags[? _key] = _global[$ _key];
+					var __key = _names[i]
+					
+					_default_flags[? __key] = _global[$ __key];
 					++i
 				}
 			}
@@ -970,8 +973,9 @@ repeat ds_map_size(_mods) {
 				i = 0
 				
 				repeat struct_names_count(_static) {
-					_key = _names[i]
-					_static_flags[? _key] = _static[$ _key];
+					var __key = _names[i]
+					
+					_static_flags[? __key] = _static[$ __key];
 					++i
 				}
 			}
