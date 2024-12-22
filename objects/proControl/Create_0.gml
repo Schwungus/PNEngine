@@ -686,8 +686,8 @@ with Catspeak {
 	addFunction(
 		"music_play", music_play,
 		
-		"music_get_instance", function (_priority) {
-			return global.music_instances[| _priority]
+		"music_get_instance", function (_index) {
+			return global.music_instances[| _index]
 		},
 		
 		"music_stop_all", function (_fade) {
