@@ -7,9 +7,9 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 	active = _active
 	
 	// 0 = main, 1 = cut, 2 = fade, 3 = game
-	gain = [_gain, 1, 1, 1]
-	gain_start = [_gain, 1, 1, 1]
-	gain_end = [_gain, 1, 1, 1]
+	gain = [_gain, 1, _active, 1]
+	gain_start = [_gain, 1, _active, 1]
+	gain_end = [_gain, 1, _active, 1]
 	gain_time = [0, 0, 0, 0]
 	gain_duration = [0, 0, 0, 0]
 	
@@ -60,11 +60,11 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		
 		if _top == self {
 			if _last_top != undefined {
-				_last_top.set_gain_common(1, 0, music.cut_out)
+				_last_top.set_gain_common(1, 0, _music.cut_out)
 			}
+		} else {
+			set_gain_common(1, 0, 0)
 		}
-	} else {
-		set_gain_common(2, 0)
 	}
 	
 	static set_active = function (_active) {
@@ -83,11 +83,11 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 			
 			if ds_priority_find_max(_music_priority) == self {
 				if _last_top != undefined {
-					_last_top.set_gain_common(2, 0, _last_top.music.fade_out)
+					_last_top.set_gain_common(1, 0, music.cut_out)
 				}
-				
-				set_gain_common(2, 1, music.fade_in)
 			}
+			
+			set_gain_common(2, 1, music.fade_in)
 		} else {
 			set_gain_common(2, 0, music.fade_out)
 			ds_priority_delete_value(_music_priority, self)
@@ -95,10 +95,7 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 			var _top = ds_priority_find_max(_music_priority)
 			
 			if _top != undefined {
-				with _top {
-					set_gain_common(1, 1, other.music.cut_in)
-					set_gain_common(2, 1, music.fade_in)
-				}
+				_top.set_gain_common(1, 1, music.cut_in)
 			}
 		}
 		
@@ -121,9 +118,18 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		}
 		
 		var _music_priority = global.music_priority
+		
+		ds_priority_delete_value(_music_priority, self)
+		
+		var _top = ds_priority_find_max(_music_priority)
+		
+		if _top != undefined {
+			_top.set_gain_common(1, 1, music.cut_in)
+			print(_top)
+		}
+		
 		var _music_instances = global.music_instances
 		
-		set_active(false)
 		ds_list_delete(_music_instances, ds_list_find_index(_music_instances, self))
 	}
 }
