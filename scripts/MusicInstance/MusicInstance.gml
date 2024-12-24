@@ -56,9 +56,7 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		
 		ds_priority_add(_music_priority, self, _priority)
 		
-		var _top = ds_priority_find_max(_music_priority)
-		
-		if _top == self {
+		if ds_priority_find_max(_music_priority) == self {
 			if _last_top != undefined {
 				_last_top.set_gain_common(1, 0, _music.cut_out)
 			}
@@ -125,7 +123,6 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		
 		if _top != undefined {
 			_top.set_gain_common(1, 1, music.cut_in)
-			print(_top)
 		}
 		
 		var _music_instances = global.music_instances
