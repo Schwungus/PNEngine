@@ -4809,6 +4809,7 @@
     {"$GMIncludedFile":"","%Name":"hurtUp.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"hurtUp.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"idle.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"idle.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"idle2.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"idle2.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"idle3.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"idle3.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"run.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"run.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"salute.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"salute.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"search.bbanim","CopyToMask":-1,"filePath":"datafiles/data/AugerBolt/animations/aniWorker","name":"search.bbanim","resourceType":"GMIncludedFile","resourceVersion":"2.0",},

@@ -395,13 +395,21 @@ with Catspeak {
 			return global.players[_index]
 		},
 		
-		/*"players_ready", function () {
+		"players_ready", function () {
 			return ds_list_size(global.players_ready)
+		},
+		
+		"player_ready_get", function (_index) {
+			return global.players_ready[| _index]
 		},
 		
 		"players_active", function () {
 			return ds_list_size(global.players_active)
-		},*/
+		},
+		
+		"player_active_get", function (_index) {
+			return global.players_active[| _index]
+		},
 		
 		"player_binding_label", function (_verb, _index = 0) {
 			return input_binding_get_name(input_binding_get(_verb, _index))
