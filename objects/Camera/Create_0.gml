@@ -202,43 +202,26 @@ stop_path = function () {
 }
 
 lerp_from_self = function (_time, _type = CameraLerpTypes.LINEAR) {
-	if lerp_time < lerp_duration {
-		var _factor = lerp_time / lerp_duration
-		
-		if lerp_type {
-			_factor = lerp(sqr(_factor), 1 - sqr(1 - _factor), _factor)
-		}
-		
-		lerp_x = lerp(lerp_x, x, _factor)
-		lerp_y = lerp(lerp_y, y, _factor)
-		lerp_z = lerp(lerp_z, z, _factor)
-		lerp_yaw = lerp(lerp_yaw, yaw, _factor)
-		lerp_pitch = lerp_angle(lerp_pitch, pitch, _factor)
-		lerp_roll = lerp_angle(lerp_roll, roll, _factor)
-		lerp_fov = lerp_angle(lerp_fov, fov, _factor)
-	} else {
-		lerp_x = x
-		lerp_y = y
-		lerp_z = z
-		lerp_yaw = yaw
-		lerp_pitch = pitch
-		lerp_roll = roll
-		lerp_fov = fov
-	}
-	
+	lerp_x = sx
+	lerp_y = sy
+	lerp_z = sz
+	lerp_yaw = syaw
+	lerp_pitch = spitch
+	lerp_roll = sroll
+	lerp_fov = sfov
 	lerp_time = 0
 	lerp_duration = _time
 	lerp_type = _type
 }
 
 lerp_from = function (_camera, _time, _type = CameraLerpTypes.LINEAR) {
-	lerp_x = _camera.x
-	lerp_y = _camera.y
-	lerp_z = _camera.z
-	lerp_yaw = _camera.yaw
-	lerp_pitch = _camera.pitch
-	lerp_roll = _camera.roll
-	lerp_fov = _camera.fov
+	lerp_x = _camera.sx
+	lerp_y = _camera.sy
+	lerp_z = _camera.sz
+	lerp_yaw = _camera.syaw
+	lerp_pitch = _camera.spitch
+	lerp_roll = _camera.sroll
+	lerp_fov = _camera.sfov
 	lerp_time = 0
 	lerp_duration = _time
 	lerp_type = _type
