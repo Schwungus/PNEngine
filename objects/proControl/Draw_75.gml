@@ -205,12 +205,9 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 		
 		repeat ds_priority_size(_gui_priority) {
 			with ds_priority_delete_max(_gui_priority) {
-				gpu_set_depth(gui_depth)
 				event_user(ThingEvents.DRAW_GUI)
 			}
 		}
-		
-		gpu_set_depth(0)
 	}
 #endregion
 }

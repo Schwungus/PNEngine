@@ -566,12 +566,10 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 				screen_camera = other
 				screen_width = _width
 				screen_height = _height
-				gpu_set_depth(screen_depth)
 				event_user(ThingEvents.DRAW_SCREEN)
 			}
 		}
 		
-		gpu_set_depth(0)
 		gpu_set_cullmode(cull_counterclockwise)
 	}
 	
