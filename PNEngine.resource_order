@@ -354,6 +354,7 @@
     {"name":"cmd_md10","order":16,"path":"scripts/cmd_md10/cmd_md10.yy",},
     {"name":"cmd_md15","order":17,"path":"scripts/cmd_md15/cmd_md15.yy",},
     {"name":"cmd_md5","order":15,"path":"scripts/cmd_md5/cmd_md5.yy",},
+    {"name":"cmd_pos","order":20,"path":"scripts/cmd_pos/cmd_pos.yy",},
     {"name":"cmd_print","order":3,"path":"scripts/cmd_print/cmd_print.yy",},
     {"name":"cmd_pseq","order":10,"path":"scripts/cmd_pseq/cmd_pseq.yy",},
     {"name":"cmd_say","order":19,"path":"scripts/cmd_say/cmd_say.yy",},
