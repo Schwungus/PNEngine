@@ -25,7 +25,6 @@ function Netgame() constructor {
 	timestamp = current_time
 	tick_queue = ds_queue_create()
 	tick_count = 0
-	ack_count = 0
 	
 	chat = false
 	chat_log = ds_list_create()

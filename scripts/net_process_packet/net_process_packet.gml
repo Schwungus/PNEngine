@@ -20,21 +20,6 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 						break
 					}
 					
-					if _netgame.master {
-						buffer_seek(b, buffer_seek_start, 0)
-						
-						var _compare = buffer_read(b, buffer_u32)
-						
-						if _compare == _index {
-							var _compare_header = buffer_read(b, buffer_u8)
-							
-							if _compare_header == NetHeaders.HOST_TICK and not tick_acked {
-								tick_acked = true;
-								++_netgame.ack_count
-							}
-						}
-					}
-					
 					buffer_delete(b)
 					ds_map_delete(reliable_write, _index)
 				}

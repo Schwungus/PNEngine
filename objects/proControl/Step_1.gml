@@ -1160,211 +1160,192 @@ if _tick >= 1 {
 	}
 	
 #region Netgame Pre-Processing
-	if _in_netgame {
-		if _is_master {
+	if not _is_master {
+		_game_tick = min(_netgame.tick_count, STALL_RATE)
+		
+		if _game_tick > 0 {
 			with _netgame {
-				if ack_count >= player_count {
-					ack_count = 1
-					i = 0
-					
-					repeat ds_list_size(players) {
-						var _player = players[| i]
-						
-						if _player != undefined {
-							_player.tick_acked = (i == local_slot)
-						}
-						
-						++i
-					}
-				}
-			}
-		} else {
-			_game_tick = min(_netgame.tick_count, STALL_RATE)
-			
-			if _game_tick > 0 {
-				with _netgame {
-					if local_player != undefined {
-						with local_player {
-							if instance_exists(thing) {
-								with thing {
-									if predict_host == undefined {
-										break
-									}
-									
-									x = predict_host.x
-									y = predict_host.y
-									z = predict_host.z
-									angle = predict_host.angle
-									pitch = predict_host.pitch
-									x_speed = predict_host.x_speed
-									y_speed = predict_host.y_speed
-									z_speed = predict_host.z_speed
-									vector_speed = predict_host.vector_speed
-									move_angle = predict_host.move_angle
-									last_prop = predict_host.last_prop
-									fric = predict_host.fric
-									grav = predict_host.grav
-									max_fall_speed = predict_host.max_fall_speed
-									max_fly_speed = predict_host.max_fly_speed
-									radius = predict_host.radius
-									height = predict_host.height
-									array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
-									array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
-									array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
-									input_length = predict_host.input_length
-									jumped = predict_host.jumped
-									coyote = predict_host.coyote
-									aim_angle = predict_host.aim_angle
-									movement_speed = predict_host.movement_speed
-									jump_speed = predict_host.jump_speed
-									coyote_time = predict_host.coyote_time
-									f_grounded = predict_host.f_grounded
-									playcam_z_lerp = predict_host.playcam_z_lerp
-									playcam_z_snap = predict_host.playcam_z_snap
-									playcam_sync_input = predict_host.playcam_sync_input
-									array_copy(playcam_target, 0, predict_host.playcam_target, 0, CameraTargetData.__SIZE)
-									array_copy(playcam, 0, predict_host.playcam, 0, 3)
-									playcam_z = predict_host.playcam_z
-									playcam_z_to = predict_host.playcam_z_to
-									
-									if model != undefined {
-										model.x = predict_host.model_x
-										model.y = predict_host.model_y
-										model.z = predict_host.model_z
-										model.yaw = predict_host.model_yaw
-										model.pitch = predict_host.model_pitch
-										model.roll = predict_host.model_roll
-									}
+				if local_player != undefined {
+					with local_player {
+						if instance_exists(thing) {
+							with thing {
+								if predict_host == undefined {
+									break
+								}
+								
+								x = predict_host.x
+								y = predict_host.y
+								z = predict_host.z
+								angle = predict_host.angle
+								pitch = predict_host.pitch
+								x_speed = predict_host.x_speed
+								y_speed = predict_host.y_speed
+								z_speed = predict_host.z_speed
+								vector_speed = predict_host.vector_speed
+								move_angle = predict_host.move_angle
+								last_prop = predict_host.last_prop
+								fric = predict_host.fric
+								grav = predict_host.grav
+								max_fall_speed = predict_host.max_fall_speed
+								max_fly_speed = predict_host.max_fly_speed
+								radius = predict_host.radius
+								height = predict_host.height
+								array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+								array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+								array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+								input_length = predict_host.input_length
+								jumped = predict_host.jumped
+								coyote = predict_host.coyote
+								aim_angle = predict_host.aim_angle
+								movement_speed = predict_host.movement_speed
+								jump_speed = predict_host.jump_speed
+								coyote_time = predict_host.coyote_time
+								f_grounded = predict_host.f_grounded
+								playcam_z_lerp = predict_host.playcam_z_lerp
+								playcam_z_snap = predict_host.playcam_z_snap
+								playcam_sync_input = predict_host.playcam_sync_input
+								array_copy(playcam_target, 0, predict_host.playcam_target, 0, CameraTargetData.__SIZE)
+								array_copy(playcam, 0, predict_host.playcam, 0, 3)
+								playcam_z = predict_host.playcam_z
+								playcam_z_to = predict_host.playcam_z_to
+								
+								if model != undefined {
+									model.x = predict_host.model_x
+									model.y = predict_host.model_y
+									model.z = predict_host.model_z
+									model.yaw = predict_host.model_yaw
+									model.pitch = predict_host.model_pitch
+									model.roll = predict_host.model_roll
 								}
 							}
-							
-							if instance_exists(camera) {
-								with camera {
-									if predict_host == undefined {
-										break
-									}
-									
-									x = predict_host.x
-									y = predict_host.y
-									z = predict_host.z
-									angle = predict_host.angle
-									pitch = predict_host.pitch
-									x_speed = predict_host.x_speed
-									y_speed = predict_host.y_speed
-									z_speed = predict_host.z_speed
-									vector_speed = predict_host.vector_speed
-									move_angle = predict_host.move_angle
-									last_prop = predict_host.last_prop
-									fric = predict_host.fric
-									grav = predict_host.grav
-									max_fall_speed = predict_host.max_fall_speed
-									max_fly_speed = predict_host.max_fly_speed
-									radius = predict_host.radius
-									height = predict_host.height
-									array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
-									array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
-									array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
-									f_grounded = predict_host.f_grounded
-									yaw = predict_host.yaw
-									roll = predict_host.roll
-									fov = predict_host.fov
-									range = predict_host.range
-									range_lerp = predict_host.range_lerp
-									
-									if model != undefined {
-										model.x = predict_host.model_x
-										model.y = predict_host.model_y
-										model.z = predict_host.model_z
-										model.yaw = predict_host.model_yaw
-										model.pitch = predict_host.model_pitch
-										model.roll = predict_host.model_roll
-									}
+						}
+						
+						if instance_exists(camera) {
+							with camera {
+								if predict_host == undefined {
+									break
+								}
+								
+								x = predict_host.x
+								y = predict_host.y
+								z = predict_host.z
+								angle = predict_host.angle
+								pitch = predict_host.pitch
+								x_speed = predict_host.x_speed
+								y_speed = predict_host.y_speed
+								z_speed = predict_host.z_speed
+								vector_speed = predict_host.vector_speed
+								move_angle = predict_host.move_angle
+								last_prop = predict_host.last_prop
+								fric = predict_host.fric
+								grav = predict_host.grav
+								max_fall_speed = predict_host.max_fall_speed
+								max_fly_speed = predict_host.max_fly_speed
+								radius = predict_host.radius
+								height = predict_host.height
+								array_copy(floor_ray, 0, predict_host.floor_ray, 0, RaycastData.__SIZE)
+								array_copy(wall_ray, 0, predict_host.wall_ray, 0, RaycastData.__SIZE)
+								array_copy(ceiling_ray, 0, predict_host.ceiling_ray, 0, RaycastData.__SIZE)
+								f_grounded = predict_host.f_grounded
+								yaw = predict_host.yaw
+								roll = predict_host.roll
+								fov = predict_host.fov
+								range = predict_host.range
+								range_lerp = predict_host.range_lerp
+								
+								if model != undefined {
+									model.x = predict_host.model_x
+									model.y = predict_host.model_y
+									model.z = predict_host.model_z
+									model.yaw = predict_host.model_yaw
+									model.pitch = predict_host.model_pitch
+									model.roll = predict_host.model_roll
 								}
 							}
 						}
 					}
-					
-					delay = 0
-				}
-			}
-			
-			var _input_up_down, _input_left_right
-			var _input_jump, _input_interact, _input_attack
-			var _input_inventory_up, _input_inventory_left, _input_inventory_down, _input_inventory_right
-			var _input_aim, _dx, _dy
-			
-			if _block_input {
-				_input_up_down = 0
-				_input_left_right = 0
-				_input_jump = false
-				_input_interact = false
-				_input_attack = false
-				_input_inventory_up = false
-				_input_inventory_left = false
-				_input_inventory_down = false
-				_input_inventory_right = false
-				_input_aim = false
-				_dx = 0
-				_dy = 0
-			} else {
-				// Main
-				var _move_range = input_check("walk") ? 64 : 127
-				
-				_input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
-				_input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
-				_input_jump = input_check("jump")
-				_input_interact = input_check("interact")
-				_input_attack = input_check("attack")
-				
-				// Inventory
-				_input_inventory_up = input_check("inventory_up")
-				_input_inventory_left = input_check("inventory_left")
-				_input_inventory_down = input_check("inventory_down")
-				_input_inventory_right = input_check("inventory_right")
-				
-				// Camera
-				_input_aim = input_check("aim")
-				
-				var _dx_factor = input_value("aim_right") - input_value("aim_left")
-				var _dy_factor = input_value("aim_down") - input_value("aim_up")
-				var _dx_angle, _dy_angle
-				
-				with _config {
-					_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
-					_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
-					
-					if _mouse_focused {
-						_dx_factor += other.mouse_dx * in_mouse_x.value
-						_dy_factor += other.mouse_dy * in_mouse_y.value
-					}
 				}
 				
-				_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-				_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+				delay = 0
 			}
-			
-			mouse_dx = 0
-			mouse_dy = 0
-			
-			_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
-				buffer_s8, _input_up_down,
-				buffer_s8, _input_left_right,
-				
-				buffer_u8, player_input_to_flags(
-					_input_jump,
-					_input_interact,
-					_input_attack,
-					_input_inventory_up,
-					_input_inventory_left,
-					_input_inventory_down,
-					_input_inventory_right,
-					_input_aim
-				),
-				
-				buffer_s16, _dx % 32768,
-				buffer_s16, _dy % 32768
-			))
 		}
+		
+		var _input_up_down, _input_left_right
+		var _input_jump, _input_interact, _input_attack
+		var _input_inventory_up, _input_inventory_left, _input_inventory_down, _input_inventory_right
+		var _input_aim, _dx, _dy
+		
+		if _block_input {
+			_input_up_down = 0
+			_input_left_right = 0
+			_input_jump = false
+			_input_interact = false
+			_input_attack = false
+			_input_inventory_up = false
+			_input_inventory_left = false
+			_input_inventory_down = false
+			_input_inventory_right = false
+			_input_aim = false
+			_dx = 0
+			_dy = 0
+		} else {
+			// Main
+			var _move_range = input_check("walk") ? 64 : 127
+			
+			_input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
+			_input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
+			_input_jump = input_check("jump")
+			_input_interact = input_check("interact")
+			_input_attack = input_check("attack")
+			
+			// Inventory
+			_input_inventory_up = input_check("inventory_up")
+			_input_inventory_left = input_check("inventory_left")
+			_input_inventory_down = input_check("inventory_down")
+			_input_inventory_right = input_check("inventory_right")
+			
+			// Camera
+			_input_aim = input_check("aim")
+			
+			var _dx_factor = input_value("aim_right") - input_value("aim_left")
+			var _dy_factor = input_value("aim_down") - input_value("aim_up")
+			var _dx_angle, _dy_angle
+			
+			with _config {
+				_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
+				_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
+				
+				if _mouse_focused {
+					_dx_factor += other.mouse_dx * in_mouse_x.value
+					_dy_factor += other.mouse_dy * in_mouse_y.value
+				}
+			}
+			
+			_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
+			_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+		}
+		
+		mouse_dx = 0
+		mouse_dy = 0
+		
+		_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
+			buffer_s8, _input_up_down,
+			buffer_s8, _input_left_right,
+			
+			buffer_u8, player_input_to_flags(
+				_input_jump,
+				_input_interact,
+				_input_attack,
+				_input_inventory_up,
+				_input_inventory_left,
+				_input_inventory_down,
+				_input_inventory_right,
+				_input_aim
+			),
+			
+			buffer_s16, _dx % 32768,
+			buffer_s16, _dy % 32768
+		))
 	}
 #endregion
 	

@@ -13,12 +13,10 @@ function net_host(_port = DEFAULT_PORT) {
 		master = true
 		active = true
 		local_slot = 0
-		ack_count = 1
 		
 		with net_add_player(0, "127.0.0.1", _port) {
 			name = global.config.name.value
 			local = true
-			tick_acked = true
 			other.local_net = self
 			other.local_player = player
 			player_activate(player, false)
