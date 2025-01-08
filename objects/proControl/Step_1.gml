@@ -1165,7 +1165,6 @@ if _tick >= 1 {
 			with _netgame {
 				if ack_count >= player_count {
 					ack_count = 1
-					stall_time = 0
 					i = 0
 					
 					repeat ds_list_size(players) {
@@ -1176,34 +1175,6 @@ if _tick >= 1 {
 						}
 						
 						++i
-					}
-				}
-				
-				stall_time += _tick
-				
-				if stall_time >= STALL_RATE {
-					_game_tick = 0
-					
-					if stall_time >= (STALL_RATE + TICKRATE) {
-						var _text = "[c_yellow]Waiting for: "
-						
-						i = 0
-						
-						repeat ds_list_size(players) {
-							var _player = players[| i++]
-							
-							if _player == undefined {
-								continue
-							}
-							
-							with _player {
-								if not tick_acked {
-									_text += name + $" (P{i}) "
-								}
-							}
-						}
-						
-						show_caption(_text, 3 * (1 / max(_tick_inc, 0.01)))
 					}
 				}
 			}
@@ -1314,11 +1285,8 @@ if _tick >= 1 {
 					}
 					
 					delay = 0
-					stall_time = 0
 				}
 			}
-			
-			_netgame.stall_time += _tick
 			
 			var _input_up_down, _input_left_right
 			var _input_jump, _input_interact, _input_attack
@@ -1395,11 +1363,7 @@ if _tick >= 1 {
 				
 				buffer_s16, _dx % 32768,
 				buffer_s16, _dy % 32768
-			));
-			
-			if _netgame.stall_time >= (STALL_RATE + TICKRATE) {
-				show_caption("[c_yellow]Waiting for host", 3 * (1 / max(_tick_inc, 0.01)))
-			}
+			))
 		}
 	}
 #endregion
