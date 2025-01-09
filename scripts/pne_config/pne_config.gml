@@ -123,8 +123,7 @@ global.config = {
 	in_mouse_y: new CVar(0.0125),
 	
 	// NETWORK
-	net_interp: new CVar(0.3),
-	net_interp_delay: new CVar(-1),
+	net_predict: new CVar(true),
 }
 
 config_load()

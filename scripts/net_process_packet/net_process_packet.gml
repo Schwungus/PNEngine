@@ -420,6 +420,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 			
 			case NetHeaders.HOST_TICK: {
 				PACKET_FOR_CLIENT
+				
 				ds_queue_enqueue(tick_queue, current_time)
 				
 				var _pos = buffer_tell(_buffer)

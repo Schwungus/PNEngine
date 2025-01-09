@@ -373,10 +373,6 @@ if _console {
 if global.debug_fps {
 	var _fps = $"{fps} FPS"
 	
-	if _in_netgame and not _netgame.master {
-		_fps += $"\n{_netgame.delay} ms"
-	}
-	
 	draw_set_alpha(0.5)
 	draw_rectangle_color(0, 0, string_width(_fps), string_height(_fps), c_black, c_black, c_black, c_black, false)
 	draw_set_alpha(1)

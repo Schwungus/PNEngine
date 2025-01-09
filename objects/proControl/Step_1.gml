@@ -743,7 +743,7 @@ var _tick_inc = delta_time * TICKRATE_DELTA
 var _tick_scale = global.tick_scale
 
 global.delta = _tick_inc
-_tick += _tick_inc * _tick_scale
+_tick = min(_tick + (_tick_inc * _tick_scale), TICKRATE)
 
 var _interps = global.interps
 var _config = global.config
@@ -764,6 +764,7 @@ if _tick >= 1 {
 	var _game_tick = _tick
 	var _ui_tick = _tick
 	var _trans_tick = _tick
+	var _predict_tick = _tick
 	
 #region Debug
 	if input_check_pressed("debug_overlay") {
@@ -1265,8 +1266,6 @@ if _tick >= 1 {
 						}
 					}
 				}
-				
-				delay = 0
 			}
 		}
 		
@@ -1511,10 +1510,7 @@ if _tick >= 1 {
 			}
 		} else {
 			with _netgame {
-				var _time = current_time
-				
-				delay += _time - ds_queue_dequeue(tick_queue)
-				timestamp = _time
+				_predict_tick = min(_predict_tick + ((current_time - ds_queue_dequeue(tick_queue)) * 0.03), TICKRATE)
 				
 				var _relay = ds_queue_dequeue(tick_queue)
 				
@@ -1914,117 +1910,116 @@ if _tick >= 1 {
 					}
 				}
 				
-				var _input = input
-				var _delay = min(_netgame.delay * 0.03, STALL_RATE)
-				var _net_interp = _config.net_interp.value
-				var _net_interp_delay = _config.net_interp_delay.value
-				
-				if _has_thing {
-					with thing {
-						if f_frozen or f_culled or predict_host == undefined {
-							break
-						}
+				if global.config.net_predict.value {
+					var _input = input
+					
+					if _has_thing {
+						with thing {
+							if f_frozen or f_culled or predict_host == undefined {
+								break
+							}
 						
-						f_predicting = true
+							f_predicting = true
 						
-						// Store original input
-						var _input_up_down = _input[PlayerInputs.UP_DOWN]
-						var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
-						var _input_jump = _input[PlayerInputs.JUMP]
-						var _input_interact = _input[PlayerInputs.INTERACT]
-						var _input_attack = _input[PlayerInputs.ATTACK]
-						var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
-						var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
-						var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
-						var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
-						var _input_aim = _input[PlayerInputs.AIM]
+							// Store original input
+							var _input_up_down = _input[PlayerInputs.UP_DOWN]
+							var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
+							var _input_jump = _input[PlayerInputs.JUMP]
+							var _input_interact = _input[PlayerInputs.INTERACT]
+							var _input_attack = _input[PlayerInputs.ATTACK]
+							var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
+							var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
+							var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
+							var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
+							var _input_aim = _input[PlayerInputs.AIM]
 						
-						// Tick in prediction mode
-						if not _block_input {
-							var _move_range = input_check("walk") ? 64 : 127
+							// Tick in prediction mode
+							if not _block_input {
+								var _move_range = input_check("walk") ? 64 : 127
 							
-							_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
-							_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
-							_input[PlayerInputs.JUMP] = input_check("jump")
-							_input[PlayerInputs.INTERACT] = input_check("interact")
-							_input[PlayerInputs.ATTACK] = input_check("attack")
-							_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
-							_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
-							_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
-							_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
-							_input[PlayerInputs.AIM] = input_check("aim")
+								_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+								_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+								_input[PlayerInputs.JUMP] = input_check("jump")
+								_input[PlayerInputs.INTERACT] = input_check("interact")
+								_input[PlayerInputs.ATTACK] = input_check("attack")
+								_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+								_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+								_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+								_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+								_input[PlayerInputs.AIM] = input_check("aim")
+							}
+						
+							i = _predict_tick
+						
+							while i >= 1 {
+								event_user(ThingEvents.TICK);
+								--i
+							}
+						
+							/*x = lerp(predict_host.x, x, _net_interp)
+							y = lerp(predict_host.y, y, _net_interp)
+							z = lerp(predict_host.z, z, _net_interp)
+							angle = lerp_angle(predict_host.angle, angle, _net_interp)
+							pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+							aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+						
+							if model != undefined {
+								model.x = lerp(predict_host.model_x, model.x, _net_interp)
+								model.y = lerp(predict_host.model_y, model.y, _net_interp)
+								model.z = lerp(predict_host.model_z, model.z, _net_interp)
+								model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+								model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+								model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+							}*/
+						
+							_input[PlayerInputs.UP_DOWN] = _input_up_down
+							_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
+							_input[PlayerInputs.JUMP] = _input_jump
+							_input[PlayerInputs.INTERACT] = _input_interact
+							_input[PlayerInputs.ATTACK] = _input_attack
+							_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
+							_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
+							_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
+							_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
+							_input[PlayerInputs.AIM] = _input_aim
+							f_predicting = false
 						}
-						
-						i = _delay
-						
-						while i >= _net_interp_delay {
-							event_user(ThingEvents.TICK);
-							--i
-						}
-						
-						x = lerp(predict_host.x, x, _net_interp)
-						y = lerp(predict_host.y, y, _net_interp)
-						z = lerp(predict_host.z, z, _net_interp)
-						angle = lerp_angle(predict_host.angle, angle, _net_interp)
-						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
-						aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
-						
-						if model != undefined {
-							model.x = lerp(predict_host.model_x, model.x, _net_interp)
-							model.y = lerp(predict_host.model_y, model.y, _net_interp)
-							model.z = lerp(predict_host.model_z, model.z, _net_interp)
-							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
-							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
-							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
-						}
-						
-						_input[PlayerInputs.UP_DOWN] = _input_up_down
-						_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
-						_input[PlayerInputs.JUMP] = _input_jump
-						_input[PlayerInputs.INTERACT] = _input_interact
-						_input[PlayerInputs.ATTACK] = _input_attack
-						_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
-						_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
-						_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
-						_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
-						_input[PlayerInputs.AIM] = _input_aim
-						f_predicting = false
 					}
-				}
-				
-				if _has_camera {
-					with camera {
-						if f_frozen or f_culled or path_active or predict_host == undefined {
-							break
+					
+					if _has_camera {
+						with camera {
+							if f_frozen or f_culled or path_active or predict_host == undefined {
+								break
+							}
+						
+							f_predicting = true
+							i = _predict_tick
+						
+							while i >= 1 {
+								event_user(ThingEvents.TICK);
+								--i
+							}
+						
+							/*x = lerp(predict_host.x, x, _net_interp)
+							y = lerp(predict_host.y, y, _net_interp)
+							z = lerp(predict_host.z, z, _net_interp)
+							angle = lerp_angle(predict_host.angle, angle, _net_interp)
+							pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+							yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
+							roll = lerp_angle(predict_host.roll, roll, _net_interp)
+							fov = lerp(predict_host.fov, fov, _net_interp)
+						
+							if model != undefined {
+								model.x = lerp(predict_host.model_x, model.x, _net_interp)
+								model.y = lerp(predict_host.model_y, model.y, _net_interp)
+								model.z = lerp(predict_host.model_z, model.z, _net_interp)
+								model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+								model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+								model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+							}*/
+						
+							f_predicting = false
 						}
-						
-						f_predicting = true
-						i = _delay
-						
-						while i >= _net_interp_delay {
-							event_user(ThingEvents.TICK);
-							--i
-						}
-						
-						x = lerp(predict_host.x, x, _net_interp)
-						y = lerp(predict_host.y, y, _net_interp)
-						z = lerp(predict_host.z, z, _net_interp)
-						angle = lerp_angle(predict_host.angle, angle, _net_interp)
-						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
-						yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
-						roll = lerp_angle(predict_host.roll, roll, _net_interp)
-						fov = lerp(predict_host.fov, fov, _net_interp)
-						
-						if model != undefined {
-							model.x = lerp(predict_host.model_x, model.x, _net_interp)
-							model.y = lerp(predict_host.model_y, model.y, _net_interp)
-							model.z = lerp(predict_host.model_z, model.z, _net_interp)
-							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
-							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
-							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
-						}
-						
-						f_predicting = false
 					}
 				}
 			}
