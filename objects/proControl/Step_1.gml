@@ -1910,7 +1910,7 @@ if _tick >= 1 {
 					}
 				}
 				
-				if global.config.net_predict.value {
+				if _config.net_predict.value {
 					var _input = input
 					
 					if _has_thing {
