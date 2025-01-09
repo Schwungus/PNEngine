@@ -170,11 +170,13 @@ function Netgame() constructor {
 				if _player.ping >= 30 {
 					print($"! Netgame.ping_time_source: Player {-~i} timed out")
 					
-					var _playa = net_player_destroy(_player)
-					var _tick_buffer = inject_tick_packet()
+					with net_player_destroy(_player) {
+						var _tick_buffer = inject_tick_packet()
+						
+						buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+						buffer_write(_tick_buffer, buffer_u8, slot)
+					}
 					
-					buffer_write(_playa, buffer_u8, TickPackets.DEACTIVATE)
-					buffer_write(_playa, buffer_u8, _playa.slot)
 					send_others(net_buffer_create(true, NetHeaders.PLAYER_LEFT, buffer_u8, _player.slot))
 					
 					continue
