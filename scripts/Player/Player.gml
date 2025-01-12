@@ -82,6 +82,11 @@ function Player() constructor {
 					player = _player
 					input = _player.input
 					input_previous = _player.input_previous
+					
+					if instance_exists(camera) {
+						camera.player = _player
+					}
+					
 					catspeak_execute(player_create)
 				}
 			}
