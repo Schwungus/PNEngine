@@ -26,6 +26,9 @@ input_icon_touch("Virtual button");
 //This is useful for turning keyboard keys into sprite icons to match other assets, or for returning formatted strings (e.g. for use with Scribble)
 //Any keyboard key label not in this struct will simply fall through and return the key name
 input_icons_keyboard_and_mouse()
+.add("mouse button left", "mouse left")
+.add("mouse button middle", "mouse middle")
+.add("mouse button right", "mouse right")
 //Put extra .add() commands here to add icons to keyboard and mouse
 
 
