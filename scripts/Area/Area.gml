@@ -320,6 +320,47 @@ function Area() constructor {
 		return things
 	}
 	
+	static find_tag_first = function (_tag) {
+		var i = 0
+		
+		switch _tag {
+			case ThingTags.ALL: return active_things[| 0]
+			
+			case ThingTags.PLAYERS:
+				repeat ds_list_size(active_things) {
+					with active_things[| i++] {
+						if is_ancestor(PlayerPawn) {
+							return self
+						}
+					}
+				}
+				
+				break
+			
+			case ThingTags.PLAYER_SPAWNS:
+				repeat ds_list_size(active_things) {
+					with active_things[| i++] {
+						if is_ancestor(PlayerSpawn) {
+							return self
+						}
+					}
+				}
+				
+				break
+			
+			default:
+				repeat ds_list_size(active_things) {
+					with active_things[| i++] {
+						if tag == _tag {
+							return self
+						}
+					}
+				}
+		}
+		
+		return noone
+	}
+	
 	static exists = function (_thing) {
 		if is_string(_thing) {
 			var i = 0
