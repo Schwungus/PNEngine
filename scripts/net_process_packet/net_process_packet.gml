@@ -11,7 +11,7 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					break
 				}
 				
-				var _index = buffer_read(_buffer, buffer_u32)
+				var _index = buffer_read(_buffer, buffer_u16)
 				
 				with _net {
 					var b = reliable_write[? _index]
@@ -176,13 +176,9 @@ function net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header) {
 					break
 				}
 				
-				var b = net_buffer_create(true, NetHeaders.PLAYER_LEFT)
+				var b = net_buffer_create(true, NetHeaders.PLAYER_LEFT, buffer_u8, _other.slot)
 				
-				with _other {
-					buffer_write(b, buffer_u8, slot)
-					net_say($"{name} left", c_yellow)
-				}
-				
+				net_say($"{_other.name} left", c_yellow)
 				send_others(b)
 				
 				var _player = net_player_destroy(_other)

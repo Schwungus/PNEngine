@@ -33,7 +33,6 @@ function cmd_signal(_args) {
 	
 	if not net_master() {
 		var b = net_buffer_create(true, NetHeaders.CLIENT_SIGNAL, buffer_string, _name)
-		
 		var _argc = __args != undefined ? array_length(__args) : 0
 		
 		buffer_write(b, buffer_u8, _argc)

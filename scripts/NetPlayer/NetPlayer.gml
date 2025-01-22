@@ -31,7 +31,9 @@ function NetPlayer() constructor {
 		var _key = ds_map_find_first(reliable_write)
 		
 		repeat n {
-			session.send_player(self, reliable_write[? _key], undefined, false, false)
+			var _buffer = reliable_write[? _key]
+			
+			session.send_player(self, _buffer, buffer_get_size(_buffer), false)
 			_key = ds_map_find_next(reliable_write, _key)
 		}
 	}), [], -1)

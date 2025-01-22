@@ -1,9 +1,14 @@
-#macro WRITE_RELIABLE buffer_poke(_buffer, 0, buffer_u32, reliable_write_index)\
+#macro WRITE_RELIABLE buffer_poke(_buffer, 0, buffer_u16, reliable_write_index)\
 \
 var b = buffer_create(_size, buffer_fixed, 1)\
 \
 buffer_copy(_buffer, 0, _size, b, 0)\
-ds_map_add(reliable_write, reliable_write_index++, b)\
+ds_map_add(reliable_write, reliable_write_index, b)\
+\
+if ++reliable_write_index >= 65536 {\
+	reliable_write_index = 1\
+}\
+\
 time_source_start(reliable_time_source)
 
 function Netgame() constructor {
@@ -36,10 +41,8 @@ function Netgame() constructor {
 	
 #region Sending Packets
 	/// @desc Sends a packet directly to the specified IP address and port. (HOST AND CLIENT)
-	static send_direct = function (_ip, _port, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		_size ??= buffer_get_size(_buffer)
-		
-		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+	static send_direct = function (_ip, _port, _buffer, _size = buffer_tell(_buffer), _overwrite = true) {
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u16) {
 			var _player = clients[? $"{_ip}:{_port}"]
 			
 			if _player != undefined {
@@ -50,83 +53,57 @@ function Netgame() constructor {
 		}
 		
 		network_send_udp_raw(socket, _ip, _port, _buffer, _size)
-		
-		if _dispose {
-			buffer_delete(_buffer)
-		}
 	}
 	
 	/// @desc Sends a packet to a NetPlayer mapped to a client key. (HOST ONLY)
-	static send_client = function (_key, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		_size ??= buffer_get_size(_buffer)
+	static send_client = function (_key, _buffer, _size = buffer_tell(_buffer), _overwrite = true) {
+		var _player = clients[? _key]
 		
-		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
-			var _player = clients[? _key]
-			
-			if _player != undefined {
-				with _player {
-					WRITE_RELIABLE
-				}
-				
-				network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
-			}
+		if _player == undefined {
+			exit
 		}
 		
-		if _dispose {
-			buffer_delete(_buffer)
-		}
-	}
-	
-	/// @desc Sends a packet directly to a NetPlayer. (HOST ONLY)
-	static send_player = function (_player, _buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		_size ??= buffer_get_size(_buffer)
-		
-		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u16) {
 			with _player {
 				WRITE_RELIABLE
 			}
 		}
 		
 		network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
-		
-		if _dispose {
-			buffer_delete(_buffer)
+	}
+	
+	/// @desc Sends a packet directly to a NetPlayer. (HOST ONLY)
+	static send_player = function (_player, _buffer, _size = buffer_tell(_buffer), _overwrite = true) {
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u16) {
+			with _player {
+				WRITE_RELIABLE
+			}
 		}
+		
+		network_send_udp_raw(socket, _player.ip, _player.port, _buffer, _size)
 	}
 	
 	/// @desc Sends a packet to the host. (HOST AND CLIENT)
-	static send_host = function (_buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		_size ??= buffer_get_size(_buffer)
-		
-		if _overwrite and buffer_peek(_buffer, 0, buffer_u32) {
+	static send_host = function (_buffer, _size = buffer_tell(_buffer), _overwrite = true) {
+		if _overwrite and buffer_peek(_buffer, 0, buffer_u16) {
 			with players[| 0] {
 				WRITE_RELIABLE
 			}
 		}
 		
 		network_send_udp_raw(socket, ip, port, _buffer, _size)
-		
-		if _dispose {
-			buffer_delete(_buffer)
-		}
 	}
 	
 	/// @desc Sends a packet to other clients. (HOST ONLY)
-	static send_others = function (_buffer, _size = undefined, _dispose = true, _overwrite = true) {
-		_size ??= buffer_get_size(_buffer)
-		
+	static send_others = function (_buffer, _size = buffer_tell(_buffer), _overwrite = true) {
 		var i = 0
 		
 		repeat ds_list_size(players) {
 			var _player = players[| i++]
 			
 			if _player != undefined and _player != local_net {
-				send_player(_player, _buffer, _size, false, _overwrite)
+				send_player(_player, _buffer, _size, _overwrite)
 			}
-		}
-		
-		if _dispose {
-			buffer_delete(_buffer)
 		}
 	}
 #endregion

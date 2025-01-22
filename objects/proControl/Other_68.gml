@@ -12,7 +12,7 @@ switch load_state {
 var _ip = async_load[? "ip"]
 var _port = async_load[? "port"]
 var _buffer = async_load[? "buffer"]
-var _reliable = buffer_read(_buffer, buffer_u32)
+var _reliable = buffer_read(_buffer, buffer_u16)
 var _header = buffer_read(_buffer, buffer_u8)
 var _netgame = global.netgame
 
@@ -30,14 +30,21 @@ with _netgame {
 		with _net {
 			if _reliable == reliable_read_index {
 				net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header);
-				++reliable_read_index
+				
+				if ++reliable_read_index >= 65536 {
+					reliable_read_index = 1
+				}
 				
 				while ds_map_exists(reliable_read, reliable_read_index) {
 					var b = reliable_read[? reliable_read_index]
 					
-					net_process_packet(_netgame, _ip, _port, b, reliable_read_index, buffer_peek(b, buffer_sizeof(buffer_u32), buffer_u8))
+					net_process_packet(_netgame, _ip, _port, b, reliable_read_index, buffer_peek(b, buffer_sizeof(buffer_u8), buffer_u8))
 					buffer_delete(b)
-					ds_map_delete(reliable_read, reliable_read_index++)
+					ds_map_delete(reliable_read, reliable_read_index)
+					
+					if ++reliable_read_index >= 65536 {
+						reliable_read_index = 1
+					}
 				}
 			} else {
 				if reliable_read_index < _reliable and not ds_map_exists(reliable_read, _reliable) {
@@ -45,13 +52,13 @@ with _netgame {
 					var b = buffer_create(_size, buffer_fixed, 1)
 					
 					buffer_copy(_buffer, 0, _size, b, 0)
-					buffer_seek(b, buffer_seek_start, buffer_sizeof(buffer_u32) + buffer_sizeof(buffer_u8))
+					buffer_seek(b, buffer_seek_start, buffer_sizeof(buffer_u16) + buffer_sizeof(buffer_u8))
 					reliable_read[? _reliable] = b
 				}
 			}
 		}
 		
-		send_player(_net, net_buffer_create(false, NetHeaders.ACK, buffer_u32, _reliable))
+		send_player(_net, net_buffer_create(false, NetHeaders.ACK, buffer_u16, _reliable))
 	} else {
 		net_process_packet(_netgame, _ip, _port, _buffer, _reliable, _header)
 	}
