@@ -62,3 +62,4 @@ Temporary Items
 # GameMaker temporary files
 *.resource_order
 *.old
+options/extensions/MultiClient.json
