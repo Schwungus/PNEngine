@@ -19,7 +19,7 @@ function NetPlayer() constructor {
 	reliable_read = ds_map_create()
 	reliable_read_index = 1
 	
-	reliable_time_source = time_source_create(time_source_global, 0.25, time_source_units_seconds, method(self, function () {
+	reliable_time_source = time_source_create(time_source_global, 0.1, time_source_units_seconds, method(self, function () {
 		var n = ds_map_size(reliable_write)
 		
 		if not n {
