@@ -1,30 +1,22 @@
-#macro _32_LIMIT 4294967296
-#macro _32_MAX 4294967295
-
-#macro DEFAULT_RNG_LEFT 4
-#macro DEFAULT_RNG_RIGHT 29
-
 function RNG() constructor {
-	left = DEFAULT_RNG_LEFT
-	right = DEFAULT_RNG_RIGHT
+	state = 0
 	
 	static next = function () {
-		right = ((36969 * (right & 65535) + (right >> 16))) % _32_LIMIT
-		left = (18000 * (left & 65535) + (left >> 16)) % _32_LIMIT
+		state = (state * 1103515245 + 12345) % 0x7FFFFFFF
 		
-		return ((right << 16) + left) % _32_LIMIT
+		return state
 	}
 	
 	static int = function (_x = 1) {
 		gml_pragma("forceinline")
 		
-		return round((next() / _32_MAX) * _x)
+		return round((next() / 0x7FFFFFFF) * _x)
 	}
 	
 	static int_range = function (_x, _y) {
 		gml_pragma("forceinline")
 		
-		return round(lerp(_x, _y, next() / _32_MAX))
+		return round(lerp(_x, _y, next() / 0x7FFFFFFF))
 	}
 	
 	static int_sign = function (_x = 1) {
@@ -36,13 +28,13 @@ function RNG() constructor {
 	static float = function (_x = 1) {
 		gml_pragma("forceinline")
 		
-		return (next() / _32_MAX) * _x
+		return (next() / 0x7FFFFFFF) * _x
 	}
 	
 	static float_range = function (_x, _y) {
 		gml_pragma("forceinline")
 		
-		return lerp(_x, _y, next() / _32_MAX)
+		return lerp(_x, _y, next() / 0x7FFFFFFF)
 	}
 	
 	static float_sign = function (_x = 1) {

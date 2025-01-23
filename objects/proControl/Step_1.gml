@@ -125,10 +125,7 @@ switch load_state {
 				}
 			}
 			
-			with global.rng_game {
-				left = DEFAULT_RNG_LEFT
-				right = DEFAULT_RNG_RIGHT
-			}
+			global.rng_game.state = 0
 			
 #region Discord Rich Presence
 			_level.rp_name = force_type_fallback(_json[$ "rp_name"], "string", "")
