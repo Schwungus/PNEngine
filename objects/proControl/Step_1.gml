@@ -125,7 +125,7 @@ switch load_state {
 				}
 			}
 			
-			global.rng_game.state = 0
+			global.rng_game.state = variable_get_hash(load_level) >> 3
 			
 #region Discord Rich Presence
 			_level.rp_name = force_type_fallback(_json[$ "rp_name"], "string", "")
