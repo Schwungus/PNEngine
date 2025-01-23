@@ -9,14 +9,19 @@ if is_struct(special) {
 	if force_type_fallback(special[$ "active"], "bool", false) {
 		global.camera_active = self
 	}
+	
+	interp_skip("syaw")
+	interp_skip("spitch")
+	interp_skip("sroll")
+	interp_skip("sfov")
 } else {
 	yaw = angle
+	interp_skip("syaw")
 }
 
 event_inherited()
 
 update_matrices()
-
 listener_pos.x = x
 listener_pos.y = y
 listener_pos.z = z
