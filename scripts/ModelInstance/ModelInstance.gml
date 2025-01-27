@@ -50,9 +50,11 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	animated = false
 	animation_name = ""
 	animation = undefined
+	animation_main = undefined
 	animation_loop = false
 	animation_finished = false
 	animation_state = 0
+	animation_blend = 0
 	frame = 0
 	frame_speed = 1
 	
@@ -84,27 +86,55 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	static output_to_sample = function (_sample) {
 		static _transframe = []
 		
-		var _duration = animation.duration
-		var _frame, _next_frame
-		
-		if animation_loop {
-			_frame = frame % _duration
-			_next_frame = (frame + 1) % _duration
-		} else {
-			var _last_frame = _duration - 1
+		if is_array(animation) {
+			static _blend_a = dq_build_identity()
+			static _blend_b = dq_build_identity()
 			
-			_frame = min(frame, _last_frame)
-			_next_frame = min(frame + 1, _last_frame)
+			var _blends = array_length(animation)
+			var _anim_a = animation[animation_blend % _blends]
+			var _anim_b = animation[(animation_blend + 1) % _blends]
+			var _duration = _anim_a.duration
+			var _frame, _next_frame
+			
+			if animation_loop {
+				_frame = frame % _duration
+				_next_frame = (frame + 1) % _duration
+			} else {
+				var _last_frame = _duration - 1
+				
+				_frame = min(frame, _last_frame)
+				_next_frame = min(frame + 1, _last_frame)
+			}
+			
+			var _parent_a = _anim_a.parent_frames
+			var _parent_b = _anim_b.parent_frames
+			var _frame_blend = frac(frame)
+			
+			dq_slerp_array(_parent_a[_frame], _parent_a[_next_frame], _frame_blend, _blend_a)
+			dq_slerp_array(_parent_b[_frame], _parent_b[_next_frame], _frame_blend, _blend_b)
+			dq_slerp_array(_blend_a, _blend_b, frac(animation_blend), _transframe)
+		} else {
+			var _duration = animation.duration
+			var _frame, _next_frame
+			
+			if animation_loop {
+				_frame = frame % _duration
+				_next_frame = (frame + 1) % _duration
+			} else {
+				var _last_frame = _duration - 1
+			
+				_frame = min(frame, _last_frame)
+				_next_frame = min(frame + 1, _last_frame)
+			}
+			
+			var _parent_frames = animation.parent_frames
+			
+			dq_lerp_array(_parent_frames[_frame], _parent_frames[_next_frame], frac(frame), _transframe)
 		}
 		
-		var _parent_frames = animation.parent_frames
-		
-		dq_lerp_array(_parent_frames[_frame], _parent_frames[_next_frame], frac(frame), _transframe)
-		
 		if not (splice == undefined or splice_branch == undefined) {
-			_parent_frames = splice.parent_frames
-			_duration = splice.duration
-			
+			var _parent_frames = splice.parent_frames
+			var _duration = splice.duration
 			var _splice_data = _parent_frames[splice_loop ? (splice_frame % _duration) : min(splice_frame, _duration - 1)]
 			var i = 0
 			
@@ -205,13 +235,15 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return _sample
 	}
 	
-	static set_animation = function (_animation = undefined, _frame = 0, _loop = false, _time = 0) {
+	static set_animation = function (_animation = undefined, _frame = 0, _loop = false, _time = 0, _blend = 0) {
 		if _animation == undefined {
 			animation_name = ""
 			animation = undefined
+			animation_main = undefined
 			animation_loop = _loop
 			animation_finished = false
 			animation_state = 0
+			animation_blend = 0
 			
 			if _frame >= 0 {
 				frame = _frame
@@ -234,8 +266,24 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 					array_copy(transition_frame_old, 0, transition_frame, 0, array_length(transition_frame))
 				}
 				
-				var _duration = animation.duration
-				var _transframe = animation.parent_frames[animation_loop ? (frame % _duration) : min(frame, _duration - 1)]
+				var _duration, _transframe
+				
+				if is_array(animation) {
+					static blend_parent_frame = dq_build_identity()
+					
+					var _blends = array_length(animation)
+					var _anim_a = animation[animation_blend % _blends]
+					var _anim_b = animation[(animation_blend + 1) % _blends]
+					
+					_duration = _anim_a.duration
+					
+					var _trans_at = animation_loop ? (frame % _duration) : min(frame, _duration - 1)
+					
+					_transframe = dq_slerp_array(_anim_a.parent_frames[_trans_at], _anim_b.parent_frames[_trans_at], frac(animation_blend), blend_parent_frame)
+				} else {
+					_duration = animation.duration
+					_transframe = animation.parent_frames[animation_loop ? (frame % _duration) : min(frame, _duration - 1)]
+				}
 				
 				array_copy(transition_frame, 0, _transframe, 0, array_length(_transframe))
 				
@@ -266,11 +314,20 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		}
 		
 		transition_duration = _time
-		animation_name = _animation.name
-		animation = _animation
+		animation = _animation 
+		
+		if is_array(_animation) {
+			animation_main = _animation[0]
+			animation_name = animation_main.name
+		} else {
+			animation_main = _animation
+			animation_name = _animation.name
+		}
+		
 		animation_loop = _loop
 		animation_finished = false
 		animation_state = 0
+		animation_blend = _blend
 		
 		if _frame >= 0 {
 			frame = _frame
@@ -399,8 +456,8 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		
 		var _update_sample = false
 		
-		if animation != undefined {
-			var _frame_step = frame_speed * animation.frame_speed
+		if animation_main != undefined {
+			var _frame_step = frame_speed * animation_main.frame_speed
 			
 			animation_finished = false
 			
@@ -409,7 +466,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 				frame += _frame_step
 			} else {
 				// Animation plays only once
-				var _frames = animation.duration - 1
+				var _frames = animation_main.duration - 1
 				
 				frame = clamp(frame + _frame_step, 0, _frames)
 				animation_finished = frame >= _frames
@@ -563,7 +620,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 			gpu_set_blendmode(blendmode)
 		}
 		
-		if animation == undefined {
+		if animation_main == undefined {
 			global.u_animated.set(0)
 		} else {
 			global.u_animated.set(1)
