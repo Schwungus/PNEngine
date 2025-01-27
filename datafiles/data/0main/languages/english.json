@@ -39,6 +39,7 @@
 				"in_invert_y": "Invert Y",
 				"in_pan_x": "X Sensitivity",
 				"in_pan_y": "Y Sensitivity",
+				"in_gyro": "Gyro Aiming",
 				"up": "Up",
 				"left": "Left",
 				"down": "Down",

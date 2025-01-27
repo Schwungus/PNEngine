@@ -121,6 +121,9 @@ global.config = {
 	in_pan_y: new CVar(6),
 	in_mouse_x: new CVar(0.0125),
 	in_mouse_y: new CVar(0.0125),
+	in_gyro: new CVar(false),
+	in_gyro_x: new CVar(0.0125),
+	in_gyro_y: new CVar(0.0125),
 	
 	// NETWORK
 	net_predict: new CVar(true),

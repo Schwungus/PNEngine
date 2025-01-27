@@ -1315,10 +1315,21 @@ if _tick >= 1 {
 					_dx_factor += other.mouse_dx * in_mouse_x.value
 					_dy_factor += other.mouse_dy * in_mouse_y.value
 				}
+				
+				if in_gyro.value {
+					var _gyro = input_motion_data_get(j)
+					
+					if _gyro != undefined {
+						_dx_factor -= _gyro.angular_velocity_y * in_gyro_x.value 
+						_dy_factor += _gyro.angular_velocity_x * in_gyro_y.value
+					}
+				}
 			}
 			
-			_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-			_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+			_dx_factor *= _dx_angle
+			_dy_factor *= _dy_angle
+			_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
+			_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
 		}
 		
 		mouse_dx = 0
@@ -1462,10 +1473,21 @@ if _tick >= 1 {
 								_dx_factor += _mouse_dx * in_mouse_x.value
 								_dy_factor += _mouse_dy * in_mouse_y.value
 							}
+							
+							if in_gyro.value {
+								var _gyro = input_motion_data_get(j)
+								
+								if _gyro != undefined {
+									_dx_factor -= _gyro.angular_velocity_y * in_gyro_x.value 
+									_dy_factor += _gyro.angular_velocity_x * in_gyro_y.value
+								}
+							}
 						}
 						
-						_dx = round(((_dx_factor * _dx_angle) * 0.0027777777777778) * 32768)
-						_dy = round(((_dy_factor * _dy_angle) * 0.0027777777777778) * 32768)
+						_dx_factor *= _dx_angle
+						_dy_factor *= _dy_angle
+						_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
+						_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
 					}
 					
 					buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)

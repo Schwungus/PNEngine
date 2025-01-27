@@ -25,6 +25,10 @@ function proOptionsUI() : UI(undefined) constructor {
 			config_set("in_pan_y", -~_value)
 		}),
 		
+		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, 0, _config.in_gyro.value, function (_value) {
+			config_set("in_gyro", _value)
+		}),
+		
 		undefined,
 		new OUIBinding("options.controls.up", "up"),
 		new OUIBinding("options.controls.left", "left"),
