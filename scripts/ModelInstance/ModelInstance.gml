@@ -133,15 +133,28 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		}
 		
 		if not (splice == undefined or splice_branch == undefined) {
-			var _parent_frames = splice.parent_frames
 			var _duration = splice.duration
-			var _splice_data = _parent_frames[splice_loop ? (splice_frame % _duration) : min(splice_frame, _duration - 1)]
+			var _frame, _next_frame
+			
+			if splice_loop {
+				_frame = splice_frame % _duration
+				_next_frame = (splice_frame + 1) % _duration
+			} else {
+				var _last_frame = _duration - 1
+			
+				_frame = min(splice_frame, _last_frame)
+				_next_frame = min(splice_frame + 1, _last_frame)
+			}
+			
+			var _parent_frames = splice.parent_frames
+			var _parent_a = _parent_frames[_frame]
+			var _parent_b = _parent_frames[_next_frame]
 			var i = 0
 			
 			repeat array_length(splice_branch) {
 				var _offset = splice_branch[i++] * 8
 				
-				array_copy(_transframe, _offset, _splice_data, _offset, 8)
+				dq_slerp_array_ext(_parent_a, _parent_b, frac(splice_frame), _offset, _transframe)
 			}
 		}
 		

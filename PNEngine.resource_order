@@ -415,6 +415,7 @@
     {"name":"dq_multiply_array","order":15,"path":"scripts/dq_multiply_array/dq_multiply_array.yy",},
     {"name":"dq_multiply","order":10,"path":"scripts/dq_multiply/dq_multiply.yy",},
     {"name":"dq_normalize","order":12,"path":"scripts/dq_normalize/dq_normalize.yy",},
+    {"name":"dq_slerp_array_ext","order":19,"path":"scripts/dq_slerp_array_ext/dq_slerp_array_ext.yy",},
     {"name":"dq_slerp_array","order":17,"path":"scripts/dq_slerp_array/dq_slerp_array.yy",},
     {"name":"dq_transform_point","order":18,"path":"scripts/dq_transform_point/dq_transform_point.yy",},
     {"name":"draw_image_ext","order":1,"path":"scripts/draw_image_ext/draw_image_ext.yy",},
