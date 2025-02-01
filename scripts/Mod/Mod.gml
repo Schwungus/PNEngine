@@ -35,10 +35,7 @@ function Mod(_name) constructor {
 				continue
 			}
 			
-			var _file_buffer = buffer_load(_file)
-			
-			buffer_write(_buffer, buffer_text, buffer_md5(_file_buffer, 0, buffer_get_size(_file_buffer)))
-			buffer_delete(_file_buffer)
+			buffer_write(_buffer, buffer_text, md5_file(_file))
 		}
 		
 		var _md5 = buffer_md5(_buffer, 0, buffer_tell(_buffer))
