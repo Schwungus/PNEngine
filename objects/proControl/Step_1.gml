@@ -480,6 +480,58 @@ switch load_state {
 								bump_grid[# 0, 0] = ds_list_create()
 							}
 						}
+						
+						// Check for SFX
+						var _sfx = _area_info[$ "sfx"]
+						
+						if is_array(_sfx) {
+							var _dsps = _area.dsps
+							var _channel = _area.sounds.channel_group
+							var i = 0
+							
+							repeat array_length(_sfx) {
+								var _dsp = force_type(_sfx[i++], "struct")
+								var _dref = undefined
+								
+								switch force_type(_dsp[$ "type"], "string") {
+									case "echo": {
+										var _dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.ECHO)
+										
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.DELAY, force_type_fallback(_dsp[$ "delay"], "number", 500))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.FEEDBACK, force_type_fallback(_dsp[$ "feedback"], "number", 50))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.WETLEVEL, force_type_fallback(_dsp[$ "wet"], "number", 0))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.DRYLEVEL, force_type_fallback(_dsp[$ "dry"], "number", 0))
+										
+										break
+									}
+									
+									case "reverb": {
+										var _dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.SFXREVERB)
+										
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.DECAYTIME, force_type_fallback(_dsp[$ "decay"], "number", 1500))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.EARLYDELAY, force_type_fallback(_dsp[$ "early_delay"], "number", 20))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.LATEDELAY, force_type_fallback(_dsp[$ "late_delay"], "number", 40))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.HFREFERENCE, force_type_fallback(_dsp[$ "hf_reference"], "number", 5000))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.HFDECAYRATIO, force_type_fallback(_dsp[$ "hf_decay_ratio"], "number", 50))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.DIFFUSION, force_type_fallback(_dsp[$ "diffusion"], "number", 50))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.DENSITY, force_type_fallback(_dsp[$ "density"], "number", 50))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.LOWSHELFFREQUENCY, force_type_fallback(_dsp[$ "low_shelf_frequency"], "number", 250))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.LOWSHELFGAIN, force_type_fallback(_dsp[$ "low_shelf_gain"], "number", 0))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.HIGHCUT, force_type_fallback(_dsp[$ "high_cut"], "number", 20000))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.EARLYLATEMIX, force_type_fallback(_dsp[$ "early_late_mix"], "number", 50))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.WETLEVEL, force_type_fallback(_dsp[$ "wet"], "number", -6))
+										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.DRYLEVEL, force_type_fallback(_dsp[$ "dry"], "number", 0))
+										
+										break
+									}
+								}
+								
+								if _dref != undefined {
+									fmod_channel_control_add_dsp(_channel, FMOD_CHANNELCONTROL_DSP_INDEX.TAIL, _dref)
+									ds_list_add(_dsps, _dref)
+								}
+							}
+						}
 					} else {
 						show_error($"!!! proControl: Invalid area ID '{_id}', expected real", true)
 					}

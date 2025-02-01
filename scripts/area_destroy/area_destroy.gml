@@ -16,6 +16,14 @@ function area_destroy(_scope) {
 		sounds.destroy()
 		i = 0
 		
+		repeat ds_list_size(dsps) {
+			fmod_dsp_release(dsps[| 0])
+			ds_list_delete(dsps, 0)
+		}
+		
+		ds_list_destroy(dsps)
+		i = 0
+		
 		repeat ds_grid_width(bump_grid) {
 			var j = 0
 			
