@@ -125,7 +125,14 @@ switch load_state {
 				}
 			}
 			
-			global.rng_game.state = variable_get_hash(load_level) >> 3
+			var i = 0
+			var _seed = 0
+			
+			repeat string_length(load_level) {
+				_seed = 31 * _seed + ord(string_char_at(load_level, ++i))
+			}
+			
+			global.rng_game.state = _seed % 32768
 			
 #region Discord Rich Presence
 			_level.rp_name = force_type_fallback(_json[$ "rp_name"], "string", "")
@@ -152,7 +159,7 @@ switch load_state {
 					_level.music = [_music_tracks]
 				} else {
 					if is_array(_music_tracks) {
-						var i = 0
+						i = 0
 						
 						repeat array_length(_music_tracks) {
 							var _track = _music_tracks[i]
