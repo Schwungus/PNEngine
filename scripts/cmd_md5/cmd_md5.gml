@@ -17,8 +17,5 @@ function cmd_md5(_args) {
 		exit
 	}
 	
-	var _buffer = buffer_load(_file)
-	
-	print(buffer_md5(_buffer, 0, buffer_get_size(_buffer)))
-	buffer_delete(_buffer)
+	print(md5_file(_file))
 }
