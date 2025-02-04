@@ -741,6 +741,7 @@
     {"name":"pne_lights","order":11,"path":"scripts/pne_lights/pne_lights.yy",},
     {"name":"pne_players","order":1,"path":"scripts/pne_players/pne_players.yy",},
     {"name":"pne_shaders","order":2,"path":"scripts/pne_shaders/pne_shaders.yy",},
+    {"name":"pne_string","order":2,"path":"scripts/pne_string/pne_string.yy",},
     {"name":"pne_ui","order":3,"path":"scripts/pne_ui/pne_ui.yy",},
     {"name":"print","order":2,"path":"scripts/print/print.yy",},
     {"name":"quat_build_euler","order":7,"path":"scripts/quat_build_euler/quat_build_euler.yy",},
