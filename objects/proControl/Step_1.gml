@@ -820,7 +820,6 @@ if _tick >= 1 {
 	var _game_tick = _tick
 	var _ui_tick = _tick
 	var _trans_tick = _tick
-	var _predict_tick = _tick
 	
 #region Debug
 	if input_check_pressed("debug_overlay") {
@@ -1220,7 +1219,7 @@ if _tick >= 1 {
 	if not _is_master {
 		_game_tick = min(_netgame.tick_count, STALL_RATE)
 		
-		if _game_tick > 0 {
+		/*if _game_tick > 0 {
 			with _netgame {
 				if local_player != undefined {
 					with local_player {
@@ -1323,7 +1322,7 @@ if _tick >= 1 {
 					}
 				}
 			}
-		}
+		}*/
 		
 		var _input_up_down, _input_left_right
 		var _input_jump, _input_interact, _input_attack
@@ -1875,234 +1874,234 @@ if _tick >= 1 {
 #endregion
 	
 #region Client Prediction
-	if not _is_master {
-		var _local_player = _netgame.local_player
+	//if not _is_master {
+	//	var _local_player = _netgame.local_player
 		
-		if _local_player != undefined {
-			with _local_player {
-				var _has_thing = instance_exists(thing)
-				var _has_camera = instance_exists(camera)
+	//	if _local_player != undefined {
+	//		with _local_player {
+	//			var _has_thing = instance_exists(thing)
+	//			var _has_camera = instance_exists(camera)
 				
-				if _ticked {
-					if _has_thing {
-						with thing {
-							predict_host ??= {
-								floor_ray: raycast_data_create(),
-								wall_ray: raycast_data_create(),
-								ceiling_ray: raycast_data_create(),
-								playcam: array_create(3),
-								playcam_target: array_create(CameraTargetData.__SIZE),
-							}
+	//			if _ticked {
+	//				if _has_thing {
+	//					with thing {
+	//						predict_host ??= {
+	//							floor_ray: raycast_data_create(),
+	//							wall_ray: raycast_data_create(),
+	//							ceiling_ray: raycast_data_create(),
+	//							playcam: array_create(3),
+	//							playcam_target: array_create(CameraTargetData.__SIZE),
+	//						}
 							
-							predict_host.x = x
-							predict_host.y = y
-							predict_host.z = z
-							predict_host.angle = angle
-							predict_host.pitch = pitch
-							predict_host.x_speed = x_speed
-							predict_host.y_speed = y_speed
-							predict_host.z_speed = z_speed
-							predict_host.vector_speed = vector_speed
-							predict_host.move_angle = move_angle
-							predict_host.last_prop = last_prop
-							predict_host.fric = fric
-							predict_host.grav = grav
-							predict_host.max_fall_speed = max_fall_speed
-							predict_host.max_fly_speed = max_fly_speed
-							predict_host.radius = radius
-							predict_host.height = height
-							array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
-							array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
-							array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
-							predict_host.input_length = input_length
-							predict_host.jumped = jumped
-							predict_host.coyote = coyote
-							predict_host.aim_angle = aim_angle
-							predict_host.movement_speed = movement_speed
-							predict_host.jump_speed = jump_speed
-							predict_host.coyote_time = coyote_time
-							predict_host.f_grounded = f_grounded
-							predict_host.playcam_z_lerp = playcam_z_lerp
-							predict_host.playcam_z_snap = playcam_z_snap
-							predict_host.playcam_sync_input = playcam_sync_input
-							array_copy(predict_host.playcam_target, 0, playcam_target, 0, CameraTargetData.__SIZE)
-							array_copy(predict_host.playcam, 0, playcam, 0, 3)
-							predict_host.playcam_z = playcam_z
-							predict_host.playcam_z_to = playcam_z_to
+	//						predict_host.x = x
+	//						predict_host.y = y
+	//						predict_host.z = z
+	//						predict_host.angle = angle
+	//						predict_host.pitch = pitch
+	//						predict_host.x_speed = x_speed
+	//						predict_host.y_speed = y_speed
+	//						predict_host.z_speed = z_speed
+	//						predict_host.vector_speed = vector_speed
+	//						predict_host.move_angle = move_angle
+	//						predict_host.last_prop = last_prop
+	//						predict_host.fric = fric
+	//						predict_host.grav = grav
+	//						predict_host.max_fall_speed = max_fall_speed
+	//						predict_host.max_fly_speed = max_fly_speed
+	//						predict_host.radius = radius
+	//						predict_host.height = height
+	//						array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+	//						array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+	//						array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+	//						predict_host.input_length = input_length
+	//						predict_host.jumped = jumped
+	//						predict_host.coyote = coyote
+	//						predict_host.aim_angle = aim_angle
+	//						predict_host.movement_speed = movement_speed
+	//						predict_host.jump_speed = jump_speed
+	//						predict_host.coyote_time = coyote_time
+	//						predict_host.f_grounded = f_grounded
+	//						predict_host.playcam_z_lerp = playcam_z_lerp
+	//						predict_host.playcam_z_snap = playcam_z_snap
+	//						predict_host.playcam_sync_input = playcam_sync_input
+	//						array_copy(predict_host.playcam_target, 0, playcam_target, 0, CameraTargetData.__SIZE)
+	//						array_copy(predict_host.playcam, 0, playcam, 0, 3)
+	//						predict_host.playcam_z = playcam_z
+	//						predict_host.playcam_z_to = playcam_z_to
 							
-							if model != undefined {
-								predict_host.model_x = model.x
-								predict_host.model_y = model.y
-								predict_host.model_z = model.z
-								predict_host.model_yaw = model.yaw
-								predict_host.model_pitch = model.pitch
-								predict_host.model_roll = model.roll
-							}
-						}
-					}
+	//						if model != undefined {
+	//							predict_host.model_x = model.x
+	//							predict_host.model_y = model.y
+	//							predict_host.model_z = model.z
+	//							predict_host.model_yaw = model.yaw
+	//							predict_host.model_pitch = model.pitch
+	//							predict_host.model_roll = model.roll
+	//						}
+	//					}
+	//				}
 					
-					if _has_camera {
-						with camera {
-							predict_host ??= {
-								floor_ray: raycast_data_create(),
-								wall_ray: raycast_data_create(),
-								ceiling_ray: raycast_data_create(),
-							}
+	//				if _has_camera {
+	//					with camera {
+	//						predict_host ??= {
+	//							floor_ray: raycast_data_create(),
+	//							wall_ray: raycast_data_create(),
+	//							ceiling_ray: raycast_data_create(),
+	//						}
 							
-							predict_host.x = x
-							predict_host.y = y
-							predict_host.z = z
-							predict_host.angle = angle
-							predict_host.pitch = pitch
-							predict_host.x_speed = x_speed
-							predict_host.y_speed = y_speed
-							predict_host.z_speed = z_speed
-							predict_host.vector_speed = vector_speed
-							predict_host.move_angle = move_angle
-							predict_host.last_prop = last_prop
-							predict_host.fric = fric
-							predict_host.grav = grav
-							predict_host.max_fall_speed = max_fall_speed
-							predict_host.max_fly_speed = max_fly_speed
-							predict_host.radius = radius
-							predict_host.height = height
-							array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
-							array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
-							array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
-							predict_host.f_grounded = f_grounded
-							predict_host.yaw = yaw
-							predict_host.roll = roll
-							predict_host.fov = fov
-							predict_host.range = range
-							predict_host.range_lerp = range_lerp
+	//						predict_host.x = x
+	//						predict_host.y = y
+	//						predict_host.z = z
+	//						predict_host.angle = angle
+	//						predict_host.pitch = pitch
+	//						predict_host.x_speed = x_speed
+	//						predict_host.y_speed = y_speed
+	//						predict_host.z_speed = z_speed
+	//						predict_host.vector_speed = vector_speed
+	//						predict_host.move_angle = move_angle
+	//						predict_host.last_prop = last_prop
+	//						predict_host.fric = fric
+	//						predict_host.grav = grav
+	//						predict_host.max_fall_speed = max_fall_speed
+	//						predict_host.max_fly_speed = max_fly_speed
+	//						predict_host.radius = radius
+	//						predict_host.height = height
+	//						array_copy(predict_host.floor_ray, 0, floor_ray, 0, RaycastData.__SIZE)
+	//						array_copy(predict_host.wall_ray, 0, wall_ray, 0, RaycastData.__SIZE)
+	//						array_copy(predict_host.ceiling_ray, 0, ceiling_ray, 0, RaycastData.__SIZE)
+	//						predict_host.f_grounded = f_grounded
+	//						predict_host.yaw = yaw
+	//						predict_host.roll = roll
+	//						predict_host.fov = fov
+	//						predict_host.range = range
+	//						predict_host.range_lerp = range_lerp
 							
-							if model != undefined {
-								predict_host.model_x = model.x
-								predict_host.model_y = model.y
-								predict_host.model_z = model.z
-								predict_host.model_yaw = model.yaw
-								predict_host.model_pitch = model.pitch
-								predict_host.model_roll = model.roll
-							}
-						}
-					}
-				}
+	//						if model != undefined {
+	//							predict_host.model_x = model.x
+	//							predict_host.model_y = model.y
+	//							predict_host.model_z = model.z
+	//							predict_host.model_yaw = model.yaw
+	//							predict_host.model_pitch = model.pitch
+	//							predict_host.model_roll = model.roll
+	//						}
+	//					}
+	//				}
+	//			}
 				
-				if _config.net_predict.value {
-					var _input = input
+	//			if _config.net_predict.value {
+	//				var _input = input
 					
-					if _has_thing {
-						with thing {
-							if f_frozen or f_culled or predict_host == undefined {
-								break
-							}
+	//				if _has_thing {
+	//					with thing {
+	//						if f_frozen or f_culled or predict_host == undefined {
+	//							break
+	//						}
 						
-							f_predicting = true
+	//						f_predicting = true
 						
-							// Store original input
-							var _input_up_down = _input[PlayerInputs.UP_DOWN]
-							var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
-							var _input_jump = _input[PlayerInputs.JUMP]
-							var _input_interact = _input[PlayerInputs.INTERACT]
-							var _input_attack = _input[PlayerInputs.ATTACK]
-							var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
-							var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
-							var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
-							var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
-							var _input_aim = _input[PlayerInputs.AIM]
+	//						// Store original input
+	//						var _input_up_down = _input[PlayerInputs.UP_DOWN]
+	//						var _input_left_right = _input[PlayerInputs.LEFT_RIGHT]
+	//						var _input_jump = _input[PlayerInputs.JUMP]
+	//						var _input_interact = _input[PlayerInputs.INTERACT]
+	//						var _input_attack = _input[PlayerInputs.ATTACK]
+	//						var _input_inventory_up = _input[PlayerInputs.INVENTORY_UP]
+	//						var _input_inventory_left = _input[PlayerInputs.INVENTORY_LEFT]
+	//						var _input_inventory_down = _input[PlayerInputs.INVENTORY_DOWN]
+	//						var _input_inventory_right = _input[PlayerInputs.INVENTORY_RIGHT]
+	//						var _input_aim = _input[PlayerInputs.AIM]
 						
-							// Tick in prediction mode
-							if not _block_input {
-								var _move_range = input_check("walk") ? 64 : 127
+	//						// Tick in prediction mode
+	//						if not _block_input {
+	//							var _move_range = input_check("walk") ? 64 : 127
 							
-								_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
-								_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
-								_input[PlayerInputs.JUMP] = input_check("jump")
-								_input[PlayerInputs.INTERACT] = input_check("interact")
-								_input[PlayerInputs.ATTACK] = input_check("attack")
-								_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
-								_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
-								_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
-								_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
-								_input[PlayerInputs.AIM] = input_check("aim")
-							}
+	//							_input[PlayerInputs.UP_DOWN] = floor((input_value("down") - input_value("up")) * _move_range)
+	//							_input[PlayerInputs.LEFT_RIGHT] = floor((input_value("right") - input_value("left")) * _move_range)
+	//							_input[PlayerInputs.JUMP] = input_check("jump")
+	//							_input[PlayerInputs.INTERACT] = input_check("interact")
+	//							_input[PlayerInputs.ATTACK] = input_check("attack")
+	//							_input[PlayerInputs.INVENTORY_UP] = input_check("inventory_up")
+	//							_input[PlayerInputs.INVENTORY_LEFT] = input_check("inventory_left")
+	//							_input[PlayerInputs.INVENTORY_DOWN] = input_check("inventory_down")
+	//							_input[PlayerInputs.INVENTORY_RIGHT] = input_check("inventory_right")
+	//							_input[PlayerInputs.AIM] = input_check("aim")
+	//						}
 						
-							i = _predict_tick
+	//						i = _predict_tick
 						
-							while i >= 1 {
-								event_user(ThingEvents.TICK);
-								--i
-							}
+	//						while i >= 1 {
+	//							event_user(ThingEvents.TICK);
+	//							--i
+	//						}
 						
-							/*x = lerp(predict_host.x, x, _net_interp)
-							y = lerp(predict_host.y, y, _net_interp)
-							z = lerp(predict_host.z, z, _net_interp)
-							angle = lerp_angle(predict_host.angle, angle, _net_interp)
-							pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
-							aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
+	//						/*x = lerp(predict_host.x, x, _net_interp)
+	//						y = lerp(predict_host.y, y, _net_interp)
+	//						z = lerp(predict_host.z, z, _net_interp)
+	//						angle = lerp_angle(predict_host.angle, angle, _net_interp)
+	//						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+	//						aim_angle = lerp_angle(predict_host.aim_angle, aim_angle, _net_interp)
 						
-							if model != undefined {
-								model.x = lerp(predict_host.model_x, model.x, _net_interp)
-								model.y = lerp(predict_host.model_y, model.y, _net_interp)
-								model.z = lerp(predict_host.model_z, model.z, _net_interp)
-								model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
-								model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
-								model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
-							}*/
+	//						if model != undefined {
+	//							model.x = lerp(predict_host.model_x, model.x, _net_interp)
+	//							model.y = lerp(predict_host.model_y, model.y, _net_interp)
+	//							model.z = lerp(predict_host.model_z, model.z, _net_interp)
+	//							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+	//							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+	//							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+	//						}*/
 						
-							_input[PlayerInputs.UP_DOWN] = _input_up_down
-							_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
-							_input[PlayerInputs.JUMP] = _input_jump
-							_input[PlayerInputs.INTERACT] = _input_interact
-							_input[PlayerInputs.ATTACK] = _input_attack
-							_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
-							_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
-							_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
-							_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
-							_input[PlayerInputs.AIM] = _input_aim
-							f_predicting = false
-						}
-					}
+	//						_input[PlayerInputs.UP_DOWN] = _input_up_down
+	//						_input[PlayerInputs.LEFT_RIGHT] = _input_left_right
+	//						_input[PlayerInputs.JUMP] = _input_jump
+	//						_input[PlayerInputs.INTERACT] = _input_interact
+	//						_input[PlayerInputs.ATTACK] = _input_attack
+	//						_input[PlayerInputs.INVENTORY_UP] = _input_inventory_up
+	//						_input[PlayerInputs.INVENTORY_LEFT] = _input_inventory_left
+	//						_input[PlayerInputs.INVENTORY_DOWN] = _input_inventory_down
+	//						_input[PlayerInputs.INVENTORY_RIGHT] = _input_inventory_right
+	//						_input[PlayerInputs.AIM] = _input_aim
+	//						f_predicting = false
+	//					}
+	//				}
 					
-					if _has_camera {
-						with camera {
-							if f_frozen or f_culled or path_active or predict_host == undefined {
-								break
-							}
+	//				if _has_camera {
+	//					with camera {
+	//						if f_frozen or f_culled or path_active or predict_host == undefined {
+	//							break
+	//						}
 						
-							f_predicting = true
-							i = _predict_tick
+	//						f_predicting = true
+	//						i = _predict_tick
 						
-							while i >= 1 {
-								event_user(ThingEvents.TICK);
-								--i
-							}
+	//						while i >= 1 {
+	//							event_user(ThingEvents.TICK);
+	//							--i
+	//						}
 						
-							/*x = lerp(predict_host.x, x, _net_interp)
-							y = lerp(predict_host.y, y, _net_interp)
-							z = lerp(predict_host.z, z, _net_interp)
-							angle = lerp_angle(predict_host.angle, angle, _net_interp)
-							pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
-							yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
-							roll = lerp_angle(predict_host.roll, roll, _net_interp)
-							fov = lerp(predict_host.fov, fov, _net_interp)
+	//						/*x = lerp(predict_host.x, x, _net_interp)
+	//						y = lerp(predict_host.y, y, _net_interp)
+	//						z = lerp(predict_host.z, z, _net_interp)
+	//						angle = lerp_angle(predict_host.angle, angle, _net_interp)
+	//						pitch = lerp_angle(predict_host.pitch, pitch, _net_interp)
+	//						yaw = lerp_angle(predict_host.yaw, yaw, _net_interp)
+	//						roll = lerp_angle(predict_host.roll, roll, _net_interp)
+	//						fov = lerp(predict_host.fov, fov, _net_interp)
 						
-							if model != undefined {
-								model.x = lerp(predict_host.model_x, model.x, _net_interp)
-								model.y = lerp(predict_host.model_y, model.y, _net_interp)
-								model.z = lerp(predict_host.model_z, model.z, _net_interp)
-								model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
-								model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
-								model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
-							}*/
+	//						if model != undefined {
+	//							model.x = lerp(predict_host.model_x, model.x, _net_interp)
+	//							model.y = lerp(predict_host.model_y, model.y, _net_interp)
+	//							model.z = lerp(predict_host.model_z, model.z, _net_interp)
+	//							model.yaw = lerp_angle(predict_host.model_yaw, model.yaw, _net_interp)
+	//							model.pitch = lerp_angle(predict_host.model_pitch, model.pitch, _net_interp)
+	//							model.roll = lerp_angle(predict_host.model_roll, model.roll, _net_interp)
+	//						}*/
 						
-							f_predicting = false
-						}
-					}
-				}
-			}
-		}
-	}
+	//						f_predicting = false
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 #endregion
 	
 	_tick -= floor(_tick)
