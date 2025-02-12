@@ -17,7 +17,9 @@ function ui_create(_type, _special = undefined, _replace = true) {
 			_internal_parent = variable_global_get(_type)
 			
 			if _internal_parent == undefined or not is_instanceof(_internal_parent, UI) {
-				show_error($"!!! ui_create: '{_type}' not found", true)
+				print($"! ui_create: '{_type}' not found")
+				
+				return undefined
 			}
 		}
 	} else {
