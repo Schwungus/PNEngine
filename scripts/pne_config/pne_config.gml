@@ -14,13 +14,7 @@ global.config = {
 	
 	// USER
 	name: new CVar("Player", is_string, function (_batch) {
-		if not variable_global_exists("netgame") {
-			print("! pne_config: 'name' updated before init")
-			
-			exit
-		}
-		
-		var _netgame = global.netgame
+		var _netgame = global[$ "netgame"]
 		
 		if _netgame != undefined {
 			with _netgame {
@@ -115,6 +109,22 @@ global.config = {
 	snd_background: new CVar(false),
 	
 	// INPUT
+	in_mode: new CVar(2, is_numeric, function (_batch) {
+		var _mode = INPUT_SOURCE_MODE.FIXED
+		
+		switch value {
+			case 1: _mode = INPUT_SOURCE_MODE.JOIN break
+			case 2: _mode = INPUT_SOURCE_MODE.HOTSWAP break
+			case 3: _mode = INPUT_SOURCE_MODE.MIXED break
+		}
+		
+		global.input_mode = _mode
+		
+		if not global[$ "console"] and global[$ "netgame"] == undefined {
+			input_source_mode_set(_mode)
+		}
+	}),
+	
 	in_invert_x: new CVar(false),
 	in_invert_y: new CVar(false),
 	in_pan_x: new CVar(6),
@@ -124,9 +134,6 @@ global.config = {
 	in_gyro: new CVar(false),
 	in_gyro_x: new CVar(0.0125),
 	in_gyro_y: new CVar(0.0125),
-	
-	// NETWORK
-	net_predict: new CVar(true),
 }
 
 config_load()

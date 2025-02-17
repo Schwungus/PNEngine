@@ -12,7 +12,7 @@ These steps require the developer console, which you can open by pressing `~`
 
 PNEngine uses input device hotswapping by default. If you want to add other
 players using separate input devices, type `config in_mode 1` into the console
-to enable join mode (use value `0` to revert back to hotswap). If you save your
+to enable join mode (use value `2` to revert back to hotswap). If you save your
 current settings after doing this, it will persist until you reset your
 settings to defaults.
 

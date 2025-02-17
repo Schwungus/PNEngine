@@ -60,14 +60,6 @@ repeat INPUT_MAX_PLAYERS {
 }
 
 global.players = _players
-global.input_mode = INPUT_SOURCE_MODE.HOTSWAP
-i = 0
-
-repeat parameter_count() {
-	if parameter_string(i++) == "-multiplayer" {
-		global.input_mode = INPUT_SOURCE_MODE.JOIN
-	}
-}
-
+global.input_mode = INPUT_SOURCE_MODE.FIXED
 input_join_params_set(1, INPUT_MAX_PLAYERS, "leave", undefined, false)
 input_source_mode_set(global.input_mode)
