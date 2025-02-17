@@ -86,8 +86,6 @@ wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
 bump_cells = undefined
 
-predict_host = undefined
-
 shadow_x = x
 shadow_y = y
 shadow_z = 0
@@ -129,7 +127,6 @@ f_holdable = false
 f_holdable_in_hand = false
 f_interactive = false
 f_grounded = true
-f_predicting = false
 
 m_collision = MCollision.NONE
 m_shadow = MShadow.NONE
@@ -233,7 +230,7 @@ play_voice = function (_sound) {
 }
 
 set_position = function (_x, _y = y, _z = z, _no_interp = false) {
-	var _moved = not f_predicting and (x != _x or y != _y)
+	var _moved = x != _x or y != _y
 	
 	x = _x
 	y = _y

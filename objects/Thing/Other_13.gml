@@ -1,7 +1,5 @@
 /// @description Tick
-var _ticking = not f_predicting
-
-if _ticking and tick_start != undefined {
+if tick_start != undefined {
 	catspeak_execute(tick_start)
 }
 
@@ -25,7 +23,7 @@ if f_gravity and not f_grounded {
 var _held = thing_exists(holder)
 
 // Thing collision
-if _ticking and not _held and bump_cells != undefined {
+if not _held and bump_cells != undefined {
 	var _bump_stack = global.bump_stack
 	var _bump_grid = area.bump_grid
 	
@@ -242,7 +240,7 @@ if _held {
 				// Stick to movers
 				var _thing = floor_ray[RaycastData.THING]
 				
-				if thing_exists(_thing) and _ticking {
+				if thing_exists(_thing) {
 					if _thing.f_collider_stick {
 						var _pos = matrix_transform_vertex(_thing.collider.delta_matrix, _new_x, _new_y, _new_z)
 						
@@ -291,147 +289,141 @@ if _held {
 	set_position(_new_x, _new_y, _new_z)
 }
 
-if _ticking {
-	if tick != undefined {
-		catspeak_execute(tick)
+if tick != undefined {
+	catspeak_execute(tick)
+}
+
+var _is_holding = thing_exists(holding) 
+
+if _is_holding {
+	holding.set_position(x, y, z - height)
+	holding.angle = angle
+	holding.set_speed(0)
+	holding.z_speed = 0
+}
+
+var _model = model
+
+if _model != undefined and not _held {
+	var _x = x
+	var _y = y
+	var _z = z
+	var _update_collider = false
+	
+	if collider != undefined {
+		var _yaw, _pitch, _roll, _scale, _x_scale, _y_scale, _z_scale
+		
+		with _model {
+			_yaw = yaw
+			_pitch = pitch
+			_roll = roll
+			_scale = scale
+			_x_scale = x_scale
+			_y_scale = y_scale
+			_z_scale = z_scale
+		}
+		
+		angle = _yaw
+		_update_collider = true
 	}
 	
-	var _is_holding = thing_exists(holding) 
+	_model.tick()
+	
+	if _update_collider {
+		collider.set_matrix(_model.tick_matrix)
+	}
 	
 	if _is_holding {
-		holding.set_position(x, y, z - height)
-		holding.angle = angle
-		holding.set_speed(0)
-		holding.z_speed = 0
-	}
-	
-	var _model = model
-	
-	if _model != undefined and not _held {
-		var _x = x
-		var _y = y
-		var _z = z
-		var _update_collider = false
-		
-		if collider != undefined {
-			var _yaw, _pitch, _roll, _scale, _x_scale, _y_scale, _z_scale
+		if holding.f_holdable_in_hand {
+			var _hold_bone = _model.hold_bone
 			
-			with _model {
-				_yaw = yaw
-				_pitch = pitch
-				_roll = roll
-				_scale = scale
-				_x_scale = x_scale
-				_y_scale = y_scale
-				_z_scale = z_scale
-			}
-			
-			angle = _yaw
-			_update_collider = true
-		}
-		
-		_model.tick()
-		
-		if _update_collider {
-			collider.set_matrix(_model.tick_matrix)
-		}
-		
-		if _is_holding {
-			if holding.f_holdable_in_hand {
-				var _hold_bone = _model.hold_bone
-				
-				if _hold_bone != -1 {
-					with holding {
-						if model != undefined {
-							with model {
-								x = _x
-								y = _y
-								z = _z
-								matrix_build_dq(_model.get_node_dq(_hold_bone, true), tick_matrix)
-								tick_matrix = matrix_multiply(matrix_multiply(hold_offset_matrix, tick_matrix), _model.tick_matrix)
-								tick(false)
-							}
-						}
-					}
-				}
-			} else {
-				catspeak_execute(holder_attach_holdable, holding)
-				
+			if _hold_bone != -1 {
 				with holding {
 					if model != undefined {
-						_x = x
-						_y = y
-						_z = z
-						
 						with model {
 							x = _x
 							y = _y
 							z = _z
-							yaw = _model.yaw
-							tick()
+							matrix_build_dq(_model.get_node_dq(_hold_bone, true), tick_matrix)
+							tick_matrix = matrix_multiply(matrix_multiply(hold_offset_matrix, tick_matrix), _model.tick_matrix)
+							tick(false)
 						}
+					}
+				}
+			}
+		} else {
+			catspeak_execute(holder_attach_holdable, holding)
+			
+			with holding {
+				if model != undefined {
+					_x = x
+					_y = y
+					_z = z
+					
+					with model {
+						x = _x
+						y = _y
+						z = _z
+						yaw = _model.yaw
+						tick()
 					}
 				}
 			}
 		}
 	}
-	
-	if _held {
-		shadow_ray[RaycastData.HIT] = false
-	} else {
-		switch m_shadow {
-			default:
-			case MShadow.NONE: shadow_ray[RaycastData.HIT] = false break
+}
+
+if _held {
+	shadow_ray[RaycastData.HIT] = false
+} else {
+	switch m_shadow {
+		default:
+		case MShadow.NONE: shadow_ray[RaycastData.HIT] = false break
+		
+		case MShadow.NORMAL:
+		case MShadow.BONE:
+		case MShadow.MODEL:
+			var _x, _y, _z
 			
-			case MShadow.NORMAL:
-			case MShadow.BONE:
-			case MShadow.MODEL:
-				var _x, _y, _z
-				
-				if m_shadow == MShadow.BONE and model != undefined {
-					with model {
-						if torso_bone <= -1 {
-							_x = x
-							_y = y
-							_z = z - other.height * 0.5
+			if m_shadow == MShadow.BONE and model != undefined {
+				with model {
+					if torso_bone <= -1 {
+						_x = x
+						_y = y
+						_z = z - other.height * 0.5
 						
-							break
-						}
-						
-						var _bone_pos = get_node_pos(torso_bone)
-						
-						_x = _bone_pos[0]
-						_y = _bone_pos[1]
-						_z = _bone_pos[2]
+						break
 					}
-				} else {
-					_x = x
-					_y = y
-					_z = z - height * 0.5
-				}
-				
-				var _has_blob = shadow_ray[RaycastData.HIT]
-				
-				if raycast(_x, _y, _z, _x, _y, _z + 2000, CollisionFlags.SHADOW, CollisionLayers.ALL, shadow_ray)[RaycastData.HIT] {
-					shadow_x = shadow_ray[RaycastData.X]
-					shadow_y = shadow_ray[RaycastData.Y]
-					shadow_z = shadow_ray[RaycastData.Z]
 					
-					if not _has_blob {
-						interp_skip("sshadow_x")
-						interp_skip("sshadow_y")
-						interp_skip("sshadow_z")
-					}
+					var _bone_pos = get_node_pos(torso_bone)
+					
+					_x = _bone_pos[0]
+					_y = _bone_pos[1]
+					_z = _bone_pos[2]
 				}
-			break
-		}
+			} else {
+				_x = x
+				_y = y
+				_z = z - height * 0.5
+			}
+			
+			var _has_blob = shadow_ray[RaycastData.HIT]
+			
+			if raycast(_x, _y, _z, _x, _y, _z + 2000, CollisionFlags.SHADOW, CollisionLayers.ALL, shadow_ray)[RaycastData.HIT] {
+				shadow_x = shadow_ray[RaycastData.X]
+				shadow_y = shadow_ray[RaycastData.Y]
+				shadow_z = shadow_ray[RaycastData.Z]
+				
+				if not _has_blob {
+					interp_skip("sshadow_x")
+					interp_skip("sshadow_y")
+					interp_skip("sshadow_z")
+				}
+			}
+		break
 	}
-	
-	if tick_end != undefined {
-		catspeak_execute(tick_end)
-	}
-} else if model != undefined {
-	model.x = x
-	model.y = y
-	model.z = z
+}
+
+if tick_end != undefined {
+	catspeak_execute(tick_end)
 }

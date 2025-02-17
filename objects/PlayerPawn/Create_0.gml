@@ -52,28 +52,21 @@ do_jump = function () {
 	f_grounded = false
 	coyote = 0
 	jumped = true
-	
-	if not f_predicting {
-		catspeak_execute(player_jumped)
-	}
+	catspeak_execute(player_jumped)
 }
 
 do_maneuver = function () {
-	if not f_predicting {
-		catspeak_execute(player_maneuvered)
-	}
+	catspeak_execute(player_maneuvered)
 }
 
 do_attack = function () {
-	if not f_predicting {
-		if thing_exists(holding) and not holding.f_holdable_in_hand {
-			do_unhold(true)
+	if thing_exists(holding) and not holding.f_holdable_in_hand {
+		do_unhold(true)
 		
-			exit
-		}
-		
-		catspeak_execute(player_attacked)
+		exit
 	}
+	
+	catspeak_execute(player_attacked)
 }
 
 get_state = function (_key) {
