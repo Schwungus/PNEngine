@@ -26,7 +26,7 @@ or `Select` on their gamepad.
 ### Online
 
 Online multiplayer uses delay-based netcode, so you need minimal latency
-between the host for a smooth experience.
+between players for a smooth experience.
 Desyncs entirely depend on the mods that users have enabled and whether or not
 they are properly scripted for full determinism.
 
