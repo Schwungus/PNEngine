@@ -3,13 +3,18 @@
 PNEngine is a fully external 3D engine for GameMaker with support for modding
 and local/online multiplayer with up to 4 players.
 
-## Multiplayer
+## Multiplayer (EXPERIMENTAL)
+
+These steps require the developer console, which you can open by pressing `~`
+(`Ö` on Nordic keyboard layouts) on Windows.
 
 ### Local
 
 PNEngine uses input device hotswapping by default. If you want to add other
-players by using different input devices, launch the game with the
-`-multiplayer` command line.
+players using separate input devices, type `config in_mode 1` into the console
+to enable join mode (use value `0` to revert back to hotswap). If you save your
+current settings after doing this, it will persist until you reset your
+settings to defaults.
 
 You can assign a new player to an input device by pressing any button on it.
 Once assigned, that player is readied and will be able to play when the level
@@ -18,15 +23,19 @@ changes.
 Players can unready or leave the game by pressing `Backspace` on their keyboard
 or `Select` on their gamepad.
 
-### Online (EXPERIMENTAL)
+### Online
 
-Deterministic lockstep and client-side prediction are used for netgames, so you
-need minimal ping with other players for a smooth experience.
-Desyncs are entirely dependent on the mods that users have enabled and
-whether or not they are properly scripted to be fully deterministic.
+Online multiplayer uses delay-based netcode, so you need minimal latency
+between the host for a smooth experience.
+Desyncs entirely depend on the mods that users have enabled and whether or not
+they are properly scripted for full determinism.
 
-- Open the developer console by pressing `~` (`Ö` on Nordic keyboard layouts).
-- Host the game on the title screen (`lvlTitle`) with the console command `host [port]`. Other players can connect with `connect <ip> [port]`.
+You need to be in the title screen (use the console command `title` as a
+shortcut) in order to host a netgame with `host [port]`. Other players will
+then be able to connect to it using `connect <ip> [port]`.
+
+Note that only a single local player may be active at a time and input modes
+will not function while a netgame is active.
 
 ## Credits
 
