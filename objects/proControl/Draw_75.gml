@@ -22,6 +22,8 @@ while _draw_target != undefined {
 }
 
 var _console = global.console
+var _netgame = global.netgame
+var _in_netgame = _netgame != undefined and _netgame.active
 var d = global.delta
 
 if _draw_target == undefined or _draw_target.f_draw_screen {
@@ -46,6 +48,12 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 			
 			if thing_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
+			} else if _in_netgame and _netgame.local_player != undefined {
+				with _netgame.local_player {
+					if thing_exists(camera) {
+						camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
+					}
+				}
 			} else switch _num_active {
 				case 1: {
 					with _players_active[| 0] {
@@ -115,7 +123,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 	
 	var _particle_step = not (
 		global.freeze_step
-		or (_console or (_draw_target != undefined and _draw_target.f_blocking))
+		or (global.netgame == undefined and (_console or (_draw_target != undefined and _draw_target.f_blocking)))
 		or (_has_camera_man and global.camera_man_freeze)
 	)
 	

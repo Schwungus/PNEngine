@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"net_destroy",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"net_destroy",
+  "parent":{
+    "name":"Netgame",
+    "path":"folders/Scripts/PNEngine/Game/Netgame.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

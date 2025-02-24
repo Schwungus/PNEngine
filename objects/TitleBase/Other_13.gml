@@ -18,6 +18,12 @@ if menu != undefined and not locked {
 		}
 	}
 	
+	var _netgame = global.netgame
+	
+	if _netgame != undefined and _netgame.chat {
+		exit
+	}
+	
 	var _change_option = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 3, 12)
 	
 	if _change_option != 0 and global.title_delete_state <= 1 {
@@ -172,6 +178,23 @@ if menu != undefined and not locked {
 						_checkpoint[0] = level
 						_checkpoint[1] = area
 						_checkpoint[2] = tag
+						global.title_loaded = true
+						
+						if _netgame != undefined and _netgame.master {
+							var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
+							
+							// States
+							i = 0
+							
+							repeat INPUT_MAX_PLAYERS {
+								buffer_write(b, buffer_u8, i)
+								_players[i++].write_states(b)
+							}
+							
+							// Flags
+							_global.write(b)
+							_netgame.send_others(b)
+						}
 					}
 					
 					_exit = true

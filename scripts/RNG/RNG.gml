@@ -2,7 +2,7 @@ function RNG() constructor {
 	state = 0
 	
 	static next = function () {
-		state = (state * 1103515245 + 12345) & 0x7FFFFFFF
+		state = (state * 1103515245 + 12345) % 0x7FFFFFFF
 		
 		return state
 	}

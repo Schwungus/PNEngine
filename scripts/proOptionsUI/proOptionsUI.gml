@@ -411,7 +411,7 @@ function proOptionsUI() : UI(undefined) constructor {
 #endregion
 #endregion
 	
-	/*with main_menu {
+	with main_menu {
 		var _name_pos = array_get_index(contents, "@@NAME@@")
 		
 		if net_active() {
@@ -424,12 +424,12 @@ function proOptionsUI() : UI(undefined) constructor {
 		} else {
 			array_delete(contents, _name_pos, 1)
 		}
-	}*/
+	}
 	
 	with controls_menu {
-		//if net_active() {
+		if net_active() {
 			array_push(contents, undefined, new OUIBinding("options.controls.chat", "chat"))
-		//}
+		}
 	}
 	
 	menu = main_menu

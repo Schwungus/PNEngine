@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"cmd_disconnect",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"cmd_disconnect",
+  "parent":{
+    "name":"Netgame",
+    "path":"folders/Scripts/PNEngine/Debug/Commands/Netgame.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
