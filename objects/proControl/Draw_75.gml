@@ -22,8 +22,6 @@ while _draw_target != undefined {
 }
 
 var _console = global.console
-var _netgame = global.netgame
-var _in_netgame = _netgame != undefined and _netgame.active
 var d = global.delta
 
 if _draw_target == undefined or _draw_target.f_draw_screen {
@@ -48,12 +46,6 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 			
 			if thing_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-			} else if _in_netgame and _netgame.local_player != undefined {
-				with _netgame.local_player {
-					if thing_exists(camera) {
-						camera.render(_width, _height, true).DrawStretched(0, 0, 480, 270)
-					}
-				}
 			} else switch _num_active {
 				case 1: {
 					with _players_active[| 0] {
@@ -123,7 +115,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 	
 	var _particle_step = not (
 		global.freeze_step
-		or (global.netgame == undefined and (_console or (_draw_target != undefined and _draw_target.f_blocking)))
+		or (_console or (_draw_target != undefined and _draw_target.f_blocking))
 		or (_has_camera_man and global.camera_man_freeze)
 	)
 	
@@ -236,84 +228,6 @@ if instance_exists(proTransition) {
 	display_set_gui_size(480, 270)
 }
 
-if _in_netgame {
-	with _netgame {
-		draw_set_font(global.chat_font)
-		
-		var _time = current_time
-		
-		if chat {
-			var _input = keyboard_string
-			
-			if (_time % 1000) < 500 {
-				_input += "_"
-			}
-			
-			var _x = string_width(_input)
-			
-			_x = _x > 224 ? 240 - _x : 16
-			draw_text_color(_x - 1, 239, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x, 239, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x + 1, 239, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x - 1, 238, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x, 238, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x + 1, 238, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x - 1, 237, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x, 237, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text_color(_x + 1, 237, _input, c_black, c_black, c_black, c_black, 0.25)
-			draw_text(_x, 238, _input)
-		}
-		
-		draw_set_valign(fa_bottom)
-		
-		var _max_lines = -~chat * MAX_LINES
-		var i = ds_list_size(chat_log)
-		var _y = 232
-		var _alpha = 1
-		var _shadow = 0.25
-		
-		while _max_lines and i {
-			var _message = chat_log[| i - 2]
-			var _color = chat_log[| i - 1]
-			var _show = true;
-			
-			--_max_lines
-			
-			if not chat {
-				var _fade_time = chat_fade[_max_lines]
-				
-				if _time >= _fade_time {
-					_show = false
-				} else {
-					var _fade = min(_fade_time - _time, 1000) * 0.001
-					
-					_alpha = _fade * 0.75
-					_shadow = _fade * 0.25
-				}
-			}
-			
-			if _show {
-				draw_text_ext_color(15, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(16, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(17, _y + 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(15, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(16, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(17, _y, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(15, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(16, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(17, _y - 1, _message, -1, 224, c_black, c_black, c_black, c_black, _shadow)
-				draw_text_ext_color(16, _y, _message, -1, 224, _color, _color, _color, _color, _alpha);
-				_y -= string_height_ext(_message, -1, 224) + 2
-			}
-			
-			i -= 2
-		}
-		
-		draw_set_valign(fa_top)
-		draw_set_font(-1)
-	}
-}
-
 if caption_time > 0 {
 	draw_set_alpha(0.5)
 	
@@ -379,7 +293,7 @@ if global.debug_fps {
 	draw_text(0, 0, _fps)
 }
 
-if load_state != LoadStates.NONE and (load_level != undefined or load_state == LoadStates.CONNECT) {
+if load_state != LoadStates.NONE and load_level != undefined {
 	scribble($"[{ui_font_name}][wave][fa_center][fa_middle]{lexicon_text("loading")}", "__PNENGINE_LOADING__").draw(240, 135)
 }
 #endregion

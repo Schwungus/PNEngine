@@ -13,33 +13,6 @@ global.config = {
 	data_path: new CVar("data/", is_string),
 	
 	// USER
-	name: new CVar("Player", is_string, function (_batch) {
-		var _netgame = global[$ "netgame"]
-		
-		if _netgame != undefined {
-			with _netgame {
-				if not active or local_net == undefined {
-					exit
-				}
-				
-				var _old = local_net.name
-				var _new = other.value
-				
-				if _old == _new {
-					exit
-				}
-				
-				if master {
-					local_net.name = _new
-					send_others(net_buffer_create(true, NetHeaders.PLAYER_RENAMED, buffer_u8, 0, buffer_string, _new))
-					net_say($"{_old} is now {_new}", c_yellow)
-				} else {
-					send_host(net_buffer_create(true, NetHeaders.CLIENT_RENAME, buffer_string, other.value))
-				}
-			}
-		}
-	}),
-	
 	language: new CVar("English", is_string, function (_batch) {
 		lexicon_language_set(value)
 	}),
@@ -120,7 +93,7 @@ global.config = {
 		
 		global.input_mode = _mode
 		
-		if not global[$ "console"] and global[$ "netgame"] == undefined {
+		if not global[$ "console"] {
 			input_source_mode_set(_mode)
 		}
 	}),

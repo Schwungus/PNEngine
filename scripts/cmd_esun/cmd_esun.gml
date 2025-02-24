@@ -5,8 +5,6 @@ function cmd_esun(_args) {
 		exit
 	}
 	
-	CMD_NO_NETGAME
-	
 	var _area = undefined
 	
 	// Get first active area

@@ -330,8 +330,6 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 		undefined,
 		
-		"@@NAME@@",
-		
 		new OUIOption("options.language", OUIValues.LANGUAGE, function () {
 			var _osl = lexicon_get_os_locale()
 			var _languages = global.oui_values[OUIValues.LANGUAGE]
@@ -410,27 +408,6 @@ function proOptionsUI() : UI(undefined) constructor {
 	])
 #endregion
 #endregion
-	
-	with main_menu {
-		var _name_pos = array_get_index(contents, "@@NAME@@")
-		
-		if net_active() {
-			contents[_name_pos] = new OUIInput("options.name", "Player", _config.name.value, function (_value) {
-				_value = string_trim(_value)
-				config_set("name", _value)
-				
-				return _value
-			})
-		} else {
-			array_delete(contents, _name_pos, 1)
-		}
-	}
-	
-	with controls_menu {
-		if net_active() {
-			array_push(contents, undefined, new OUIBinding("options.controls.chat", "chat"))
-		}
-	}
 	
 	menu = main_menu
 	focus = undefined

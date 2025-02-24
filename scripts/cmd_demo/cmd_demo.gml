@@ -8,8 +8,6 @@ function cmd_demo(_args) {
 		exit
 	}
 	
-	CMD_NO_NETGAME
-	
 	var _filename = _parse_args[0] + ".pnd"
 	var _path = DEMOS_PATH + _filename
 	

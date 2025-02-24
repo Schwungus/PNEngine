@@ -105,36 +105,7 @@ function UI(_ui_script) constructor {
 		
 		// UIs are non-deterministic!!!
 		// Do some workarounds for demos and netgames.
-		
-		var _netgame = global.netgame
-		
-		if _netgame != undefined and _netgame.active {
-			with _netgame {
-				if not master {
-					exit
-				}
-				
-				if not global.title_loaded {
-					var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
-					
-					// States
-					var _players = global.players
-					var i = 0
-					
-					repeat INPUT_MAX_PLAYERS {
-						buffer_write(b, buffer_u8, i)
-						_players[i++].write_states(b)
-					}
-					
-					// Flags
-					global.global_flags.write(b)
-					send_others(b)
-					global.title_loaded = true
-				}
-			}
-			
-			_inject = true
-		} else if global.demo_buffer != undefined {
+		if global.demo_buffer != undefined {
 			// Clear the UI, assuming that the following tick buffer contains a
 			// level packet.
 			while global.ui != undefined {
@@ -163,38 +134,23 @@ function UI(_ui_script) constructor {
 	}
 	
 	static leave = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
-		var _in_netgame = net_active()
-		
-		cmd_disconnect("")
-		
-		if _in_netgame {
-			// Override the transition while disconnecting to prevent erroneous
-			// warps
-			_transition = noone
+		// This is a safe method for leaving the game, i.e. ending
+		// demos/disconnecting.
+		if global.demo_buffer != undefined {
+			if global.demo_write {
+				var _filename = "demo_" + string_replace_all(date_datetime_string(date_current_datetime()), "/", ".")
+				
+				cmd_dend(_filename)
+				show_caption($"[c_red]Demo ended prematurely. Saved as '{}.pnd'.")
+			} else {
+				cmd_dend("")
+			}
 		}
 		
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
 	static send_signal = function (_name) {
-		if not net_master() {
-			var b = net_buffer_create(true, NetHeaders.CLIENT_SIGNAL, buffer_string, _name)
-			
-			var _argc = argument_count - 1
-			
-			buffer_write(b, buffer_u8, _argc)
-			
-			var i = 1
-			
-			repeat _argc {
-				buffer_write_dynamic(b, argument[i++])
-			}
-			
-			global.netgame.send_host(b)
-			
-			exit
-		}
-		
 		if global.demo_buffer != undefined and not global.demo_write {
 			exit
 		}

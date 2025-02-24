@@ -1,7 +1,6 @@
 function Player() constructor {
 	slot = -1
 	status = PlayerStatus.INACTIVE
-	net = undefined
 	
 	// Area
 	level = undefined
@@ -281,14 +280,12 @@ function Player() constructor {
 	static is_local = function () {
 		gml_pragma("forceinline")
 		
-		return net == undefined or net.local
+		return true
 	}
 	
 	static get_name = function () {
-		if net == undefined {
-			return $"Player {-~slot}"
-		}
+		gml_pragma("forceinline")
 		
-		return net.name
+		return $"Player {-~slot}"
 	}
 }

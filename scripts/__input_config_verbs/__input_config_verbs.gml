@@ -43,10 +43,6 @@ function __input_config_verbs()
 			ui_enter: [input_binding_key(vk_enter), input_binding_key(vk_space)],
 			ui_click: input_binding_mouse_button(mb_left),
 			
-			chat: input_binding_key("T"),
-			chat_submit: input_binding_key(vk_enter),
-			chat_previous: input_binding_key(vk_up),
-			
 			pause: input_binding_key(vk_escape),
 			leave: input_binding_key(vk_backspace),
 			

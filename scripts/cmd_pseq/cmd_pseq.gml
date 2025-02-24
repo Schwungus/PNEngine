@@ -9,7 +9,6 @@ function cmd_pseq(_args) {
 	}
 	
 	CMD_NO_DEMO
-	CMD_NO_NETGAME
 	
 	var _slot = real(_parse_args[0])
 	

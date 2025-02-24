@@ -8,41 +8,12 @@ function cmd_level(_args) {
 		exit
 	}
 	
-	CMD_NO_CLIENT
-	
 	var _level = _parse_args[0]
 	
 	if mod_find_file("levels/" + _level + ".*") == "" {
 		print($"! cmd_level: '{_level}' not found")
 		
 		exit
-	}
-	
-	if not global.title_loaded {
-		var _netgame = global.netgame
-		
-		if _netgame != undefined {
-			with _netgame {
-				if active and master {
-					var b = net_buffer_create(true, NetHeaders.HOST_STATES_FLAGS, buffer_u8, INPUT_MAX_PLAYERS)
-					
-					// States
-					var _players = global.players
-					var i = 0
-					
-					repeat INPUT_MAX_PLAYERS {
-						buffer_write(b, buffer_u8, i)
-						_players[i++].write_states(b)
-					}
-					
-					// Flags
-					global.global_flags.write(b)
-					send_others(b)
-				}
-			}
-		}
-		
-		global.title_loaded = true
 	}
 	
 	var _area = n >= 2 ? real(_parse_args[1]) : 0
