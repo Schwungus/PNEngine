@@ -1,5 +1,4 @@
 #macro DEFAULT_PORT 7788
-#macro STALL_RATE 10
 #macro MAX_LINES 5
 
 enum NetHeaders {

@@ -18,10 +18,10 @@ function Level() constructor {
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
 		set_tick_scale(1)
 		
-		if net_active() {
+		/*if net_active() {
 			instance_destroy(proTransition)
 			_transition = noone
-		}
+		}*/
 		
 		with proTransition {
 			if state < 3 {

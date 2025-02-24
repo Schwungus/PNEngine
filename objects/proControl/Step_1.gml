@@ -1,23 +1,5 @@
 switch load_state {
 	case LoadStates.START: {
-		var _netgame = global.netgame
-		
-		if _netgame != undefined and _netgame.master and _netgame.player_count > 1 {
-			with _netgame {
-				var i = 0
-				
-				repeat ds_list_size(players) {
-					var _player = players[| i++]
-					
-					if _player == undefined {
-						continue
-					}
-					
-					_player.ready = (_player == local_net)
-				}
-			}
-		}
-		
 		load_state = LoadStates.UNLOAD
 		
 		exit
@@ -657,7 +639,7 @@ switch load_state {
 			   netgame. (0 = local, 1 = host, 2 = client)
 			   Some mods may have special behaviour on netgames, so this is
 			   required. */
-			buffer_write(_demo_buffer, buffer_u8, net_active() + (not net_master()))
+			buffer_write(_demo_buffer, buffer_u8, 0)//net_active() + (not net_master()))
 			
 			// Mods
 			var _mods = global.mods
@@ -706,54 +688,7 @@ switch load_state {
 			}
 		}
 		
-		var _netgame = global.netgame
-		
-		if _netgame != undefined {
-			if _netgame.master {
-				var _player_count = _netgame.player_count
-				
-				if _player_count > 1 {
-					print($"proControl: Waiting for {_player_count} players")
-					load_state = LoadStates.HOST_WAIT
-				}
-			} else {
-				_netgame.send_host(net_buffer_create(true, NetHeaders.CLIENT_READY))
-			}
-		}
-		
 		exit
-	}
-	
-	case LoadStates.CONNECT: {
-		// This is a dummy load state that waits until the netgame connection
-		// returns a result.
-		exit
-	}
-	
-	case LoadStates.HOST_WAIT: {
-		var _netgame = global.netgame
-		
-		if _netgame != undefined and _netgame.master and _netgame.player_count > 1 {
-			with _netgame {
-				var i = 0
-				
-				repeat ds_list_size(players) {
-					var _player = players[| i++]
-					
-					if _player == undefined {
-						continue
-					}
-					
-					if not _player.ready {
-						exit
-					}
-				}
-			}
-		}
-		
-		load_state = LoadStates.NONE
-		
-		break
 	}
 }
 
@@ -812,9 +747,6 @@ if _tick >= 1 {
 	var _demo_buffer = global.demo_buffer
 	var _playing_demo = not _demo_write and _demo_buffer != undefined
 	var _recording_demo = _demo_write and _demo_buffer != undefined
-	var _netgame = global.netgame
-	var _in_netgame = _netgame != undefined and _netgame.active
-	var _is_master = not _in_netgame or _netgame.master
 	var _block_input = false
 	
 	var _game_tick = _tick
@@ -871,11 +803,6 @@ if _tick >= 1 {
 			
 			keyboard_string = ""
 			
-			if global.netgame == undefined {
-				_in_netgame = false
-				_is_master = true
-			}
-			
 			if global.demo_buffer == undefined {
 				_playing_demo = false
 				_recording_demo = false
@@ -886,89 +813,32 @@ if _tick >= 1 {
 			input_verb_consume("pause")
 		}
 		
-		if not _in_netgame {
-			_game_tick = 0
-			_ui_tick = 0
-			_trans_tick = 0
-		} else {
-			_block_input = true
-		}
-	} else {
-		if _in_netgame and _netgame.chat {
-			if input_check_pressed("chat_previous") {
-				keyboard_string = _netgame.chat_previous
-			}
-			
-			if input_check_pressed("pause") {
-				_netgame.chat = false
-			} else if input_check_pressed("chat_submit") {
-				if cmd_say(keyboard_string) {
-					_netgame.chat_previous = keyboard_string
-				}
-				
-				_netgame.chat = false
-			}
-			
-			if not _netgame.chat {
-				input_verb_consume(all)
-			}
-			
-			_block_input = true
-		} else {
-			if input_check_pressed("debug_console") {
-				input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
-				global.console = true
-				keyboard_string = global.console_input
-				
-				if not _in_netgame {
-					fmod_channel_control_set_paused(global.world_channel_group, true)
-				}
-				
-				_block_input = true
-			} else if input_check_pressed("chat") and _in_netgame and not _netgame.chat {
-				var _top = _ui
-				
-				while _top != undefined {
-					var _child = _top.child
-					
-					if _child == undefined {
-						break
-					}
-					
-					_top = _child
-				}
-				
-				if _top == undefined or not _top.is_ancestor(proOptionsUI) or _top.focus == undefined {
-					_netgame.chat = true
-					keyboard_string = ""
-					_block_input = true
-				}
-			}
-		}
+		_game_tick = 0
+		_ui_tick = 0
+		_trans_tick = 0
 	}
 #endregion
 	
-	var _local_connections = input_players_get_status()
-	
 	// Handle player activations by injecting into the tick buffer
-	if _local_connections.__any_changed and not (_playing_demo or _in_netgame) {
-		var _tick_buffer = inject_tick_packet()
-		
-		with _local_connections {
-			var i = 0
-			
-			repeat array_length(__new_connections) {
-				buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
-				buffer_write(_tick_buffer, buffer_u8, __new_connections[i]);
-				++i
-			}
-			
-			i = 0
-			
-			repeat array_length(__new_disconnections) {
-				buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
-				buffer_write(_tick_buffer, buffer_u8, __new_disconnections[i]);
-				++i
+	if not _playing_demo {
+		with input_players_get_status() {
+			if __any_changed {
+				var _tick_buffer = inject_tick_packet()
+				var i = 0
+				
+				repeat array_length(__new_connections) {
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
+					buffer_write(_tick_buffer, buffer_u8, __new_connections[i]);
+					++i
+				}
+				
+				i = 0
+				
+				repeat array_length(__new_disconnections) {
+					buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+					buffer_write(_tick_buffer, buffer_u8, __new_disconnections[i]);
+					++i
+				}
 			}
 		}
 	}
@@ -1138,49 +1008,28 @@ if _tick >= 1 {
 						_skip_input = true
 					}
 				}
-				
-				// Extra check to prevent a crash when disconnecting
-				// through UI leave() method
-				if _in_netgame and not net_active() {
-					_in_netgame = false
-					_is_master = true
-					_skip_tick = true
-				}
 			} else {
 				var _paused = false
 				
 				if not _block_input and input_check_pressed("pause") {
 					_paused = true
-					
-					if _in_netgame {
-						if _is_master {
-							with TitleBase {
-								if (menu != undefined and menu.from != undefined) or global.title_delete_state {
-									_paused = false
-									
-									break
-								}
-							}
-						}
-					} else {
-						i = ds_list_size(_players_active)
+					i = ds_list_size(_players_active)
 						
-						while i {
-							with _players_active[| --i] {
-								if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
-									break
-								}
-								
-								if not thing_exists(thing) or get_state("frozen") {
-									_paused = false
-									
-									break
-								}
-							}
-							
-							if not _paused {
+					while i {
+						with _players_active[| --i] {
+							if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
 								break
 							}
+								
+							if not thing_exists(thing) or get_state("frozen") {
+								_paused = false
+									
+								break
+							}
+						}
+							
+						if not _paused {
+							break
 						}
 					}
 				}
@@ -1195,7 +1044,7 @@ if _tick >= 1 {
 			}
 			
 			// Try to clear momentary input if game ticks are skipped
-			if _skip_tick and not _in_netgame {
+			if _skip_tick {
 				input_clear_momentary(true)
 			}
 			
@@ -1216,100 +1065,8 @@ if _tick >= 1 {
 	}
 	
 #region Netgame Pre-Processing
-	if not _is_master {
-		_game_tick = min(_netgame.tick_count, STALL_RATE)
-		
-		var _input_up_down, _input_left_right
-		var _input_jump, _input_interact, _input_attack
-		var _input_inventory_up, _input_inventory_left, _input_inventory_down, _input_inventory_right
-		var _input_aim, _dx, _dy
-		
-		if _block_input {
-			_input_up_down = 0
-			_input_left_right = 0
-			_input_jump = false
-			_input_interact = false
-			_input_attack = false
-			_input_inventory_up = false
-			_input_inventory_left = false
-			_input_inventory_down = false
-			_input_inventory_right = false
-			_input_aim = false
-			_dx = 0
-			_dy = 0
-		} else {
-			// Main
-			var _move_range = input_check("walk") ? 64 : 127
-			
-			_input_up_down = floor((input_value("down") - input_value("up")) * _move_range)
-			_input_left_right = floor((input_value("right") - input_value("left")) * _move_range)
-			_input_jump = input_check("jump")
-			_input_interact = input_check("interact")
-			_input_attack = input_check("attack")
-			
-			// Inventory
-			_input_inventory_up = input_check("inventory_up")
-			_input_inventory_left = input_check("inventory_left")
-			_input_inventory_down = input_check("inventory_down")
-			_input_inventory_right = input_check("inventory_right")
-			
-			// Camera
-			_input_aim = input_check("aim")
-			
-			var _dx_factor = input_value("aim_right") - input_value("aim_left")
-			var _dy_factor = input_value("aim_down") - input_value("aim_up")
-			var _dx_angle, _dy_angle
-			
-			with _config {
-				_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
-				_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
-				
-				if _mouse_focused {
-					_dx_factor += other.mouse_dx * in_mouse_x.value
-					_dy_factor += other.mouse_dy * in_mouse_y.value
-				}
-				
-				if in_gyro.value {
-					var _gyro = input_motion_data_get(j)
-					
-					if _gyro != undefined {
-						_dx_factor -= _gyro.angular_velocity_y * in_gyro_x.value 
-						_dy_factor += _gyro.angular_velocity_x * in_gyro_y.value
-					}
-				}
-			}
-			
-			_dx_factor *= _dx_angle
-			_dy_factor *= _dy_angle
-			_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
-			_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
-		}
-		
-		mouse_dx = 0
-		mouse_dy = 0
-		
-		_netgame.send_host(net_buffer_create(false, NetHeaders.CLIENT_INPUT,
-			buffer_s8, _input_up_down,
-			buffer_s8, _input_left_right,
-			
-			buffer_u8, player_input_to_flags(
-				_input_jump,
-				_input_interact,
-				_input_attack,
-				_input_inventory_up,
-				_input_inventory_left,
-				_input_inventory_down,
-				_input_inventory_right,
-				_input_aim
-			),
-			
-			buffer_s16, _dx % 32768,
-			buffer_s16, _dy % 32768
-		))
-	}
 #endregion
 	
-	var _ticked = false
 	var _camera_man = global.camera_man
 	var _has_camera_man = thing_exists(_camera_man)
 	var _camera_man_freeze = global.camera_man_freeze
@@ -1362,34 +1119,7 @@ if _tick >= 1 {
 					var j = slot
 					var _input_up_down, _input_left_right, _input_flags, _dx, _dy
 					
-					if _in_netgame and j > 0 {
-						_input_up_down = input[PlayerInputs.UP_DOWN]
-						_input_left_right = input[PlayerInputs.LEFT_RIGHT]
-						
-						_input_flags = player_input_to_flags(
-							input[PlayerInputs.JUMP],
-							input[PlayerInputs.INTERACT],
-							input[PlayerInputs.ATTACK],
-							input[PlayerInputs.INVENTORY_UP],
-							input[PlayerInputs.INVENTORY_LEFT],
-							input[PlayerInputs.INVENTORY_DOWN],
-							input[PlayerInputs.INVENTORY_RIGHT],
-							input[PlayerInputs.AIM]
-						)
-						
-						_dx = 0
-						_dy = 0
-						
-						with net {
-							while ds_queue_size(input_queue) {
-								_input_up_down = ds_queue_dequeue(input_queue)
-								_input_left_right = ds_queue_dequeue(input_queue)
-								_input_flags = ds_queue_dequeue(input_queue)
-								_dx += ds_queue_dequeue(input_queue)
-								_dy += ds_queue_dequeue(input_queue)
-							}
-						}
-					} else if _block_input {
+					if _block_input {
 						_input_up_down = 0
 						_input_left_right = 0
 						_input_flags = 0
@@ -1455,41 +1185,7 @@ if _tick >= 1 {
 			
 			mouse_dx = 0
 			mouse_dy = 0
-			
-			if _in_netgame or _recording_demo {
-				with _level {
-					if name != "lvlTitle" and (time % 15) == 0 {
-						var _checksum = 0
-						
-						with Thing {
-							_checksum += 1 + floor(x) + floor(y) + floor(z)
-						}
-						
-						buffer_write(_tick_buffer, buffer_u8, TickPackets.CHECKSUM)
-						buffer_write(_tick_buffer, buffer_u8, abs(time + _checksum) % 256)
-					}
-				}
-			}
-			
 			_tick_size = buffer_tell(_tick_buffer)
-			
-			if _in_netgame {
-				var b = net_buffer_create(true, NetHeaders.HOST_TICK)
-				var _pos = buffer_tell(b)
-				
-				buffer_copy(_tick_buffer, 0, _tick_size, b, _pos)
-				_netgame.send_others(b, _pos + _tick_size)
-			}
-		} else {
-			with _netgame {
-				var _placebo = ds_queue_dequeue(tick_queue)
-				var _relay = ds_queue_dequeue(tick_queue)
-				
-				_tick_size = buffer_get_size(_relay)
-				buffer_copy(_relay, 0, _tick_size, _tick_buffer, 0)
-				buffer_delete(_relay);
-				--tick_count
-			}
 		}
 		
 		// Parse tick buffer
@@ -1510,7 +1206,7 @@ if _tick >= 1 {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
 					with _players[_slot] {
-						if not player_activate(self, not _in_netgame) {
+						if not player_activate(self) {
 							if __show_reconnect_caption {
 								var _device = input_player_get_gamepad_type(_slot)
 								
@@ -1531,7 +1227,7 @@ if _tick >= 1 {
 				case TickPackets.DEACTIVATE: {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
-					if not player_deactivate(_players[_slot], not _in_netgame) {
+					if not player_deactivate(_players[_slot]) {
 						show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
 					}
 					
@@ -1761,8 +1457,7 @@ if _tick >= 1 {
 		++_level.time
 #endregion
 		
-		input_clear_momentary(true)
-		_ticked = true;
+		input_clear_momentary(true);
 		--_game_tick
 	}
 #endregion

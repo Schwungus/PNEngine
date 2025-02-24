@@ -28,14 +28,6 @@ global.config = {
 				if _old == _new {
 					exit
 				}
-				
-				if master {
-					local_net.name = _new
-					send_others(net_buffer_create(true, NetHeaders.PLAYER_RENAMED, buffer_u8, 0, buffer_string, _new))
-					net_say($"{_old} is now {_new}", c_yellow)
-				} else {
-					send_host(net_buffer_create(true, NetHeaders.CLIENT_RENAME, buffer_string, other.value))
-				}
 			}
 		}
 	}),

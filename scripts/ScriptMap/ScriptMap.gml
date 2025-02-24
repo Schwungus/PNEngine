@@ -80,10 +80,8 @@ function ScriptMap() : AssetMap() constructor {
 						
 						var _parent = _parents[1]
 						
-						load(_parent, _special)
-						
 						with _script {
-							parent = other.get(_parent)
+							parent = other.fetch(_parent, _special)
 							
 							if parent == undefined {
 								_index = asset_get_index(_parent)

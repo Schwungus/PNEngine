@@ -23,74 +23,64 @@ function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 			if thing_exists(_camera_demo) {
 				_camera_demo.render(_width, _height, true).Draw(0, 0)
 			} else {
-				var _netgame = global.netgame
-				
-				if _netgame != undefined and _netgame.active and _netgame.local_player != undefined {
-					with _netgame.local_player {
-						if thing_exists(camera) {
-							camera.render(_width, _height, true).Draw(0, 0)
+				switch _num_active {
+					case 1: {
+						with _players_active[| 0] {
+							if thing_exists(camera) {
+								camera.render(_width, _height, true).Draw(0, 0)
+							}
 						}
+							
+						break
 					}
-				} else {
-					switch _num_active {
-						case 1: {
-							with _players_active[| 0] {
+						
+					case 2: {
+						_height *= 0.5
+							
+						var _y = 0
+						var i = 0
+							
+						repeat _num_active {
+							with _players_active[| i] {
 								if thing_exists(camera) {
-									camera.render(_width, _height, true).Draw(0, 0)
+									camera.render(_width, _height, i == 0).Draw(0, _y)
 								}
 							}
-							
-							break
+								
+							_y += _height;
+							++i
 						}
+							
+						break
+					}
 						
-						case 2: {
-							_height *= 0.5
+					case 3:
+					case 4: {
+						_width *= 0.5
+						_height *= 0.5
 							
-							var _y = 0
-							var i = 0
+						var _x = 0
+						var _y = 0
+						var i = 0
 							
-							repeat _num_active {
-								with _players_active[| i] {
-									if thing_exists(camera) {
-										camera.render(_width, _height, i == 0).Draw(0, _y)
-									}
+						repeat _num_active {
+							with _players_active[| i] {
+								if thing_exists(camera) {
+									camera.render(_width, _height, i == 0).Draw(_x, _y)
 								}
-								
-								_y += _height;
-								++i
 							}
-							
-							break
-						}
-						
-						case 3:
-						case 4: {
-							_width *= 0.5
-							_height *= 0.5
-							
-							var _x = 0
-							var _y = 0
-							var i = 0
-							
-							repeat _num_active {
-								with _players_active[| i] {
-									if thing_exists(camera) {
-										camera.render(_width, _height, i == 0).Draw(_x, _y)
-									}
-								}
 								
-								_x += _width
+							_x += _width
 								
-								if _x > _width {
-									_x = 0
-									_y += _height
-								}
-								
-								++i
+							if _x > _width {
+								_x = 0
+								_y += _height
 							}
-							
-							break
+								
+							++i
 						}
+							
+						break
 					}
 				}
 			}

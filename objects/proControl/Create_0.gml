@@ -754,7 +754,7 @@ with Catspeak {
 		},
 		
 		"game_master", function () {
-			return not global.demo_client and net_master()
+			return not global.demo_client
 		},
 		
 		"delta_time", function () {
