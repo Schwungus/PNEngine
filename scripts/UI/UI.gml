@@ -141,7 +141,7 @@ function UI(_ui_script) constructor {
 				var _filename = "demo_" + string_replace_all(date_datetime_string(date_current_datetime()), "/", ".")
 				
 				cmd_dend(_filename)
-				show_caption($"[c_red]Demo ended prematurely. Saved as '{}.pnd'.")
+				show_caption($"[c_red]Demo ended prematurely. Saved as '{_filename}.pnd'.")
 			} else {
 				cmd_dend("")
 			}
