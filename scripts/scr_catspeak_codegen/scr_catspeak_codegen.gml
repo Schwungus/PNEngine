@@ -186,12 +186,17 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
     /// @ignore
     static __setupCatspeakFunctionMethods = function (f) {
         f.setSelf = method(sharedData, function (selfInst) {
-            self_ = catspeak_special_to_struct(selfInst);
+            self_ = selfInst == undefined
+                    ? undefined
+                    : catspeak_special_to_struct(selfInst);
         });
         f.setGlobals = method(sharedData, function (globalInst) {
-            globals = catspeak_special_to_struct(globalInst);
+            var newGlobals = catspeak_special_to_struct(globalInst);
+            if (newGlobals != undefined) {
+                globals = newGlobals;
+            }
         });
-        f.getSelf = method(sharedData, function () { return self_ ?? globals });
+        f.getSelf = method(sharedData, function () { return self_ });
         f.getGlobals = method(sharedData, function () { return globals });
     };
 
@@ -383,6 +388,30 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
     /// @param {Struct} ctx
     /// @param {Struct} term
     /// @return {Function}
+    static __compileCatch = function (ctx, term) {
+        if (CATSPEAK_DEBUG_MODE) {
+            __catspeak_check_arg_struct("term", term,
+                "eager", undefined,
+                "lazy", undefined,
+                "localRef", undefined
+            );
+            __catspeak_check_arg_struct("term.localRef", term.localRef,
+                "idx", is_numeric
+            );
+        }        
+        return method({
+            eager : __compileTerm(ctx, term.eager),
+            lazy : __compileTerm(ctx, term.lazy),
+            locals : ctx.locals,
+            idx : term.localRef.idx,
+        }, __catspeak_expr_catch__);
+    };
+
+    /// @ignore
+    ///
+    /// @param {Struct} ctx
+    /// @param {Struct} term
+    /// @return {Function}
     static __compileLoop = function (ctx, term) {
         if (CATSPEAK_DEBUG_MODE) {
             __catspeak_check_arg_struct("term", term,
@@ -522,6 +551,22 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
     /// @return {Function}
     static __compileContinue = function (ctx, term) {
         return method(undefined, __catspeak_expr_continue__);
+    };
+
+    /// @ignore
+    ///
+    /// @param {Struct} ctx
+    /// @param {Struct} term
+    /// @return {Function}
+    static __compileThrow = function (ctx, term) {
+        if (CATSPEAK_DEBUG_MODE) {
+            __catspeak_check_arg_struct("term", term,
+                "value", undefined
+            );
+        }
+        return method({
+            value : __compileTerm(ctx, term.value),
+        }, __catspeak_expr_throw__);
     };
 
     /// @ignore
@@ -929,6 +974,15 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
     /// @param {Struct} ctx
     /// @param {Struct} term
     /// @return {Function}
+    static __compileOther = function (ctx, term) {
+        return method(sharedData, __catspeak_expr_other__);
+    };
+
+    /// @ignore
+    ///
+    /// @param {Struct} ctx
+    /// @param {Struct} term
+    /// @return {Function}
     static __compileTerm = function (ctx, term) {
         if (CATSPEAK_DEBUG_MODE) {
             __catspeak_check_arg_struct("term", term,
@@ -950,12 +1004,14 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
         db[@ CatspeakTerm.STRUCT] = __compileStruct;
         db[@ CatspeakTerm.BLOCK] = __compileBlock;
         db[@ CatspeakTerm.IF] = __compileIf;
+        db[@ CatspeakTerm.CATCH] = __compileCatch;
         db[@ CatspeakTerm.LOOP] = __compileLoop;
         db[@ CatspeakTerm.WITH] = __compileWith;
         db[@ CatspeakTerm.MATCH] = __compileMatch;
         db[@ CatspeakTerm.RETURN] = __compileReturn;
         db[@ CatspeakTerm.BREAK] = __compileBreak;
         db[@ CatspeakTerm.CONTINUE] = __compileContinue;
+        db[@ CatspeakTerm.THROW] = __compileThrow;
         db[@ CatspeakTerm.OP_BINARY] = __compileOpBinary;
         db[@ CatspeakTerm.OP_UNARY] = __compileOpUnary;
         db[@ CatspeakTerm.CALL] = __compileCall;
@@ -967,6 +1023,7 @@ function CatspeakGMLCompiler(ir, interface=undefined) constructor {
         db[@ CatspeakTerm.LOCAL] = __compileLocal;
         db[@ CatspeakTerm.FUNCTION] = __compileFunctionExpr;
         db[@ CatspeakTerm.SELF] = __compileSelf;
+        db[@ CatspeakTerm.OTHER] = __compileOther;
         db[@ CatspeakTerm.AND] = __compileAnd;
         db[@ CatspeakTerm.OR] = __compileOr;
         db[@ CatspeakTerm.PARAMS] = __compileParams;
@@ -1066,14 +1123,19 @@ function __catspeak_function__() {
     for(var argI = argument_count - 1; argI >= 0; argI -= 1) {
         args[@ argI] = argument[argI];	
     }
-    var value;
+    var value = undefined;
+    var throwValue = undefined;
+    var doThrowValue = false;
+    // the finally block doesn't execute sometimes if there's a `break`,
+    // `throw`, or `continue` in the try/catch blocks
     try {
         value = program();
     } catch (e) {
         if (e == global.__catspeakGmlReturnRef) {
             value = e[0];
         } else {
-            throw e;
+            throwValue = e;
+            doThrowValue = true;
         }
     } finally {
         if (isRecursing) {
@@ -1096,6 +1158,9 @@ function __catspeak_function__() {
             array_resize(args, 0);
             array_resize(args, argCount);
         }
+    }
+    if (doThrowValue) {
+        throw throwValue;
     }
     return value;
 }
@@ -1203,6 +1268,19 @@ function __catspeak_expr_if__() {
 /// @return {Any}
 function __catspeak_expr_if_else__() {
     return condition() ? ifTrue() : ifFalse();
+}
+
+/// @ignore
+/// @return {Any}
+function __catspeak_expr_catch__() {
+    var result;
+    try {
+        result = eager();
+    } catch (exValue) {
+        locals[@ idx] = exValue;
+        result = lazy();
+    }
+    return result;
 }
 
 /// @ignore
@@ -1318,18 +1396,32 @@ function __catspeak_expr_loop_general__() {
 /// @return {Any}
 function __catspeak_expr_loop_with__() {
     var body_ = body;
+    var throwValue = undefined;
+    var doThrowValue = false;
+    var returnValue = undefined;
+    var doReturnValue = false;
     with (scope()) {
+        // the finally block doesn't execute sometimes if there's a `break`,
+        // `throw`, or `continue` in the try/catch blocks
         __CATSPEAK_BEGIN_SELF = self;
         try {
             body_();
         } catch (e) {
             if (e == global.__catspeakGmlBreakRef) {
-                return e[0];
+                returnValue = e[0];
+                doReturnValue = true;
             } else if (e != global.__catspeakGmlContinueRef) {
-                throw e;
+                throwValue = e;
+                doThrowValue = true;
             }
         }
         __CATSPEAK_END_SELF;
+        if (doThrowValue) {
+            throw throwValue;
+        }
+        if (doReturnValue) {
+            return returnValue;
+        }
     }
     return undefined;
 }
@@ -1387,6 +1479,12 @@ function __catspeak_expr_break__() {
 /// @return {Any}
 function __catspeak_expr_continue__() {
     throw global.__catspeakGmlContinueRef;
+}
+
+/// @ignore
+/// @return {Any}
+function __catspeak_expr_throw__() {
+    throw value();
 }
 
 /// @ignore
@@ -1467,10 +1565,18 @@ function __catspeak_expr_call_method__() {
             i += 1;
         }
     }
+    var result = undefined;
+    // a weird sharp edge here means that `__CATSPEAK_BEGIN_SELF` needs
+    // to use `catspeak_get_self`, but the actual with loop needs to use
+    // `method_get_self` (see test "get-self-method")
+    __CATSPEAK_BEGIN_SELF = catspeak_get_self(callee_) ?? collection_;
     with (method_get_self(callee_) ?? collection_) {
         var calleeIdx = method_get_index(callee_);
-        return __catspeak_script_execute_ext_fixed(calleeIdx, args_);
+        result = __catspeak_script_execute_ext_fixed(calleeIdx, args_);
+        break;
     }
+    __CATSPEAK_END_SELF;
+    return result;
 }
 
 /// @ignore
@@ -1496,7 +1602,7 @@ function __catspeak_expr_call__() {
     }
     var shared_ = shared;
     with (method_get_self(callee_) ?? 
-        (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals))
+        (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals))
     ) {
         var calleeIdx = method_get_index(callee_);
         return __catspeak_script_execute_ext_fixed(calleeIdx, args_);
@@ -1516,7 +1622,7 @@ function __catspeak_expr_call_0__() {
         return callee_();
     }
 	
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx();
     }
@@ -1537,7 +1643,7 @@ function __catspeak_expr_call_1__() {
         return callee_(arg1);
     }
 	
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx(arg1);
     }
@@ -1559,7 +1665,7 @@ function __catspeak_expr_call_2__() {
         return callee_(arg1, arg2);
     }
 	
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx(arg1, arg2);
     }
@@ -1582,7 +1688,7 @@ function __catspeak_expr_call_3__() {
         return callee_(arg1, arg2, arg3);
     }
 	
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx(arg1, arg2, arg3);
     }
@@ -1606,7 +1712,7 @@ function __catspeak_expr_call_4__() {
         return callee_(arg1, arg2, arg3, arg4);
     }
 
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx(arg1, arg2, arg3, arg4);
     }
@@ -1631,7 +1737,7 @@ function __catspeak_expr_call_5__() {
         return callee_(arg1, arg2, arg3, arg4, arg5);
     }
 
-    with (global.__catspeakGmlSelf ?? (shared_.self_ ?? shared_.globals)) {
+    with (shared_.self_ ?? (global.__catspeakGmlSelf ?? shared_.globals)) {
         var calleeIdx = method_get_index(callee_);
         return calleeIdx(arg1, arg2, arg3, arg4, arg5);
     }
@@ -1698,6 +1804,11 @@ function __catspeak_expr_index_set__() {
     if (is_array(collection_)) {
         collection_[@ key_] = value_;
     } else if (__catspeak_is_withable(collection_)) {
+        var specialSet = global.__catspeakGmlSpecialVars[$ key_];
+        if (specialSet != undefined) {
+            specialSet(collection_, value_);
+            return;
+        }
         collection_[$ key_] = value_;
     } else {
         __catspeak_error_got(dbgError, collection_);
@@ -1713,6 +1824,11 @@ function __catspeak_expr_index_set_mult__() {
     if (is_array(collection_)) {
         collection_[@ key_] *= value_;
     } else if (__catspeak_is_withable(collection_)) {
+        var specialSet = global.__catspeakGmlSpecialVars[$ key_];
+        if (specialSet != undefined) {
+            specialSet(collection_, collection_[$ key_] * value_);
+            return;
+        }
         collection_[$ key_] *= value_;
     } else {
         __catspeak_error_got(dbgError, collection_);
@@ -1728,6 +1844,11 @@ function __catspeak_expr_index_set_div__() {
     if (is_array(collection_)) {
         collection_[@ key_] /= value_;
     } else if (__catspeak_is_withable(collection_)) {
+        var specialSet = global.__catspeakGmlSpecialVars[$ key_];
+        if (specialSet != undefined) {
+            specialSet(collection_, collection_[$ key_] / value_);
+            return;
+        }
         collection_[$ key_] /= value_;
     } else {
         __catspeak_error_got(dbgError, collection_);
@@ -1743,6 +1864,11 @@ function __catspeak_expr_index_set_sub__() {
     if (is_array(collection_)) {
         collection_[@ key_] -= value_;
     } else if (__catspeak_is_withable(collection_)) {
+        var specialSet = global.__catspeakGmlSpecialVars[$ key_];
+        if (specialSet != undefined) {
+            specialSet(collection_, collection_[$ key_] - value_);
+            return;
+        }
         collection_[$ key_] -= value_;
     } else {
         __catspeak_error_got(dbgError, collection_);
@@ -1758,6 +1884,11 @@ function __catspeak_expr_index_set_plus__() {
     if (is_array(collection_)) {
         collection_[@ key_] += value_;
     } else if (__catspeak_is_withable(collection_)) {
+        var specialSet = global.__catspeakGmlSpecialVars[$ key_];
+        if (specialSet != undefined) {
+            specialSet(collection_, collection_[$ key_] + value_);
+            return;
+        }
         collection_[$ key_] += value_;
     } else {
         __catspeak_error_got(dbgError, collection_);
@@ -1906,7 +2037,7 @@ function __catspeak_expr_local_set_plus__() {
 function __catspeak_expr_self__() {
     // will either access a user-defined self instance, or the internal
     // global struct
-    return global.__catspeakGmlSelf ?? (self_ ?? globals);
+    return self_ ?? (global.__catspeakGmlSelf ?? globals);
 }
 
 /// @ignore
@@ -1940,4 +2071,97 @@ function __catspeak_init_codegen() {
     global.__catspeakGmlSelf = undefined;
     /// @ignore
     global.__catspeakGmlOther = undefined;
+    /// @ignore
+    global.__catspeakGmlSpecialVars = { };
+    var db = global.__catspeakGmlSpecialVars;
+    // addresses an LTS bug where self[$ name] = val doesn't work for internal properties
+    db[$ "enabled"] = function (s, v) { s.enabled = v };
+    db[$ "left"] = function (s, v) { s.left = v };
+    db[$ "right"] = function (s, v) { s.right = v };
+    db[$ "top"] = function (s, v) { s.top = v };
+    db[$ "bottom"] = function (s, v) { s.bottom = v };
+    db[$ "tilemode"] = function (s, v) { s.tilemode = v };
+    db[$ "frame"] = function (s, v) { s.frame = v };
+    db[$ "length"] = function (s, v) { s.length = v };
+    db[$ "stretch"] = function (s, v) { s.stretch = v };
+    db[$ "channels"] = function (s, v) { s.channels = v };
+    db[$ "channel"] = function (s, v) { s.channel = v };
+    db[$ "sequence"] = function (s, v) { s.sequence = v };
+    db[$ "headPosition"] = function (s, v) { s.headPosition = v };
+    db[$ "headDirection"] = function (s, v) { s.headDirection = v };
+    db[$ "speedScale"] = function (s, v) { s.speedScale = v };
+    db[$ "volume"] = function (s, v) { s.volume = v };
+    db[$ "paused"] = function (s, v) { s.paused = v };
+    db[$ "finished"] = function (s, v) { s.finished = v };
+    db[$ "activeTracks"] = function (s, v) { s.activeTracks = v };
+    db[$ "elementID"] = function (s, v) { s.elementID = v };
+    db[$ "name"] = function (s, v) { s.name = v };
+    db[$ "loopmode"] = function (s, v) { s.loopmode = v };
+    db[$ "playbackSpeed"] = function (s, v) { s.playbackSpeed = v };
+    db[$ "playbackSpeedType"] = function (s, v) { s.playbackSpeedType = v };
+    db[$ "xorigin"] = function (s, v) { s.xorigin = v };
+    db[$ "yorigin"] = function (s, v) { s.yorigin = v };
+    db[$ "tracks"] = function (s, v) { s.tracks = v };
+    db[$ "messageEventKeyframes"] = function (s, v) { s.messageEventKeyframes = v };
+    db[$ "momentKeyframes"] = function (s, v) { s.momentKeyframes = v };
+    db[$ "event_create"] = function (s, v) { s.event_create = v };
+    db[$ "event_destroy"] = function (s, v) { s.event_destroy = v };
+    db[$ "event_clean_up"] = function (s, v) { s.event_clean_up = v };
+    db[$ "event_step"] = function (s, v) { s.event_step = v };
+    db[$ "event_step_begin"] = function (s, v) { s.event_step_begin = v };
+    db[$ "event_step_end"] = function (s, v) { s.event_step_end = v };
+    db[$ "event_async_system"] = function (s, v) { s.event_async_system = v };
+    db[$ "event_broadcast_message"] = function (s, v) { s.event_broadcast_message = v };
+    db[$ "type"] = function (s, v) { s.type = v };
+    db[$ "subType"] = function (s, v) { s.subType = v };
+    db[$ "traits"] = function (s, v) { s.traits = v };
+    db[$ "interpolation"] = function (s, v) { s.interpolation = v };
+    db[$ "visible"] = function (s, v) { s.visible = v };
+    db[$ "linked"] = function (s, v) { s.linked = v };
+    db[$ "linkedTrack"] = function (s, v) { s.linkedTrack = v };
+    db[$ "keyframes"] = function (s, v) { s.keyframes = v };
+    db[$ "disabled"] = function (s, v) { s.disabled = v };
+    db[$ "spriteIndex"] = function (s, v) { s.spriteIndex = v };
+    db[$ "soundIndex"] = function (s, v) { s.soundIndex = v };
+    db[$ "emitterIndex"] = function (s, v) { s.emitterIndex = v };
+    db[$ "playbackMode"] = function (s, v) { s.playbackMode = v };
+    db[$ "imageIndex"] = function (s, v) { s.imageIndex = v };
+    db[$ "value"] = function (s, v) { s.value = v };
+    db[$ "colour"] = function (s, v) { s.colour = v };
+    db[$ "color"] = function (s, v) { s.color = v };
+    db[$ "curve"] = function (s, v) { s.curve = v };
+    db[$ "objectIndex"] = function (s, v) { s.objectIndex = v };
+    db[$ "text"] = function (s, v) { s.text = v };
+    db[$ "events"] = function (s, v) { s.events = v };
+    db[$ "event"] = function (s, v) { s.event = v };
+    db[$ "graphType"] = function (s, v) { s.graphType = v };
+    db[$ "iterations"] = function (s, v) { s.iterations = v };
+    db[$ "points"] = function (s, v) { s.points = v };
+    db[$ "posx"] = function (s, v) { s.posx = v };
+    db[$ "matrix"] = function (s, v) { s.matrix = v };
+    db[$ "posy"] = function (s, v) { s.posy = v };
+    db[$ "rotation"] = function (s, v) { s.rotation = v };
+    db[$ "scalex"] = function (s, v) { s.scalex = v };
+    db[$ "scaley"] = function (s, v) { s.scaley = v };
+    db[$ "gain"] = function (s, v) { s.gain = v };
+    db[$ "pitch"] = function (s, v) { s.pitch = v };
+    db[$ "width"] = function (s, v) { s.width = v };
+    db[$ "height"] = function (s, v) { s.height = v };
+    db[$ "imagespeed"] = function (s, v) { s.imagespeed = v };
+    db[$ "colormultiply"] = function (s, v) { s.colormultiply = v };
+    db[$ "colourmultiply"] = function (s, v) { s.colourmultiply = v };
+    db[$ "coloradd"] = function (s, v) { s.coloradd = v };
+    db[$ "colouradd"] = function (s, v) { s.colouradd = v };
+    db[$ "instanceID"] = function (s, v) { s.instanceID = v };
+    db[$ "track"] = function (s, v) { s.track = v };
+    db[$ "parent"] = function (s, v) { s.parent = v };
+    db[$ "objects_touched"] = function (s, v) { s.objects_touched = v };
+    db[$ "objects_collected"] = function (s, v) { s.objects_collected = v };
+    db[$ "traversal_time"] = function (s, v) { s.traversal_time = v };
+    db[$ "collection_time"] = function (s, v) { s.collection_time = v };
+    db[$ "gc_frame"] = function (s, v) { s.gc_frame = v };
+    db[$ "generation_collected"] = function (s, v) { s.generation_collected = v };
+    db[$ "num_generations"] = function (s, v) { s.num_generations = v };
+    db[$ "num_objects_in_generation"] = function (s, v) { s.num_objects_in_generation = v };
+    db[$ "ref"] = function (s, v) { s.ref = v };
 }
