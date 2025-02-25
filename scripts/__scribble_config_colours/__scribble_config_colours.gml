@@ -39,8 +39,7 @@ function __scribble_config_colours()
         c_smaragdine: scribble_rgb_to_bgr(0x50c875),
         c_xanadu:     scribble_rgb_to_bgr(0x738678),
         c_amaranth:   scribble_rgb_to_bgr(0xe52b50),
-		
-		c_ab_green: C_AB_GREEN,
+        c_ab_green:   C_AB_GREEN,
     };
     
     return _colours;
