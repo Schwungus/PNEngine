@@ -1,5 +1,5 @@
 /// @description Tick
-if global.demo_buffer == undefined and input_check_pressed("pause") {
+if input_check_pressed("pause") {
 	finished = 2
 }
 

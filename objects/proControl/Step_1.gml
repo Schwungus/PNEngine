@@ -88,21 +88,21 @@ switch load_state {
 		if not is_struct(_json) {
 			show_error($"!!! proControl: '{load_level}' not found", true)
 		} else {
-			if not force_type_fallback(_json[$ "allow_demos"], "bool", true) {
+			if load_level == "lvlLogo" or load_level == "lvlTitle" {
 				if global.demo_write {
 					if global.demo_buffer != undefined {
 						var _filename = "demo_" + string_replace_all(date_datetime_string(date_current_datetime()), "/", ".")
 						
 						cmd_dend(_filename)
-						show_caption($"[c_red]Recording ended on a protected level.\nSaved as '{_filename}.pnd'.")
+						show_caption($"[c_red]Recording ended on title.\nSaved as '{_filename}.pnd'.")
 					} else {
 						cmd_dend("")
-						show_caption("[c_red]Recording cancelled by a protected level.")
+						show_caption("[c_red]Recording cancelled by title.")
 					}
 				} else {
 					if global.demo_buffer != undefined {
 						cmd_dend("")
-						show_caption("[c_red]Demo ended on a protected level.")
+						show_caption("[c_red]Demo ended on title.")
 					}
 				}
 			}
@@ -1191,7 +1191,7 @@ if _tick >= 1 {
 			
 			if _recording_demo {
 				with _level {
-					if name != "lvlTitle" and (time % 15) == 0 {
+					if (time % 15) == 0 {
 						var _checksum = 0
 						
 						with Thing {
