@@ -906,7 +906,7 @@ if _tick >= 1 {
 		
 		while _trans_tick >= 1 {
 			with proTransition {
-				event_user(ThingEvents.TICK)
+				event_tick()
 				
 				// Freeze the world while the screen is fading in
 				switch state {
@@ -918,9 +918,7 @@ if _tick >= 1 {
 						_transition_canvas.Resize(_width, _height)
 						_transition_canvas.Start()
 						draw_clear(c_black)
-						screen_width = _width
-						screen_height = _height
-						event_user(ThingEvents.DRAW_SCREEN)
+						event_draw_screen(_width, _height)
 						_transition_canvas.Finish()
 						
 						with proControl {
@@ -1299,7 +1297,9 @@ if _tick >= 1 {
 						var _clientsum = 0
 						
 						with Thing {
-							_clientsum += 1 + floor(x) + floor(y) + floor(z)
+							if not f_desync {
+								_clientsum += 1 + floor(x) + floor(y) + floor(z)
+							}
 						}
 						
 						_clientsum = abs(_level.time + _clientsum) % 256
@@ -1410,7 +1410,7 @@ if _tick >= 1 {
 									f_culled = false
 									
 									if not f_frozen {
-										event_user(ThingEvents.TICK)
+										event_tick()
 									}
 								} else {
 									f_culled = true
@@ -1453,7 +1453,7 @@ if _tick >= 1 {
 									f_culled = false
 									
 									if not f_frozen {
-										event_user(ThingEvents.TICK)
+										event_tick()
 									}
 								} else {
 									f_culled = true

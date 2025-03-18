@@ -196,9 +196,7 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 		}
 		
 		repeat ds_priority_size(_gui_priority) {
-			with ds_priority_delete_max(_gui_priority) {
-				event_user(ThingEvents.DRAW_GUI)
-			}
+			ds_priority_delete_max(_gui_priority).event_draw_gui()
 		}
 	}
 #endregion
@@ -220,9 +218,7 @@ if instance_exists(proTransition) {
 	display_set_gui_size(_width, _height)
 	
 	with proTransition {
-		screen_width = _width
-		screen_height = _height
-		event_user(ThingEvents.DRAW_SCREEN)
+		event_draw_screen(_width, _height)
 	}
 	
 	display_set_gui_size(480, 270)

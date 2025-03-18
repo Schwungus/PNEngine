@@ -110,7 +110,7 @@ function Area() constructor {
 			tag = _tag
 			special = _special
 			f_new = true
-			event_user(ThingEvents.CREATE)
+			event_create()
 			f_created = true
 		}
 		

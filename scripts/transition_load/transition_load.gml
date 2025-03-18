@@ -25,7 +25,7 @@ function transition_load(_type) {
 		}
 		
 		with instance_create_depth(0, 0, 0, _type) {
-			event_user(ThingEvents.LOAD)
+			event_load()
 			instance_destroy(self, false)
 		}
 		

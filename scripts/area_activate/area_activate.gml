@@ -114,7 +114,7 @@ function area_activate(_scope) {
 		while i {
 			with active_things[| --i] {
 				if f_new and not f_created {
-					event_user(ThingEvents.CREATE)
+					event_create()
 					f_created = true
 					ds_list_add(collider != undefined ? other.tick_colliders : other.tick_things, self)
 				}

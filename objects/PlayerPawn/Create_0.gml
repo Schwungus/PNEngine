@@ -146,3 +146,36 @@ player_create = function () {}
 player_update = function () {}
 player_update_camera = function () {}
 #endregion
+
+#region Events
+Thing_event_load = event_load
+Thing_event_create = event_create
+Thing_event_tick = event_tick
+
+event_load = function () {
+	Thing_event_load()
+	ui_load("Pause")
+}
+
+event_create = function () {
+	Thing_event_create()
+	playcam = [x, y, z]
+	playcam_z = z
+	playcam_z_to = z
+	camera = area.add(PlayerCamera, x, y, z, angle)
+	
+	if thing_exists(camera) {
+		playcam_target = camera.add_target(playcam, playcam_range, playcam_x_origin, playcam_y_origin, -height + playcam_z_origin)
+		camera.pitch = 15
+	}
+}
+
+event_tick = function () {
+	Thing_event_tick()
+	
+	if thing_exists(self) and player != undefined {
+		catspeak_execute(player_update)
+		catspeak_execute(player_update_camera)
+	}
+}
+#endregion

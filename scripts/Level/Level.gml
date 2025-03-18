@@ -61,7 +61,7 @@ function Level() constructor {
 				to_level = _level
 				to_area = _area
 				to_tag = _tag
-				event_user(ThingEvents.CREATE)
+				event_create()
 			}
 			
 			exit

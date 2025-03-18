@@ -26,7 +26,7 @@ function thing_load(_type, _special = undefined) {
 		
 		with instance_create_depth(0, 0, 0, _type) {
 			special = _special
-			event_user(ThingEvents.LOAD)
+			event_load()
 			instance_destroy(self, false)
 		}
 		
