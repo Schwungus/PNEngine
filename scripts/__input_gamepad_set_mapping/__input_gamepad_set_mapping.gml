@@ -79,7 +79,7 @@ function __input_gamepad_set_mapping()
     
     if (__INPUT_ON_OPERAGX)
     {
-        if ((__guessed_type == true) && (__simple_type == "switch"))
+        if (__guessed_type && (__simple_type == "switch"))
         {
             __set_mapping(gp_face2,  0, __INPUT_MAPPING.BUTTON, "b");
             __set_mapping(gp_face1,  1, __INPUT_MAPPING.BUTTON, "a");
@@ -234,7 +234,7 @@ function __input_gamepad_set_mapping()
         case "CommunityStadia":
             if (__INPUT_ON_WINDOWS)
             {
-                //Analogue triggers and right stick mapping depends on Windows Registry setting
+                //Analogue triggers and right stick mapping depends on driver and registry
                 if (!__INPUT_SILENT) __input_trace("Setting default Stadia controller mapping");                
                 
                 __set_face_button_mapping();
@@ -252,7 +252,7 @@ function __input_gamepad_set_mapping()
                 //__set_mapping(???,    13, __INPUT_MAPPING.BUTTON,  ???);    //Assistant button, no SDL key for this
                 __set_mapping(gp_misc1, 14, __INPUT_MAPPING.BUTTON, "misc1"); //Capture button
                 
-                __set_dpad_hat_mapping();        
+                __set_dpad_hat_mapping();
                 __set_thumbstick_axis_mapping(true);        
                   
                 //Set default mapping with digital triggers, test later
@@ -261,61 +261,16 @@ function __input_gamepad_set_mapping()
                 __set_mapping(gp_shoulderrb, 11, __INPUT_MAPPING.BUTTON, "righttrigger");
                 __set_mapping(gp_shoulderlb, 12, __INPUT_MAPPING.BUTTON, "lefttrigger");
                 
-                __set_mapping(gp_axisrh, 3, __INPUT_MAPPING.AXIS, "rightx");
-                __set_mapping(gp_axisrv, 4, __INPUT_MAPPING.AXIS, "righty");
-                
                 return;
             }
         break;
 
         #endregion
-
-
-        #region Unofficial Windows driver for official Wii U GCN USB
-
-        case "CommunityGameCube":
-            if ((_vendor_and_product == "3412adbe") && __INPUT_ON_WINDOWS)
-            {
-                //Userland vJoy device feeder for WUP-028
-                if (!__INPUT_SILENT) __input_trace("Setting GameCube adapter slot to alternate mapping");
-                
-                __set_mapping(gp_face1, 0, __INPUT_MAPPING.BUTTON, "a");
-                __set_mapping(gp_face3, 1, __INPUT_MAPPING.BUTTON, "x");
-                __set_mapping(gp_face2, 2, __INPUT_MAPPING.BUTTON, "b");
-                __set_mapping(gp_face4, 3, __INPUT_MAPPING.BUTTON, "y");
-                
-                __set_mapping(gp_shoulderr, 4, __INPUT_MAPPING.BUTTON, "rightshoulder");
-                
-                ////Dual-stage trigger mapping (semantically incorrect)
-                //__set_mapping(gp_paddle2, 5, __INPUT_MAPPING.BUTTON, "paddle2");
-                //__set_mapping(gp_paddle1, 6, __INPUT_MAPPING.BUTTON, "paddle1");        
-                 
-                __set_mapping(gp_padu,  8, __INPUT_MAPPING.BUTTON, "dpup");
-                __set_mapping(gp_padd,  9, __INPUT_MAPPING.BUTTON, "dpdown");
-                __set_mapping(gp_padl, 10, __INPUT_MAPPING.BUTTON, "dpleft");
-                __set_mapping(gp_padr, 11, __INPUT_MAPPING.BUTTON, "dpright");
-                
-                __set_thumbstick_axis_mapping(true);        
-                __set_mapping(gp_axisrh, 3, __INPUT_MAPPING.AXIS, "rightx");
-                __set_mapping(gp_axisrv, 4, __INPUT_MAPPING.AXIS, "righty");
-                
-                var _mapping = __set_mapping(gp_shoulderlb, 2, __INPUT_MAPPING.AXIS, "lefttrigger");
-                _mapping.__clamp_positive = true;
-
-                _mapping = __set_mapping(gp_shoulderrb, 5, __INPUT_MAPPING.AXIS, "righttrigger");
-                _mapping.__clamp_positive = true;  
-                
-                return;
-            }
-        break;
-
-        #endregion
-
 
         #region MFi controller on Windows
 
         case "AppleController":
-            if ((__guessed_type == false) && __INPUT_ON_WINDOWS)
+            if (!__guessed_type && __INPUT_ON_WINDOWS)
             {
                 //MFi controllers have unreliable VID+PID, type is set on other indicators
                 if (!__INPUT_SILENT) __input_trace("Setting MFi controller mapping");
@@ -359,12 +314,79 @@ function __input_gamepad_set_mapping()
         break;
 
         #endregion
+        
+        #region GameCube controller overrides
 
+        case "CommunityGameCube":
+            if ((_vendor_and_product == "6f0e1311") && (__saffun_axis_test == false))
+            {
+                //Saffun GameCube controller
+                if (!__INPUT_SILENT) __input_trace("Setting Saffun GameCube mapping to GameCube");
+                            
+                __set_mapping(gp_face4, 0,  __INPUT_MAPPING.BUTTON, "y");
+                __set_mapping(gp_face3, 1,  __INPUT_MAPPING.BUTTON, "x");
+                __set_mapping(gp_face1, 2,  __INPUT_MAPPING.BUTTON, "a");
+                __set_mapping(gp_face2, 3,  __INPUT_MAPPING.BUTTON, "b");
+
+                __set_mapping(gp_shoulderl,  4, __INPUT_MAPPING.BUTTON, "leftshoulder");
+                __set_mapping(gp_shoulderr,  5, __INPUT_MAPPING.BUTTON, "rightshoulder");
+                __set_mapping(gp_shoulderlb, 6, __INPUT_MAPPING.BUTTON, "lefttrigger");
+                __set_mapping(gp_shoulderrb, 7, __INPUT_MAPPING.BUTTON, "righttrigger");
+
+                __set_mapping(gp_select, 8, __INPUT_MAPPING.BUTTON, "back");
+                __set_mapping(gp_start,  9, __INPUT_MAPPING.BUTTON, "start");
+
+                __set_dpad_and_thumbstick_mapping();
+
+                __set_mapping(gp_stickl, 10, __INPUT_MAPPING.BUTTON, "leftstick");
+                __set_mapping(gp_stickr, 11, __INPUT_MAPPING.BUTTON, "rightstick");
+
+                __set_mapping(gp_guide, 12, __INPUT_MAPPING.BUTTON, "guide");
+                
+                return;
+            }
+        
+            if ((_vendor_and_product == "3412adbe") && __INPUT_ON_WINDOWS)
+            {
+                //Userland vJoy device feeder for WUP-028
+                if (!__INPUT_SILENT) __input_trace("Setting GameCube adapter slot to alternate mapping");
+                
+                __set_mapping(gp_face1, 0, __INPUT_MAPPING.BUTTON, "a");
+                __set_mapping(gp_face3, 1, __INPUT_MAPPING.BUTTON, "x");
+                __set_mapping(gp_face2, 2, __INPUT_MAPPING.BUTTON, "b");
+                __set_mapping(gp_face4, 3, __INPUT_MAPPING.BUTTON, "y");
+                
+                __set_mapping(gp_shoulderr, 4, __INPUT_MAPPING.BUTTON, "rightshoulder");
+                
+                ////Dual-stage trigger mapping (semantically incorrect)
+                //__set_mapping(gp_paddle2, 5, __INPUT_MAPPING.BUTTON, "paddle2");
+                //__set_mapping(gp_paddle1, 6, __INPUT_MAPPING.BUTTON, "paddle1");        
+                 
+                __set_mapping(gp_padu,  8, __INPUT_MAPPING.BUTTON, "dpup");
+                __set_mapping(gp_padd,  9, __INPUT_MAPPING.BUTTON, "dpdown");
+                __set_mapping(gp_padl, 10, __INPUT_MAPPING.BUTTON, "dpleft");
+                __set_mapping(gp_padr, 11, __INPUT_MAPPING.BUTTON, "dpright");
+                
+                __set_thumbstick_axis_mapping(true);        
+                __set_mapping(gp_axisrh, 3, __INPUT_MAPPING.AXIS, "rightx");
+                __set_mapping(gp_axisrv, 4, __INPUT_MAPPING.AXIS, "righty");
+                
+                var _mapping = __set_mapping(gp_shoulderlb, 2, __INPUT_MAPPING.AXIS, "lefttrigger");
+                _mapping.__clamp_positive = true;
+
+                _mapping = __set_mapping(gp_shoulderrb, 5, __INPUT_MAPPING.AXIS, "righttrigger");
+                _mapping.__clamp_positive = true;  
+                
+                return;
+            }
+        break;
+
+        #endregion
 
         #region N64 controller overrides
 
         case "CommunityN64":
-            if (__guessed_type == true) break;
+            if (__guessed_type) break;
 
             switch(_vendor_and_product)
             {
@@ -437,13 +459,49 @@ function __input_gamepad_set_mapping()
                 break;
                 
                 #endregion
+                
+                #region Saffun N64
+
+                case "6f0e1311":
+                    if (__saffun_axis_test == true)
+                    {
+                        if (!__INPUT_SILENT) __input_trace("Overriding mapping to N64");
+
+                        __set_mapping(gp_face1, 2, __INPUT_MAPPING.BUTTON, "a");
+                        __set_mapping(gp_face2, 1, __INPUT_MAPPING.BUTTON, "b");
+
+                        __set_mapping(gp_select, 8, __INPUT_MAPPING.BUTTON, "back");
+                        __set_mapping(gp_start,  9, __INPUT_MAPPING.BUTTON, "start");
+                        __set_mapping(gp_guide, 12, __INPUT_MAPPING.BUTTON, "guide");
+
+                        __set_mapping(gp_shoulderl,  4, __INPUT_MAPPING.BUTTON, "leftshoulder");
+                        __set_mapping(gp_shoulderr,  5, __INPUT_MAPPING.BUTTON, "rightshoulder");
+                        __set_mapping(gp_shoulderlb, 6, __INPUT_MAPPING.BUTTON, "lefttrigger");
+                        __set_mapping(gp_shoulderrb, 7, __INPUT_MAPPING.BUTTON, "righttrigger");
+
+                        __set_dpad_hat_mapping();
+                        __set_thumbstick_axis_mapping(true);
+
+                        _mapping = __set_mapping(gp_axisrh, undefined, __INPUT_MAPPING.BUTTON_TO_AXIS, "rightx");
+                        _mapping.__raw_negative = 0;
+                        _mapping.__raw_positive = 10;
+                        
+                        _mapping = __set_mapping(gp_axisrv, undefined, __INPUT_MAPPING.BUTTON_TO_AXIS, "righty");
+                        _mapping.__raw_negative = 11;
+                        _mapping.__raw_positive = 3;
+                            
+                        return;
+                    }
+                break;
+                
+                #endregion
+                
             }
         break;
 
         #endregion
 
-
-        #region Obins Anne Pro 2 on Windows MacOS and Linux
+        #region Obins Anne Pro 2
 
         case "CommunityAnnePro":    
             if (INPUT_ON_PC)
@@ -479,7 +537,6 @@ function __input_gamepad_set_mapping()
         break;
         
         #endregion
-
 
         #region Ouya Controller on MacOS
 
@@ -523,11 +580,48 @@ function __input_gamepad_set_mapping()
     
         #endregion
 
-
-        #region NeoGeo Mini on Windows and Linux
+        #region NeoGeo Mini and Arcade Stick Pro
 
         case "CommunityNeoGeoMini":
-            if ((__guessed_type == false) && (__INPUT_ON_LINUX || __INPUT_ON_WINDOWS))
+            if (_vendor_and_product == "bc200155")
+            {
+                if (__input_string_contains(gamepad_get_description(__index), "JJ"))
+                {
+                     if (!__INPUT_SILENT) __input_trace("Overriding mapping to NeoGeo Arcade Stick Pro (Mode 1)");
+                     
+                    __set_mapping(gp_face3,      0, __INPUT_MAPPING.BUTTON, "x");
+                    __set_mapping(gp_face1,      1, __INPUT_MAPPING.BUTTON, "a");
+                    __set_mapping(gp_shoulderr,  2, __INPUT_MAPPING.BUTTON, "rightshoulder");
+                    __set_mapping(gp_face4,      3, __INPUT_MAPPING.BUTTON, "y");
+                    __set_mapping(gp_face2,      4, __INPUT_MAPPING.BUTTON, "b");
+                    __set_mapping(gp_shoulderrb, 5, __INPUT_MAPPING.BUTTON, "righttrigger");
+                    
+                    __set_mapping(gp_guide, 9, __INPUT_MAPPING.BUTTON, "guide");
+                }
+                else
+                {
+                    if (!__INPUT_SILENT) __input_trace("Overriding mapping to NeoGeo Arcade Stick Pro (Mode 3)");
+                    
+                    __set_mapping(gp_face1,      0, __INPUT_MAPPING.BUTTON, "a");
+                    __set_mapping(gp_face2,      1, __INPUT_MAPPING.BUTTON, "b");
+                    __set_mapping(gp_shoulderrb, 2, __INPUT_MAPPING.BUTTON, "righttrigger");
+                    __set_mapping(gp_face3,      3, __INPUT_MAPPING.BUTTON, "x");
+                    __set_mapping(gp_face4,      4, __INPUT_MAPPING.BUTTON, "y");
+                    __set_mapping(gp_shoulderr,  5, __INPUT_MAPPING.BUTTON, "rightshoulder");
+                }
+                
+                __set_mapping(gp_shoulderl,  6, __INPUT_MAPPING.BUTTON, "leftshoulder");
+                __set_mapping(gp_shoulderlb, 7, __INPUT_MAPPING.BUTTON, "lefttrigger");
+                
+                __set_mapping(gp_select, 10, __INPUT_MAPPING.BUTTON, "back");
+                __set_mapping(gp_start,  11, __INPUT_MAPPING.BUTTON, "start");
+                
+                __set_dpad_hat_mapping();
+                
+                return;
+            }
+        
+            if ((_vendor_and_product == "63257505") && !__guessed_type && (__INPUT_ON_LINUX || __INPUT_ON_WINDOWS))
             {
                 if (!__INPUT_SILENT) __input_trace("Overriding mapping to NeoGeo Mini");
 
@@ -547,11 +641,10 @@ function __input_gamepad_set_mapping()
 
         #endregion
 
-
         #region Nintendo Switch Online Controllers on Linux
 
         case "CommunitySaturn":
-            if ((__guessed_type == false) && __INPUT_ON_LINUX && (_vendor_and_product == "7e051720"))
+            if (!__guessed_type && __INPUT_ON_LINUX && (_vendor_and_product == "7e051720"))
             {
                 if (__input_string_contains(__description, "Genesis 3btn"))
                 {
@@ -596,7 +689,6 @@ function __input_gamepad_set_mapping()
         break;
 
         #endregion
-
 
         #region Non-normative HID mappings for Linux
         
@@ -719,7 +811,6 @@ function __input_gamepad_set_mapping()
     
         #endregion
 
-
         #region Nintendo Switch Controllers
 
         case "CommunityLikeSwitch":
@@ -813,10 +904,12 @@ function __input_gamepad_set_mapping()
     
     switch(os_type)
     {
-        
-        #region Windows Xbox One Wireless BT (New firmware)
+        #region Windows overrides
     
         case os_windows:
+
+            #region Xbox One Wireless BT (New firmware)
+            
             if ((_vendor_and_product == "5e04e002")                                 //XbOne Wireless Revision 1
             ||  (_vendor_and_product == "5e04fd02")                                 //XbOne Wireless Revision 2
             &&  (gamepad_axis_value(__index, 1) == gamepad_axis_value(__index, 2))  //Axes 1 and 2 are the same
@@ -853,10 +946,46 @@ function __input_gamepad_set_mapping()
         
                 return;
             }
+            
+            #endregion
+            
+            #region 3rd party PlayStation 3
+            
+            if ((_vendor_and_product == "4c056802") && (__button_count == 36) && (__axis_count == 2) && (__hat_count == 0))
+            {
+                 if (!__INPUT_SILENT) __input_trace("Overriding PS3 Controller on Windows");
+                
+                __set_mapping(gp_select, 0, __INPUT_MAPPING.BUTTON, "back");
+                __set_mapping(gp_stickl, 1, __INPUT_MAPPING.BUTTON, "leftstick");
+                __set_mapping(gp_stickr, 2, __INPUT_MAPPING.BUTTON, "rightstick");
+                __set_mapping(gp_start,  3, __INPUT_MAPPING.BUTTON, "start");
+
+                __set_mapping(gp_padu, 4, __INPUT_MAPPING.BUTTON, "dpup");
+                __set_mapping(gp_padr, 5, __INPUT_MAPPING.BUTTON, "dpright");
+                __set_mapping(gp_padd, 6, __INPUT_MAPPING.BUTTON, "dpdown");
+                __set_mapping(gp_padl, 7, __INPUT_MAPPING.BUTTON, "dpleft");
+
+                __set_mapping(gp_shoulderlb,  8, __INPUT_MAPPING.BUTTON, "lefttrigger");
+                __set_mapping(gp_shoulderrb,  9, __INPUT_MAPPING.BUTTON, "righttrigger");
+                __set_mapping(gp_shoulderl,  10, __INPUT_MAPPING.BUTTON, "leftshoulder");
+                __set_mapping(gp_shoulderr,  11, __INPUT_MAPPING.BUTTON, "rightshoulder");
+
+                __set_mapping(gp_face4, 12, __INPUT_MAPPING.BUTTON, "y");
+                __set_mapping(gp_face2, 13, __INPUT_MAPPING.BUTTON, "b");
+                __set_mapping(gp_face1, 14, __INPUT_MAPPING.BUTTON, "a");
+                __set_mapping(gp_face3, 15, __INPUT_MAPPING.BUTTON, "x");
+                
+                __set_thumbstick_axis_mapping();
+
+                __set_mapping(gp_guide, 16, __INPUT_MAPPING.BUTTON, "guide");
+
+                return;
+            }
         break;
     
         #endregion
-
+            
+        #endregion
     
         #region Missing mapping on MacOS
         
@@ -882,7 +1011,7 @@ function __input_gamepad_set_mapping()
                 __set_mapping(gp_shoulderl, 13, __INPUT_MAPPING.BUTTON, "leftshoulder");
                 __set_mapping(gp_shoulderr, 14, __INPUT_MAPPING.BUTTON, "rightshoulder");
         
-                __set_thumbstick_axis_mapping();    
+                __set_thumbstick_axis_mapping();
         
                 //No dpad data :-(
         
@@ -895,7 +1024,6 @@ function __input_gamepad_set_mapping()
     
         #endregion
 
-    
         #region Linux overrides
     
         case os_linux:
@@ -977,11 +1105,33 @@ function __input_gamepad_set_mapping()
             }
 
             #endregion
+            
+            #region Manba Mini
+
+            if ((__guid == "0500000049190000020400001b010000") && (gamepad_get_description(__index) == "xbox Wireless Controller"))
+            {
+
+               __set_mapping(gp_face1, 0, __INPUT_MAPPING.BUTTON, "a");
+               __set_mapping(gp_face2, 1, __INPUT_MAPPING.BUTTON, "b");
+               __set_mapping(gp_face3, 2, __INPUT_MAPPING.BUTTON, "x");
+               __set_mapping(gp_face4, 3, __INPUT_MAPPING.BUTTON, "y");
+
+               __set_mapping(gp_shoulderl, 4, __INPUT_MAPPING.BUTTON, "leftshoulder");
+               __set_mapping(gp_shoulderr, 5, __INPUT_MAPPING.BUTTON, "rightshoulder");
+
+               __set_mapping(gp_select, 6, __INPUT_MAPPING.BUTTON, "back");
+               __set_mapping(gp_start, 7, __INPUT_MAPPING.BUTTON, "start");
+
+               __set_dpad_hat_mapping();
+               
+               return;
+            }
+
+            #endregion
 
         break;
     
         #endregion
-        
         
         #region Conflicting Android GUIDS
 
@@ -1462,7 +1612,7 @@ function __input_gamepad_set_mapping()
     
     #endregion
     
-    #region Generic mapping    
+    #region Generic mapping
         
     __set_mapping(gp_face1, gp_face1, __INPUT_MAPPING.BUTTON, "a", false);
     __set_mapping(gp_face2, gp_face2, __INPUT_MAPPING.BUTTON, "b", false);

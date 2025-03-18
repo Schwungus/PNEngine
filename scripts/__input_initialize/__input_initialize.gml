@@ -48,6 +48,28 @@ function __input_initialize()
     
     if not (_use_split_and_trim) __input_error("Error!\nGM extended string functions are unavailable. Please update GameMaker.");
     
+    //Detect non-native string_split(), which degrades loading particularly on YYC
+    var _native_split;
+    try
+    {
+        if (is_real(string_split))
+        {
+            //Native index boundary
+            _native_split = (real(string_split) < 100000);
+        }        
+        else
+        {
+            //GMRT native functions are structs
+            _native_split = is_struct(string_split);
+        }
+    }
+    catch(_error)
+    {
+        _native_split = false;
+    }
+    
+    if (!INPUT_ON_WEB && !_native_split) __input_trace_loud("Warning!\nFound indirection for GM native \"string_split\" function. Overriding \"string_split\" degrades load performance.");
+    
     //Detect is_instanceof(), which offers some minor performance gains
     if (INPUT_ON_WEB)
     {
@@ -355,7 +377,7 @@ function __input_initialize()
         }
         else if (__INPUT_ON_IOS)
         {
-        	_max_gamepads = 5;
+            _max_gamepads = 5;
         }
         else if (__INPUT_ON_LINUX || __INPUT_ON_ANDROID)
         {
@@ -718,13 +740,19 @@ function __input_initialize()
     __input_key_name_set(vk_end,      "end");
    
     //Name newline character after Enter
-    __input_key_name_set(10, _global.__key_name_dict[$ vk_enter]);
+    __input_key_name_set(0x0A, _global.__key_name_dict[$ vk_enter]);
     
     //Reset F11 and F12 keycodes on certain platforms
     if (__INPUT_ON_SWITCH || __INPUT_ON_LINUX || __INPUT_ON_MACOS)
     {
-        __input_key_name_set(128, "f11");
-        __input_key_name_set(129, "f12");
+        __input_key_name_set(0x80, "f11");
+        __input_key_name_set(0x81, "f12");
+    }
+
+    //Numeric key 2 on MacOS
+    if (__INPUT_ON_MACOS)
+    {
+        __input_key_name_set(0x32, "2");
     }
     
     //Numeric keys 2-7 on Switch
@@ -736,17 +764,17 @@ function __input_initialize()
     if (__INPUT_ON_WINDOWS || INPUT_ON_WEB)
     {
         //F13 to F32 on Windows and Web
-        for(var _i = 13; _i <= 32; _i++) __input_key_name_set(_i + vk_f1 - 1, "f" + string(_i));
+        for(var _i = 0x0D; _i <= 0x20; _i++) __input_key_name_set(_i + vk_f1 - 1, "f" + string(_i));
         
         //IntlBackslash, Backquote
-        __input_key_name_set(226, (INPUT_ON_WEB? "\\" : "<"));
+        __input_key_name_set(0xE2, (INPUT_ON_WEB? "\\" : "<"));
         
         //Uncommon layout-contextual symbol
         switch(INPUT_KEYBOARD_LOCALE)
         {
-            case "QWERTY": __input_key_name_set(223, "`"); break;
-            case "AZERTY": __input_key_name_set(223, "!"); break;
-            case "QWERTZ": __input_key_name_set(223, "$"); break;
+            case "QWERTY": __input_key_name_set(0xDF, "`"); break;
+            case "AZERTY": __input_key_name_set(0xDF, "!"); break;
+            case "QWERTZ": __input_key_name_set(0xDF, "$"); break;
         }
     }
     

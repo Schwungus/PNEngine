@@ -66,7 +66,7 @@ function __input_gamepad_set_type()
         default:
             var _vendor_and_product = __vendor + __product;
             var _irregular_guid = (_vendor_and_product == "");            
-            if (__xinput == true)
+            if (__xinput)
             {
                 __raw_type = "CommunityLikeXBox";
                 __guessed_type = true;
@@ -115,6 +115,10 @@ function __input_gamepad_set_type()
                     else if (__input_string_contains(_desc, " n64"))
                     {
                         __raw_type = "CommunityN64";
+                    }
+                    else if (__input_string_contains(_desc, " ngc"))
+                    {
+                        __raw_type = "CommunityGameCube";
                     }
                     else
                     {
@@ -254,7 +258,6 @@ function __input_gamepad_set_type()
                 
                 #endregion
                 
-                
                 #region MFi on Windows (bad GUID)                
                 
                 case "0d000000":
@@ -268,7 +271,6 @@ function __input_gamepad_set_type()
                 break;
                 
                 #endregion
-                
                 
                 #region PS3 clone, NeoGeo Mini, Saturn Wireless Pro, third party N64 controllers
                 
@@ -309,6 +311,19 @@ function __input_gamepad_set_type()
                 
                 #endregion
                 
+                #region NeoGeo Arcade Stick Pro
+                
+                case "bc200155":
+                    if (__input_string_contains(gamepad_get_description(__index), "JJ", "NeoGeo G1 Pro") && INPUT_ON_PC)
+                    {
+                        if (!__INPUT_SILENT) __input_trace("Overriding controller ", __index ," type to NeoGeo Mini");
+                        __description = "SNK NEOGEO Arcade Stick Pro";
+                        __raw_type = "CommunityNeoGeoMini";
+                        __guessed_type = false;
+                    }
+                break;
+                
+                #endregion
                 
                 #region Anne Pro 2
                 
@@ -323,7 +338,6 @@ function __input_gamepad_set_type()
                 break;
                 
                 #endregion
-                
                 
                 #region MayFlash N64 adapter A
                 
@@ -342,7 +356,6 @@ function __input_gamepad_set_type()
                 
                 #endregion
                 
-                
                 #region MayFlash N64 adapter B
                 
                 case "d62010a7":                
@@ -358,7 +371,31 @@ function __input_gamepad_set_type()
                 break;
                 
                 #endregion
+                
+                #region Saffun N64
+                
+                case "6f0e1311":
+                    if (__saffun_axis_test == undefined)
+                    {
+                        if (!__INPUT_SILENT) __input_trace("Overriding controller ", __index ," type to Saffun N64");
+                        __saffun_axis_test = true;
+                        
+                        __description = "Saffun N64";
+                        __raw_type = "CommunityN64";
+                        __guessed_type = false;
+                    }
+                    else if (__saffun_axis_test == false)
+                    {
+                        if (!__INPUT_SILENT) __input_trace("Overriding controller ", __index ," type to Saffun GameCube");
 
+                        __description = "Saffun GameCube";
+                        __raw_type = "CommunityGameCube";
+                        __guessed_type = false;                     
+                    }
+                        
+                break;
+                
+                #endregion
 
                 #region PowerA Core Wired Controller in GameCube form factor
 
@@ -372,7 +409,6 @@ function __input_gamepad_set_type()
 
                 #endregion
 
-
                 #region PowerA Switch Controller
 
                 case "00000000":
@@ -380,12 +416,25 @@ function __input_gamepad_set_type()
                     {
                         if (!__INPUT_SILENT) __input_trace("Overridding controller ", __index ," type to Switch");
                         __raw_type = "CommunityLikeSwitch";
-                        __guessed_type = true;
+                        __guessed_type = false;
                     }
                 break;
 
                 #endregion
                 
+                #region Manba Mini
+                
+                case "49190204":
+                    if ((__guid == "0500000049190000020400001b010000") && (gamepad_get_description(__index) == "xbox Wireless Controller"))
+                    {
+                        if (!__INPUT_SILENT) __input_trace("Overridding controller ", __index ," type to Switch");
+                        __description = "Manba Mini";
+                        __raw_type = "CommunityLikeSwitch";
+                        __guessed_type = false;
+                    }
+                break;
+                
+                #endregion
                 
                 #region Malformed GUIDs
                 
@@ -519,7 +568,7 @@ function __input_gamepad_set_type()
                                             --_g;
                                             if (gamepad_is_connected(_g)) break;
                                         }
-                                            
+                                        
                                         if ((_g >= 0)
                                         &&  (_global.__gamepads[@ _g].__axis_count   == 3)
                                         &&  (_global.__gamepads[@ _g].__button_count == 0)
@@ -535,7 +584,7 @@ function __input_gamepad_set_type()
                                                 __input_gamepad_set_blacklist();
                                                 __input_gamepad_set_mapping();
                                             }
-                                                
+                                            
                                             if (!__INPUT_SILENT) __input_trace("Overriding controller ", _ir_index ," type to \"HIDWiiRemoteIRSensor\"");
                                             with(_global.__gamepads[@ _ir_index])
                                             {
@@ -544,7 +593,7 @@ function __input_gamepad_set_type()
                                                 __input_gamepad_set_blacklist();
                                                 __input_gamepad_set_mapping();                                  
                                             }
-                                                
+                                            
                                             if (!__INPUT_SILENT) __input_trace("Overriding controller ", __index ," type to \"HIDWiiRemote\"");
                                             __description = "Nintendo Wii Remote";
                                             __raw_type = "HIDWiiRemote";
@@ -552,10 +601,10 @@ function __input_gamepad_set_type()
                                         }
                                     }                        
                                 break;
-                        
+                                
                                 #endregion
                             }
-                    
+                            
                             #endregion
                             
                         break;
