@@ -196,7 +196,9 @@ if _draw_target == undefined or _draw_target.f_draw_screen {
 		}
 		
 		repeat ds_priority_size(_gui_priority) {
-			ds_priority_delete_max(_gui_priority).event_draw_gui()
+			with ds_priority_delete_max(_gui_priority) {
+				event_draw_gui()
+			}
 		}
 	}
 #endregion
