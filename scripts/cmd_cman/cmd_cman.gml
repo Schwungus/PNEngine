@@ -16,6 +16,7 @@ function cmd_cman(_args) {
 	if thing_exists(_camera_active) {
 		with _camera_active.resolve() {
 			global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
+			global.camera_man.f_desync = true
 		}
 		
 		exit
@@ -31,6 +32,7 @@ function cmd_cman(_args) {
 		if thing_exists(_camera) {
 			with _camera.resolve() {
 				global.camera_man = area.add(Camera, x, y, z, yaw, 0, {pitch, roll, fov})
+				global.camera_man.f_desync = true
 			}
 			
 			exit
