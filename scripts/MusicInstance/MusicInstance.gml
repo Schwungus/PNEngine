@@ -19,7 +19,6 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 	fmod_channel_control_set_mode(sound_instance, _loop ? FMOD_MODE.LOOP_NORMAL : FMOD_MODE.LOOP_OFF)
 	fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2] * gain[3])
 	fmod_channel_set_position(sound_instance, _offset, FMOD_TIMEUNIT.PCM)
-	fmod_channel_control_set_paused(sound_instance, false)
 	
 	static set_gain = function (_gain, _time = 0) {
 		gml_pragma("forceinline")
@@ -65,6 +64,8 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		}
 	}
 	
+	fmod_channel_control_set_paused(sound_instance, false)
+	
 	static set_active = function (_active) {
 		if active == _active {
 			return false
@@ -83,6 +84,8 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 				if _last_top != undefined {
 					_last_top.set_gain_common(1, 0, music.cut_out)
 				}
+			} else if _last_top != undefined {
+				set_gain_common(1, 0, gain[2] > 0 ? _last_top.music.cut_out : 0)
 			}
 			
 			set_gain_common(2, 1, music.fade_in)
