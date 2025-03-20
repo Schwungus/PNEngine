@@ -481,7 +481,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	
 	var _config = global.config
 	
-	_world_shader ??= (_config.vid_lighting.value or _config.vid_antialias.value) ? global.world_pixel_shader : global.world_shader
+	_world_shader ??= _config.vid_lighting.value ? global.world_pixel_shader : global.world_shader
 	
 	if thing_exists(child) {
 		var _render = child.render(_width, _height, _update_listener, _allow_sky, _allow_screen, _world_shader);
