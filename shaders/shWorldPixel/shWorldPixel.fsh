@@ -1,11 +1,4 @@
-/* -----------------------
-   SMF FRAGMENT ÜBERSHADER
-       (PER-FRAGMENT)
-    Original by TheSnidr
-          Forked by
-    Can't Sleep & nonk123
-        for PNEngine
-   ----------------------- */
+// PIXEL ÜBERSHADER (PER-PIXEL)
 
 #define LIGHT_SIZE 15
 #define MAX_LIGHTS 16
@@ -60,7 +53,7 @@ uniform vec4 u_lightmap_uvs;
 float mipmap_level(in vec2 texels) {
 	vec2 dx_vtc = dFdx(texels);
 	vec2 dy_vtc = dFdy(texels);
-	float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+	float delta_max_sqr = dot(dx_vtc, dx_vtc) + dot(dy_vtc, dy_vtc);
 	
 	return 0.5 * log2(delta_max_sqr);
 }
@@ -141,13 +134,14 @@ void main() {
 	total_light = vec4(mix(total_light.rgb, vec3(1.), u_material_bright), min(total_light.a, 1.));
 	total_specular = mix(u_material_specular.x * total_specular, 0., u_material_bright);
 	
+	// Rimlight
 	float rimlight = mix(u_material_rimlight.x * (1. - max(v_rimlight, 0.)), 0., u_material_bright);
 	
 	// Fog
 	float fog_start = u_fog_distance.x;
 	float fog = clamp((length(v_position) - fog_start) / (u_fog_distance.y - fog_start), 0., 1.);
 	
-	// Final changes
+	// Mipmapping
 	float u = fract(v_texcoord.x);
 	float v = fract(v_texcoord.y);
 	float lod = clamp(mipmap_level(v_texcoord * u_texture_size), 0., u_max_lod);
@@ -168,6 +162,7 @@ void main() {
 		sample = texture2D(gm_BaseTexture, uv);
 	}
 	
+	// Texture blending
 	float v_alpha;
 	
 	if (bool(u_material_can_blend)) {
@@ -179,6 +174,7 @@ void main() {
 		v_alpha = v_color.a;
 	}
 	
+	// Alpha testing
 	if (u_material_alpha_test > 0.) {
 		if (sample.a < u_material_alpha_test) {
 			discard;
@@ -189,15 +185,21 @@ void main() {
 	
 	vec4 starting_color = sample * u_material_color * vec4(v_color.rgb, v_alpha) * total_light;
 	
-	starting_color.rgb += pow(total_specular, u_material_specular.y) + pow(rimlight, u_material_rimlight.y);
+	// GROSS HACK: Prevent stray pixels when anti-aliasing is enabled
+	if (total_specular > 0.) { starting_color.rgb += pow(total_specular, u_material_specular.y); }
+	if (rimlight > 0.) { starting_color.rgb += pow(rimlight, u_material_rimlight.y); }
+	
 	starting_color.rgb = mix(starting_color.rgb, u_fog_color.rgb, fog);
 	starting_color.a *= mix(1., u_fog_color.a, fog);
 	gl_FragColor = starting_color * u_color;
 	
+	// Screen-door transparency
 	if (gl_FragColor.a <= (bayer8(gl_FragCoord.xy) + 0.003921568627451)) {
 		discard;
 	}
 	
 	gl_FragColor.a = 1.;
+	
+	// Stencil
 	gl_FragColor.rgb = mix(gl_FragColor.rgb, u_stencil.rgb, u_stencil.a);
 }

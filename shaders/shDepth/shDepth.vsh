@@ -1,12 +1,6 @@
-/* ---------------------
-   SMF DEPTH ÜBERSHADER
-   Original by TheSnidr
-         Forked by
-   Can't Sleep & nonk123
-       for PNEngine
-   --------------------- */
+// VERTEX ÜBERSHADER (DEPTH)
 
-#define MAX_BONES 128
+#define MAX_BONES 64
 
 /* ----------
    ATTRIBUTES

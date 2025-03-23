@@ -1,13 +1,6 @@
-/* ---------------------
-   SMF VERTEX ÜBERSHADER
-       (PER-VERTEX)
-   Original by TheSnidr
-         Forked by
-   Can't Sleep & nonk123
-       for PNEngine
-   --------------------- */
+// VERTEX ÜBERSHADER (PER-VERTEX)
 
-#define MAX_BONES 128
+#define MAX_BONES 64
 
 #define LIGHT_SIZE 15
 #define MAX_LIGHTS 16
@@ -160,6 +153,7 @@ float snoise(vec4 v) {
 			   + dot(m1 * m1, vec2(dot(p3, x3), dot(p4, x4))));
 }
 
+// Transformation
 vec3 quat_rotate(vec4 q, vec3 v) {
 	vec3 u = q.xyz;
 	
@@ -244,14 +238,8 @@ void main() {
 	vec3 camera_position = -(view_matrix[3] * view_matrix).xyz;
 	vec3 object_space_position = vec3(object_space_position_vec4);
 	vec3 view_position = object_space_position - camera_position;
-	vec4 total_light;
 	bool lightmap_enabled = bool(u_lightmap_enable_vertex);
-	
-	if (lightmap_enabled) {
-		total_light = vec4(0., 0., 0., 1.);
-	} else {
-		total_light = u_ambient_color;
-	}
+	vec4 total_light = lightmap_enabled ? vec4(0., 0., 0., 1.) : u_ambient_color;
 	
 	float total_specular = 0.;
 	vec3 reflection = normalize(reflect(view_position, world_normal));
@@ -305,16 +293,18 @@ void main() {
 	v_lighting = vec4(mix(total_light.rgb, vec3(1.), u_material_bright), min(total_light.a, 1.));
 	v_specular = vec2(mix(u_material_specular.x * total_specular, 0., u_material_bright), u_material_specular.y);
 	
+	// Rimlight
 	vec3 rim_n = normalize(mat3(view_matrix) * world_normal);
 	vec3 rim_v = normalize(-vec3(view_matrix * object_space_position_vec4));
 	
 	v_rimlight = vec2(mix(u_material_rimlight.x * (1. - max(dot(rim_v, rim_n), 0.)), 0., u_material_bright), u_material_rimlight.y);
 	
+	// Fog
 	float fog_start = u_fog_distance.x;
 	
 	v_fog = clamp((length(gl_Position.xyz) - fog_start) / (u_fog_distance.y - fog_start), 0., 1.);
 	
-	// Miscellaneous
+	// UVs
 	v_texcoord = in_TextureCoord + (u_time * u_material_scroll);
 	v_texcoord2 = in_TextureCoord2;
 }

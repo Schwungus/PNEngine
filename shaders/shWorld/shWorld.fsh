@@ -1,11 +1,4 @@
-/* -----------------------
-   SMF FRAGMENT ÜBERSHADER
-        (PER-VERTEX)
-    Original by TheSnidr
-          Forked by
-    Can't Sleep & nonk123
-        for PNEngine
-   ----------------------- */
+// PIXEL ÜBERSHADER (PER-VERTEX)
 
 /* --------
    VARYINGS
@@ -48,7 +41,7 @@ uniform vec4 u_lightmap_uvs;
 float mipmap_level(in vec2 texels) {
 	vec2 dx_vtc = dFdx(texels);
 	vec2 dy_vtc = dFdy(texels);
-	float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+	float delta_max_sqr = dot(dx_vtc, dx_vtc) + dot(dy_vtc, dy_vtc);
 	
 	return 0.5 * log2(delta_max_sqr);
 }
@@ -64,6 +57,7 @@ float bayer2(vec2 a) {
 #define bayer8(a) (bayer4(0.5 * a) * 0.25 + bayer2(a))
 
 void main() {
+	// Mipmapping
 	float u = fract(v_texcoord.x);
 	float v = fract(v_texcoord.y);
 	float lod = clamp(mipmap_level(v_texcoord * u_texture_size), 0., u_max_lod);
@@ -84,6 +78,7 @@ void main() {
 		sample = texture2D(gm_BaseTexture, uv);
 	}
 	
+	// Texture blending
 	float v_alpha;
 	
 	if (bool(u_material_can_blend)) {
@@ -95,6 +90,7 @@ void main() {
 		v_alpha = v_color.a;
 	}
 	
+	// Alpha testing
 	if (u_material_alpha_test > 0.) {
 		if (sample.a < u_material_alpha_test) {
 			discard;
@@ -103,6 +99,7 @@ void main() {
 		sample.a = 1.;
 	}
 	
+	// Lighting
 	vec4 lighting = v_lighting;
 	
 	if (bool(u_lightmap_enable_pixel)) {
@@ -115,15 +112,24 @@ void main() {
 	
 	vec4 starting_color = sample * u_material_color * vec4(v_color.rgb, v_alpha) * lighting;
 	
-	starting_color.rgb += pow(v_specular.x, v_specular.y) + pow(v_rimlight.x, v_rimlight.y);
+	// GROSS HACK: Prevent stray pixels when anti-aliasing is enabled
+	float specular = v_specular.x;
+	float rimlight = v_rimlight.x;
+	
+	if (specular > 0.) { starting_color.rgb += pow(specular, v_specular.y); }
+	if (rimlight > 0.) { starting_color.rgb += pow(rimlight, v_rimlight.y); }
+	
 	starting_color.rgb = mix(starting_color.rgb, u_fog_color.rgb, v_fog);
 	starting_color.a *= mix(1., u_fog_color.a, v_fog);
 	gl_FragColor = starting_color * u_color;
 	
+	// Screen-door transparency
 	if (gl_FragColor.a <= (bayer8(gl_FragCoord.xy) + 0.003921568627451)) {
 		discard;
 	}
 	
 	gl_FragColor.a = 1.;
+	
+	// Stencil
 	gl_FragColor.rgb = mix(gl_FragColor.rgb, u_stencil.rgb, u_stencil.a);
 }

@@ -1,11 +1,4 @@
-/* -----------------------
-   SMF FRAGMENT ÜBERSHADER
-        (PER-VERTEX)
-    Original by TheSnidr
-          Forked by
-    Can't Sleep & nonk123
-        for PNEngine
-   ----------------------- */
+// PIXEL ÜBERSHADER (DEPTH)
 
 /* --------
    VARYINGS
@@ -38,7 +31,7 @@ uniform vec4 u_material_blend_uvs;
 float mipmap_level(in vec2 texels) {
 	vec2 dx_vtc = dFdx(texels);
 	vec2 dy_vtc = dFdy(texels);
-	float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+	float delta_max_sqr = dot(dx_vtc, dx_vtc) + dot(dy_vtc, dy_vtc);
 	
 	return 0.5 * log2(delta_max_sqr);
 }
@@ -54,6 +47,7 @@ float bayer2(vec2 a) {
 #define bayer8(a) (bayer4(0.5 * a) * 0.25 + bayer2(a))
 
 void main() {
+	// Mipmapping
 	float u = fract(v_texcoord.x);
 	float v = fract(v_texcoord.y);
 	float lod = clamp(mipmap_level(v_texcoord * u_texture_size), 0., u_max_lod);
@@ -74,6 +68,7 @@ void main() {
 		sample = texture2D(gm_BaseTexture, uv);
 	}
 	
+	// Texture blending
 	float v_alpha;
 	
 	if (bool(u_material_can_blend)) {
@@ -85,6 +80,7 @@ void main() {
 		v_alpha = v_color.a;
 	}
 	
+	// Alpha testing
 	if (u_material_alpha_test > 0.) {
 		if (sample.a < u_material_alpha_test) {
 			discard;
@@ -95,6 +91,7 @@ void main() {
 	
 	gl_FragColor = (sample * u_material_color * vec4(v_color.rgb, mix(v_alpha, 0., u_material_bright))) * u_color;
 	
+	// Screen-door transparency
 	if (gl_FragColor.a <= (bayer8(gl_FragCoord.xy) + 0.003921568627451)) {
 		discard;
 	}

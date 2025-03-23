@@ -1,13 +1,6 @@
-/* ---------------------
-   SMF VERTEX ÜBERSHADER
-      (PER-FRAGMENT)
-   Original by TheSnidr
-         Forked by
-   Can't Sleep & nonk123
-       for PNEngine
-   --------------------- */
+// VERTEX ÜBERSHADER (PER-PIXEL)
 
-#define MAX_BONES 128
+#define MAX_BONES 64
 
 /* ----------
    ATTRIBUTES
@@ -237,12 +230,13 @@ void main() {
 	v_view_position = v_object_space_position + (view_matrix[3] * view_matrix).xyz;
 	v_color = in_Colour;
 	
+	// Rimlight
 	vec3 rim_n = normalize(mat3(view_matrix) * v_world_normal);
 	vec3 rim_v = normalize(-vec3(view_matrix * object_space_position_vec4));
 	
 	v_rimlight = dot(rim_v, rim_n);
 	
-	// Miscellaneous
+	// UVs
 	v_texcoord = in_TextureCoord + (u_time * u_material_scroll);
 	v_texcoord2 = in_TextureCoord2;
 }
