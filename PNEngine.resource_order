@@ -814,6 +814,7 @@
     {"name":"ui_create","order":2,"path":"scripts/ui_create/ui_create.yy",},
     {"name":"ui_exists","order":1,"path":"scripts/ui_exists/ui_exists.yy",},
     {"name":"ui_load","order":8,"path":"scripts/ui_load/ui_load.yy",},
+    {"name":"ui_top","order":6,"path":"scripts/ui_top/ui_top.yy",},
     {"name":"UIScript","order":5,"path":"scripts/UIScript/UIScript.yy",},
     {"name":"UISoundPool","order":3,"path":"scripts/UISoundPool/UISoundPool.yy",},
     {"name":"Uniform","order":1,"path":"scripts/Uniform/Uniform.yy",},

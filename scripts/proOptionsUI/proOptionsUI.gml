@@ -5,27 +5,25 @@ function proOptionsUI() : UI(undefined) constructor {
 	fail_sound = global.fail_sound
 	back_sound = global.back_sound
 	
-	var _config = global.config
-	
 #region Controls
-	controls_menu = new OUIMenu("options.controls.title", [
-		new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, _config.in_invert_x.value, function (_value) {
+	static controls_menu = new OUIMenu("options.controls.title", [
+		new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, global.config.in_invert_x.value, function (_value) {
 			config_set("in_invert_x", _value)
 		}),
 		
-		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, _config.in_invert_y.value, function (_value) {
+		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, global.config.in_invert_y.value, function (_value) {
 			config_set("in_invert_y", _value)
 		}),
 		
-		new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, _config.in_pan_x.value - 1, function (_value) {
+		new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, global.config.in_pan_x.value - 1, function (_value) {
 			config_set("in_pan_x", -~_value)
 		}),
 		
-		new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, _config.in_pan_y.value - 1, function (_value) {
+		new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, global.config.in_pan_y.value - 1, function (_value) {
 			config_set("in_pan_y", -~_value)
 		}),
 		
-		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, 0, _config.in_gyro.value, function (_value) {
+		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, 0, global.config.in_gyro.value, function (_value) {
 			config_set("in_gyro", _value)
 		}),
 		
@@ -53,12 +51,12 @@ function proOptionsUI() : UI(undefined) constructor {
 #endregion
 	
 #region Main Menu
-	main_menu = new OUIMenu("options.title", [
+	static main_menu = new OUIMenu("options.title", [
 		controls_menu,
 		
 #region Video
 		new OUIMenu("options.video.title", [
-			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, 0, _config.vid_fullscreen.value, function (_value) {
+			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, 0, global.config.vid_fullscreen.value, function (_value) {
 				config_set("vid_fullscreen", _value)
 			}),
 			
@@ -243,17 +241,17 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_max_fps", _fps)
 			}),
 			
-			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, 0, _config.vid_vsync.value, function (_value) {
+			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, 0, global.config.vid_vsync.value, function (_value) {
 				config_set("vid_vsync", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, 1, _config.vid_texture_filter.value, function (_value) {
+			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, 1, global.config.vid_texture_filter.value, function (_value) {
 				config_set("vid_texture_filter", _value)
 			}),
 			
-			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, 1, _config.vid_mipmap_filter.value, function (_value) {
+			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, 1, global.config.vid_mipmap_filter.value, function (_value) {
 				config_set("vid_mipmap_filter", _value)
 			}),
 			
@@ -285,13 +283,13 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_antialias", _aa)
 			}),
 			
-			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, 1, _config.vid_bloom.value, function (_value) {
+			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, 1, global.config.vid_bloom.value, function (_value) {
 				config_set("vid_bloom", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, 1, _config.vid_lighting.value, function (_value) {
+			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, 1, global.config.vid_lighting.value, function (_value) {
 				config_set("vid_lighting", _value)
 			}),
 			
@@ -309,21 +307,21 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 #region Audio
 		new OUIMenu("options.audio.title", [
-			new OUIOption("options.audio.snd_volume", OUIValues.VOLUME, 20, floor(clamp(_config.snd_volume.value, 0, 1) * 20), function (_value) {
+			new OUIOption("options.audio.snd_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_volume.value, 0, 1) * 20), function (_value) {
 				config_set("snd_volume", _value * 0.05)
 			}),
 			
-			new OUIOption("options.audio.snd_sound_volume", OUIValues.VOLUME, 20, floor(clamp(_config.snd_sound_volume.value, 0, 1) * 20), function (_value) {
+			new OUIOption("options.audio.snd_sound_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_sound_volume.value, 0, 1) * 20), function (_value) {
 				config_set("snd_sound_volume", _value * 0.05)
 			}),
 			
-			new OUIOption("options.audio.snd_music_volume", OUIValues.VOLUME, 20, floor(clamp(_config.snd_music_volume.value, 0, 1) * 20), function (_value) {
+			new OUIOption("options.audio.snd_music_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_music_volume.value, 0, 1) * 20), function (_value) {
 				config_set("snd_music_volume", _value * 0.05)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, 0, _config.snd_background.value, function (_value) {
+			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, 0, global.config.snd_background.value, function (_value) {
 				config_set("snd_background", _value)
 			}),
 		]),
@@ -376,7 +374,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			
 			new OUIButton("options.confirm.confirm", function () {
 				config_save()
-				replace(proOptionsUI).main_menu.option = main_menu.option
+				ui_top().replace(proOptionsUI)
 				
 				return true
 			}),
@@ -388,7 +386,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			
 			new OUIButton("options.confirm.confirm", function () {
 				config_load()
-				replace(proOptionsUI).main_menu.option = main_menu.option
+				ui_top().replace(proOptionsUI)
 				
 				return true
 			}),
@@ -400,7 +398,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			
 			new OUIButton("options.confirm.confirm", function () {
 				config_reset()
-				replace(proOptionsUI).main_menu.option = main_menu.option
+				ui_top().replace(proOptionsUI)
 				
 				return true
 			}),
@@ -482,9 +480,9 @@ function proOptionsUI() : UI(undefined) constructor {
 							option += n
 						}
 						
-						var _option = contents[option]
+						var _element = contents[option]
 						
-						if is_instanceof(_option, OUIElement) and not _option.disabled {
+						if is_instanceof(_element, OUIElement) and not _element.disabled {
 							break
 						}
 					}
@@ -498,7 +496,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			}
 		}
 		
-		var _left_right = input[UIInputs.LEFT_RIGHT] + input[UIInputs.CONFIRM]
+		var _left_right = input[UIInputs.LEFT_RIGHT]
 		
 		if _left_right != 0 {
 			var _selected = false
@@ -531,7 +529,11 @@ function proOptionsUI() : UI(undefined) constructor {
 					other.menu = _option
 					_changed = true
 				} else if is_instanceof(_option, OUIButton) {
-					_changed = _option.select(0)
+					_changed = _option.select(1)
+					
+					if not _changed {
+						play_sound(fail_sound)
+					}
 				} else if is_instanceof(_option, OUIInput) {
 					keyboard_string = string(_option.current_value)
 					other.focus = _option
@@ -578,7 +580,7 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 		with menu {
 			var i = 0
-			var _margin = string_height(" ") + 1
+			var _margin = -~string_height(" ")
 			var _y = 135 - (option * _margin)
 			
 			repeat array_length(contents) {

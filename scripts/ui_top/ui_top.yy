@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ui_top",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ui_top",
+  "parent":{
+    "name":"UI",
+    "path":"folders/Scripts/PNEngine/Game/UI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
