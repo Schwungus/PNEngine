@@ -31,6 +31,7 @@ function Uniform(_name, _type) constructor {
 	
 	repeat ds_list_size(_shaders) {
 		with _shaders[| i++] {
+			/// @feather ignore GM1063 SHUT UP SHUT UP SHUT UP SHUT UP SHUT UP
 			var _uniform = _type == UniformTypes.TEXTURE ? shader_get_sampler_index(shader, _name) : shader_get_uniform(shader, _name)
 			
 			ds_list_add(uniforms, _uniform)
