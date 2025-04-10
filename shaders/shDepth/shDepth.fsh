@@ -12,20 +12,20 @@ varying float v_light_depth;
    UNIFORMS
    -------- */
 
-uniform vec2 u_texture_size;
-uniform float u_max_lod;
-uniform vec4 u_mipmaps[12];
-uniform int u_mipmap_filter;
+uniform lowp ivec2 u_texture_size;
+uniform mediump float u_max_lod;
+uniform lowp vec4 u_mipmaps[12];
+uniform lowp int u_mipmap_filter;
 
 uniform vec4 u_color;
 
 uniform vec4 u_material_color;
-uniform float u_material_alpha_test;
+uniform lowp float u_material_alpha_test;
 uniform float u_material_bright;
 
-uniform int u_material_can_blend;
+uniform lowp int u_material_can_blend;
 uniform sampler2D u_material_blend;
-uniform vec4 u_material_blend_uvs;
+uniform lowp vec4 u_material_blend_uvs;
 
 // By genpfault
 float mipmap_level(in vec2 texels) {
@@ -50,7 +50,7 @@ void main() {
 	// Mipmapping
 	float u = fract(v_texcoord.x);
 	float v = fract(v_texcoord.y);
-	float lod = clamp(mipmap_level(v_texcoord * u_texture_size), 0., u_max_lod);
+	float lod = clamp(mipmap_level(v_texcoord * float(u_texture_size)), 0., u_max_lod);
 	vec4 sample;
 	
 	if (bool(u_mipmap_filter)) {

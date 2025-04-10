@@ -33,7 +33,7 @@ uniform vec4 u_wind; // strength, xyz
 uniform vec2 u_material_scroll;
 uniform vec3 u_material_wind; // waviness, lock bottom, speed
 
-uniform int u_animated;
+uniform lowp int u_animated;
 uniform vec4 u_bone_dq[2 * MAX_BONES];
 
 // Simplex 4D Noise 

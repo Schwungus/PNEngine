@@ -22,6 +22,8 @@ function MaterialMap() : AssetMap() constructor {
 		var _specular_exponent = 1
 		var _rimlight = 0
 		var _rimlight_exponent = 1
+		var _half_lambert = false
+		var _cel = 0
 		var _wind = 0
 		var _wind_lock_bottom = 1
 		var _wind_speed = 1
@@ -49,6 +51,8 @@ function MaterialMap() : AssetMap() constructor {
 			_specular_exponent = force_type_fallback(_json[$ "specular_exponent"], "number", 1)
 			_rimlight =force_type_fallback( _json[$ "rimlight"], "number", 0)
 			_rimlight_exponent = force_type_fallback(_json[$ "rimlight_exponent"], "number", 1)
+			_half_lambert = force_type_fallback(_json[$ "half_lambert"], "bool", false)
+			_cel = force_type_fallback(_json[$ "cel"], "number", 0)
 			_wind = force_type_fallback(_json[$ "wind"], "number", 0)
 			_wind_lock_bottom = force_type_fallback(_json[$ "wind_lock_bottom"], "number", 1)
 			_wind_speed = force_type_fallback(_json[$ "wind_speed"], "number", 1)
@@ -78,6 +82,8 @@ function MaterialMap() : AssetMap() constructor {
 			specular_exponent = _specular_exponent
 			rimlight = _rimlight
 			rimlight_exponent = _rimlight_exponent
+			half_lambert = _half_lambert
+			cel = _cel
 			wind = _wind
 			wind_lock_bottom = _wind_lock_bottom
 			wind_speed = _wind_speed

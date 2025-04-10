@@ -2,12 +2,12 @@ varying vec2 v_texcoord;
 varying vec4 v_color;
 
 uniform sampler2D u_light_texture;
-uniform vec4 u_light_uvs;
+uniform lowp vec4 u_light_uvs;
 uniform vec2 u_light_repeat;
 
 uniform vec4 u_dark_color;
 
-uniform vec2 u_bleed;
+uniform lowp vec2 u_bleed; // factor, threshold
 
 void main() {
 	vec2 frac = fract(v_texcoord * u_light_repeat);

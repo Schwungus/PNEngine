@@ -13,7 +13,7 @@ varying vec4 v_color;
    UNIFORMS
    -------- */
 
-uniform vec4 u_uvs;
+uniform lowp vec4 u_uvs;
 uniform vec4 u_color;
 
 void main() {

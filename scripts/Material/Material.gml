@@ -17,6 +17,9 @@ function Material() : Asset() constructor {
 	rimlight = 0
 	rimlight_exponent = 1
 	
+	half_lambert = false
+	cel = 0
+	
 	wind = 0
 	wind_lock_bottom = 1
 	wind_speed = 1

@@ -40,17 +40,18 @@ uniform vec4 u_wind; // strength, xyz
 
 uniform float u_material_bright;
 uniform vec2 u_material_scroll;
-uniform vec2 u_material_specular; // base, exponent
-uniform vec2 u_material_rimlight; // base, exponent
+uniform vec4 u_material_specular; // specular base+exponent, rimlight b+e
+uniform lowp int u_material_half_lambert;
+uniform lowp float u_material_cel;
 uniform vec3 u_material_wind; // waviness, lock bottom, speed
 
-uniform int u_animated;
+uniform lowp int u_animated;
 uniform vec4 u_bone_dq[2 * MAX_BONES];
 
 uniform vec4 u_ambient_color;
 uniform vec2 u_fog_distance;
 uniform float u_light_data[MAX_LIGHT_DATA];
-uniform int u_lightmap_enable_vertex;
+uniform lowp int u_lightmap_enable_vertex;
 
 //	Simplex 4D Noise 
 //	by Ian McEwan, Ashima Arts
@@ -167,6 +168,13 @@ vec3 dq_transform(vec4 real, vec4 dual, vec3 v) {
 	return (quat_rotate(real, v) + 2. * (real.w * d3 - dual.w * r3 + cross(r3, d3)));
 }
 
+// Lighting
+float matdot(vec3 a, vec3 b) {
+	float dotp = bool(u_material_half_lambert) ? pow((dot(a, b) * 0.5) + 0.5, 2.) : max(dot(a, b), 0.);
+	
+	return smoothstep(0. + u_material_cel, 1. - u_material_cel, dotp);
+}
+
 void main() {
 	vec3 calc_position = in_Position;
 	vec3 calc_normal = in_Normal;
@@ -254,8 +262,8 @@ void main() {
 				vec3 light_normal = -normalize(vec3(u_light_data[i + 5], u_light_data[i + 6], u_light_data[i + 7]));
 				vec4 light_color = vec4(u_light_data[i + 11], u_light_data[i + 12], u_light_data[i + 13], u_light_data[i + 14]);
 				
-				total_light += max(dot(world_normal, light_normal), 0.) * light_color;
-				total_specular += max(dot(reflection, light_normal), 0.);
+				total_light += matdot(world_normal, light_normal) * light_color;
+				total_specular += matdot(reflection, light_normal);
 			} else if (light_type == 2) { // Point
 				vec3 light_position = vec3(u_light_data[i + 2], u_light_data[i + 3], u_light_data[i + 4]);
 				float light_start = u_light_data[i + 5];
@@ -265,8 +273,8 @@ void main() {
 				vec3 light_direction = normalize(object_space_position - light_position);
 				float attenuation = max((light_end - distance(object_space_position, light_position)) / (light_end - light_start), 0.);
 				
-				total_light += attenuation * light_color * max(dot(world_normal, -light_direction), 0.);
-				total_specular += attenuation * max(dot(reflection, light_direction), 0.);
+				total_light += attenuation * light_color * matdot(world_normal, -light_direction);
+				total_specular += attenuation * matdot(reflection, light_direction);
 			} else if (light_type == 3) { // Spot
 				vec3 light_position = vec3(u_light_data[i + 2], u_light_data[i + 3], u_light_data[i + 4]);
 				vec3 light_normal = -normalize(vec3(u_light_data[i + 5], u_light_data[i + 6], u_light_data[i + 7]));
@@ -283,8 +291,8 @@ void main() {
 				float cutoff_outer = light_cutoff.y;
 				float attenuation = clamp((angle_difference - cutoff_outer) / (light_cutoff.x - cutoff_outer), 0., 1.) * max((light_range - dist) / light_range, 0.);
 				
-				total_light += attenuation * light_color * max(dot(world_normal, light_direction), 0.);
-				total_specular += attenuation * max(dot(reflection, light_direction), 0.);
+				total_light += attenuation * light_color * matdot(world_normal, light_direction);
+				total_specular += attenuation * matdot(reflection, light_direction);
 			}
 		}
 	}
@@ -297,7 +305,7 @@ void main() {
 	vec3 rim_n = normalize(mat3(view_matrix) * world_normal);
 	vec3 rim_v = normalize(-vec3(view_matrix * object_space_position_vec4));
 	
-	v_rimlight = vec2(mix(u_material_rimlight.x * (1. - max(dot(rim_v, rim_n), 0.)), 0., u_material_bright), u_material_rimlight.y);
+	v_rimlight = vec2(mix(u_material_specular.z * (1. - matdot(rim_v, rim_n)), 0., u_material_bright), u_material_specular.w);
 	
 	// Fog
 	float fog_start = u_fog_distance.x;

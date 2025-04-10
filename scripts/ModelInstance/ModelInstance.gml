@@ -649,7 +649,8 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		
 		var _u_material_bright = global.u_material_bright
 		var _u_material_specular = global.u_material_specular
-		var _u_material_rimlight = global.u_material_rimlight
+		var _u_material_half_lambert = global.u_material_half_lambert
+		var _u_material_cel = global.u_material_cel
 		var _u_material_wind = global.u_material_wind
 		var _u_material_color = global.u_material_color
 		var _u_material_alpha_test = global.u_material_alpha_test
@@ -748,8 +749,9 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 				}
 				
 				_u_material_bright.set(bright)
-				_u_material_specular.set(specular, specular_exponent)
-				_u_material_rimlight.set(rimlight, rimlight_exponent)
+				_u_material_specular.set(specular, specular_exponent, rimlight, rimlight_exponent)
+				_u_material_half_lambert.set(half_lambert)
+				_u_material_cel.set(cel)
 				_u_material_wind.set(wind, wind_lock_bottom, wind_speed)
 				_u_material_color.set(color[0], color[1], color[2], color[3])
 			}

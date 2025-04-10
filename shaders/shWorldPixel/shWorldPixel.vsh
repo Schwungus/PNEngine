@@ -25,7 +25,7 @@ varying vec4 v_color;
 varying vec3 v_object_space_position;
 varying vec3 v_world_normal;
 varying vec3 v_view_position;
-varying float v_rimlight;
+varying lowp float v_rimlight;
 
 /* --------
    UNIFORMS
@@ -38,7 +38,7 @@ uniform vec4 u_wind; // strength, xyz
 uniform vec2 u_material_scroll;
 uniform vec3 u_material_wind; // waviness, lock bottom, speed
 
-uniform int u_animated;
+uniform lowp int u_animated;
 uniform vec4 u_bone_dq[2 * MAX_BONES];
 
 //	Simplex 4D Noise 
