@@ -107,14 +107,7 @@ switch load_state {
 				}
 			}
 			
-			var i = 0
-			var _seed = 0
-			
-			repeat string_length(load_level) {
-				_seed = 31 * _seed + ord(string_char_at(load_level, ++i))
-			}
-			
-			global.rng_game.state = _seed % 32768
+			global.rng_game.state = 0
 			
 #region Discord Rich Presence
 			_level.rp_name = force_type_fallback(_json[$ "rp_name"], "string", "")
@@ -1021,7 +1014,7 @@ if _tick >= 1 {
 					
 					while i {
 						with _players_active[| --i] {
-							if status != PlayerStatus.ACTIVE or get_state("hp") <= 0 {
+							if status != PlayerStatus.ACTIVE {
 								break
 							}
 							
