@@ -1479,20 +1479,16 @@ event_tick = function () {
 }
 
 event_draw = function () {
-	var _draw_model = false
-	var _model
-	
 	if not thing_exists(holder) or not f_holdable_in_hand {
-		_model = model
-		
-		if _model != undefined {
-			_draw_model = true
-			_model.draw()
+		if model != undefined {
+			model.draw()
 			
 			if thing_exists(holding) and holding.f_holdable_in_hand {
-				var _hold_bone = _model.hold_bone
+				var _hold_bone = model.hold_bone
 				
 				if _hold_bone != -1 {
+					var _model = model
+					
 					with holding {
 						if model != undefined {
 							with model {
@@ -1520,13 +1516,11 @@ event_draw = function () {
 		if draw != undefined {
 			catspeak_execute(draw)
 		}
-	} else {
-		_draw_model = false
 	}
 	
 	if m_shadow != MShadow.NONE and shadow_ray[RaycastData.HIT] {
 		if m_shadow == MShadow.MODEL {
-			if _draw_model {
+			if model != undefined {
 				var _mwp = matrix_get(matrix_world)
 				var _shadow_ray = shadow_ray
 				
