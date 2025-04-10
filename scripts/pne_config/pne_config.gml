@@ -64,6 +64,8 @@ global.config = {
 	}),
 	
 	vid_bloom: new CVar(true),
+	vid_bloom_threshold: new CVar(0.85),
+	vid_bloom_intensity: new CVar(0.2),
 	vid_lighting: new CVar(1),
 	
 	// AUDIO

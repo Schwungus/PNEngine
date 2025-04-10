@@ -661,8 +661,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		if _config.vid_bloom.value {
 			gpu_set_blendenable(false)
 			global.bloom_pass_shader.set()
-			global.u_threshold.set(0.85)
-			global.u_intensity.set(0.36)
+			global.u_bloom.set(_config.vid_bloom_threshold.value, _config.vid_bloom_intensity.value)
 			
 			var _bloom = global.bloom
 			var _third_width = _width div 3
