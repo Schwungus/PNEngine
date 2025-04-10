@@ -528,7 +528,7 @@ function proOptionsUI() : UI(undefined) constructor {
 					_option.from = other.menu
 					other.menu = _option
 					_changed = true
-				} else if is_instanceof(_option, OUIButton) {
+				} else if is_instanceof(_option, OUIButton) or is_instanceof(_option, OUIOption) {
 					_changed = _option.select(1)
 					
 					if not _changed {
