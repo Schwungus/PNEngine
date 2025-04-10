@@ -31,11 +31,13 @@ with Catspeak {
 	addConstant(
 		"PI", pi,
 		"EPSILON", math_get_epsilon(),
+		
 		"MATRIX_PROJECTION", matrix_projection,
 		"MATRIX_VIEW", matrix_view,
 		"MATRIX_WORLD", matrix_world,
+		
 		"RNG_GAME", global.rng_game,
-		"RNG_VISUAL", global.rng_visual,
+		"RNG_VISUAL", global.rng_visual
 	)
 	
 	addFunction(
@@ -86,7 +88,9 @@ with Catspeak {
 		"dot_product_normalized", dot_product_normalized,
 		"angle_difference", angle_difference,
 		"lengthdir_x", lengthdir_x,
-		"lengthdir_y", lengthdir_y
+		"lengthdir_y", lengthdir_y,
+		
+		"RNG", RNG
 	)
 	
 	addFunction(

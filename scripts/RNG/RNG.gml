@@ -1,5 +1,5 @@
-function RNG() constructor {
-	state = 0
+function RNG(_state = 0) constructor {
+	state = _state
 	
 	static next = function () {
 		state = (state * 1103515245 + 12345) & 0x7FFFFFFF
