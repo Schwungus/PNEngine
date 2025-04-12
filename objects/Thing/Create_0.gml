@@ -1523,7 +1523,7 @@ event_draw = function () {
 				with model {
 					matrix_set(matrix_world, matrix_multiply(
 						matrix_build(0, 0, 0, sroll, spitch, syaw, sscale * sx_scale, sscale * sy_scale, 0),
-						matrix_build_normal(sx, sy, other.sshadow_z - 0.05, _shadow_ray[RaycastData.NX], _shadow_ray[RaycastData.NY], _shadow_ray[RaycastData.NZ], 1, other.shadow_matrix)
+						matrix_build_normal(sx, sy, other.sshadow_z - 0.01, _shadow_ray[RaycastData.NX], _shadow_ray[RaycastData.NY], _shadow_ray[RaycastData.NZ], 1, other.shadow_matrix)
 					))
 					
 					var _color = color
@@ -1545,7 +1545,7 @@ event_draw = function () {
 			var _radius = (shadow_radius ?? radius) * 2.285714285714286 // 2 * (32 / 28)
 			
 			batch_set_properties()
-			batch_floor_ext(imgShadow, 0, _radius, _radius, sshadow_x, sshadow_y, sshadow_z - 0.0625, shadow_ray[RaycastData.NX], shadow_ray[RaycastData.NY], shadow_ray[RaycastData.NZ], c_black, 0.5)
+			batch_floor_ext(imgShadow, 0, _radius, _radius, sshadow_x, sshadow_y, sshadow_z - 0.01, shadow_ray[RaycastData.NX], shadow_ray[RaycastData.NY], shadow_ray[RaycastData.NZ], c_black, 0.5)
 		}
 	}
 }
