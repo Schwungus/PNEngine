@@ -1196,11 +1196,14 @@ event_tick = function () {
 				var _half_height = height * 0.5
 				var _center_z = _new_z - _half_height
 				
-				// Check the ground first so we don't clip through moving colliders
+				/* GROSS HACK: Check the ground first so we don't clip through
+				               quickly moving colliders.
+				               I really dislike this but it has to be done. */
 				var _raycast = raycast(_new_x, _new_y, _center_z, _new_x, _new_y, _new_z, CollisionFlags.BODY)
 				
 				if _raycast[RaycastData.HIT] {
 					_new_z = _raycast[RaycastData.Z]
+					_center_z = _new_z - _half_height
 				}
 				
 				// X-axis
@@ -1262,6 +1265,7 @@ event_tick = function () {
 					ceiling_ray
 				)[RaycastData.HIT] {
 					_new_z = ceiling_ray[RaycastData.Z] + height
+					_center_z = _new_z - _half_height
 					z_speed = max(z_speed, 0)
 				}
 				
@@ -1278,7 +1282,7 @@ event_tick = function () {
 				}
 				
 				if raycast(
-					_new_x, _new_y, _new_z - _half_height,
+					_new_x, _new_y, _center_z,
 					_new_x, _new_y, _new_z + z_speed + _extra_z + math_get_epsilon(),
 					CollisionFlags.BODY, CollisionLayers.ALL,
 					floor_ray
