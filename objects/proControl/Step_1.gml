@@ -1155,8 +1155,8 @@ if _tick >= 1 {
 								var _gyro = input_motion_data_get(j)
 								
 								if _gyro != undefined {
-									_dx_factor -= _gyro.angular_velocity_y * in_gyro_x.value 
-									_dy_factor += _gyro.angular_velocity_x * in_gyro_y.value
+									_dx_factor += radtodeg(_gyro.angular_velocity_y) * in_gyro_x.value 
+									_dy_factor -= radtodeg(_gyro.angular_velocity_x) * in_gyro_y.value
 								}
 							}
 						}
