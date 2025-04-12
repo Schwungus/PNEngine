@@ -1,3 +1,5 @@
+steam_update()
+
 switch load_state {
 	case LoadStates.START: {
 		load_state = LoadStates.UNLOAD

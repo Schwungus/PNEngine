@@ -1,6 +1,7 @@
 {
   "FolderOrderSettings":[
     {"name":"Extensions","order":1762,"path":"folders/Extensions.yy",},
+    {"name":"FMOD","order":2,"path":"folders/Extensions/FMOD.yy",},
     {"name":"Objects","order":1761,"path":"folders/Objects.yy",},
     {"name":"Lights","order":7,"path":"folders/Objects/Things/Lights.yy",},
     {"name":"Players","order":3,"path":"folders/Objects/Things/Players.yy",},
@@ -122,8 +123,7 @@
   "ResourceOrderSettings":[
     {"name":"FMOD","order":1,"path":"extensions/FMOD/FMOD.yy",},
     {"name":"MultiClient","order":1,"path":"extensions/MultiClient/MultiClient.yy",},
-    {"name":"NekoPresence","order":1,"path":"extensions/NekoPresence/NekoPresence.yy",},
-    {"name":"Steamworks","order":2,"path":"extensions/Steamworks/Steamworks.yy",},
+    {"name":"Steamworks","order":1,"path":"extensions/Steamworks/Steamworks.yy",},
     {"name":"scribble_fallback_font","order":16,"path":"fonts/scribble_fallback_font/scribble_fallback_font.yy",},
     {"name":"Ambience","order":5,"path":"objects/Ambience/Ambience.yy",},
     {"name":"Camera","order":1,"path":"objects/Camera/Camera.yy",},
