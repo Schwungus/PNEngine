@@ -10,7 +10,9 @@ enum UniformTypes {
 }
 
 function Uniform(_name, _type) constructor {
-	index = global.uniforms_amount++
+	static last_index = 0
+	
+	index = last_index++
 	name = _name
 	type = _type
 	func = undefined

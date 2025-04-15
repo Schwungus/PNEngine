@@ -1,5 +1,4 @@
 global.shaders = ds_list_create()
-global.uniforms_amount = 0
 
 global.world_shader = new Shader(shWorld)
 global.world_pixel_shader = new Shader(shWorldPixel)
