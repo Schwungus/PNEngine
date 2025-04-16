@@ -31,7 +31,6 @@ global.canvases = _canvases
 global.bloom = new Bloom(160, 90, 3)
 gpu_set_ztestenable(true)
 gpu_set_zwriteenable(true)
-gpu_set_stencil_enable(true)
 global.current_shader = undefined
 #endregion
 

@@ -477,6 +477,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	++global.camera_layer
 	
 	if global.camera_layer == 1 {
+		gpu_set_stencil_enable(true)
 		gpu_set_cullmode(cull_counterclockwise)
 	}
 	
@@ -490,6 +491,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		--global.camera_layer
 		
 		if global.camera_layer <= 0 {
+			gpu_set_stencil_enable(false)
 			gpu_set_cullmode(cull_noculling)
 		}
 		
@@ -793,6 +795,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	--global.camera_layer
 	
 	if global.camera_layer <= 0 {
+		gpu_set_stencil_enable(false)
 		gpu_set_cullmode(cull_noculling)
 	}
 	
