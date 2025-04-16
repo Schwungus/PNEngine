@@ -108,7 +108,7 @@ function Player() constructor {
 				
 				with camera {
 					yaw = _player_pawn.angle
-					pitch = -15
+					pitch = 15
 					interp_skip("syaw")
 					interp_skip("spitch")
 				}
