@@ -32,7 +32,6 @@ playcam_y_origin = 0
 playcam_z_origin = -4
 playcam_z_lerp = 0.25
 playcam_z_snap = false
-playcam_sync_input = true
 playcam_target = undefined
 #endregion
 

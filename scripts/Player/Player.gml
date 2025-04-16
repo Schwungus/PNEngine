@@ -105,8 +105,13 @@ function Player() constructor {
 				}
 				
 				camera = _player_pawn.camera
-				input[PlayerInputs.FORCE_LEFT_RIGHT] = _player_pawn.angle
-				input[PlayerInputs.FORCE_UP_DOWN] = -15
+				
+				with camera {
+					yaw = _player_pawn.angle
+					pitch = -15
+					interp_skip("syaw")
+					interp_skip("spitch")
+				}
 				
 				if _respawned {
 					catspeak_execute_ext(_player_pawn.player_respawned, _player_pawn)

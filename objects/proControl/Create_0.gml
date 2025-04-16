@@ -390,8 +390,6 @@ with Catspeak {
 		"INPUT_AIM", PlayerInputs.AIM,
 		"INPUT_AIM_UP_DOWN", PlayerInputs.AIM_UP_DOWN,
 		"INPUT_AIM_LEFT_RIGHT", PlayerInputs.AIM_LEFT_RIGHT,
-		"INPUT_FORCE_UP_DOWN", PlayerInputs.FORCE_UP_DOWN,
-		"INPUT_FORCE_LEFT_RIGHT", PlayerInputs.FORCE_LEFT_RIGHT,
 	)
 	
 	addFunction(

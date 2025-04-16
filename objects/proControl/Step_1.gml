@@ -1184,8 +1184,8 @@ if _tick >= 1 {
 					buffer_write(_tick_buffer, buffer_s8, _input_up_down)
 					buffer_write(_tick_buffer, buffer_s8, _input_left_right)
 					buffer_write(_tick_buffer, buffer_u8, _input_flags)
-					buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_LEFT_RIGHT] - _dx) % 32768)
-					buffer_write(_tick_buffer, buffer_s16, (input[PlayerInputs.AIM_UP_DOWN] - _dy) % 32768)
+					buffer_write(_tick_buffer, buffer_s16, _dx % 32768)
+					buffer_write(_tick_buffer, buffer_s16, _dy % 32768)
 				}
 			}
 			
@@ -1345,22 +1345,6 @@ if _tick >= 1 {
 		
 		while i {
 			with _players_active[| --i] {
-#region Force Aim
-				var _input_force_x = input[PlayerInputs.FORCE_LEFT_RIGHT]
-				
-				if not is_nan(_input_force_x) {
-					input[PlayerInputs.AIM_LEFT_RIGHT] = round(_input_force_x * PLAYER_AIM_DIRECT) % 32768
-					input[PlayerInputs.FORCE_LEFT_RIGHT] = NaN
-				}
-				
-				var _input_force_y = input[PlayerInputs.FORCE_UP_DOWN]
-				
-				if not is_nan(_input_force_y) {
-					input[PlayerInputs.AIM_UP_DOWN] = round(_input_force_y * PLAYER_AIM_DIRECT) % 32768
-					input[PlayerInputs.FORCE_UP_DOWN] = NaN
-				}
-#endregion
-				
 #region Area
 				if area != undefined {
 					with area {

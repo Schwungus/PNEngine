@@ -21,8 +21,6 @@ enum PlayerInputs {
 	AIM,
 	AIM_UP_DOWN,
 	AIM_LEFT_RIGHT,
-	FORCE_UP_DOWN,
-	FORCE_LEFT_RIGHT,
 	__SIZE,
 }
 
