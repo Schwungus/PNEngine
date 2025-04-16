@@ -456,7 +456,7 @@ with Catspeak {
 		"M_SHADOW_NONE", MShadow.NONE,
 		"M_SHADOW_NORMAL", MShadow.NORMAL,
 		"M_SHADOW_BONE", MShadow.BONE,
-		"M_SHADOW_MODEL", MShadow.MODEL,
+		"M_SHADOW_POINTS", MShadow.POINTS,
 		
 		"HSF_IGNORE_HOLDER", HitscanFlags.IGNORE_HOLDER,
 		"HSF_IGNORE_MASTER", HitscanFlags.IGNORE_MASTER,

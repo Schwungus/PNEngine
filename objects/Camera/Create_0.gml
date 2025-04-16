@@ -91,6 +91,7 @@ interp("quake_y", "squake_y")
 interp("quake_z", "squake_z")
 
 alpha = 1
+shadows = 0
 output = (new Canvas(1, 1)).SetDepthDisabled(true)
 
 listener_pos = new FmodVector()
@@ -495,6 +496,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		return _render
 	}
 	
+	global.camera_current = self
 	output.Resize(_width, _height)
 	
 	if lerp_time < lerp_duration {
@@ -540,6 +542,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	_world_canvas.Start()
 	update_matrices(_width, _height, _update_listener)
 	
+	var _mvp = matrix_get(matrix_view)
+	var _mpp = matrix_get(matrix_projection)
 	var _camera = camera_get_active()
 	
 	camera_set_view_mat(_camera, view_matrix)
@@ -556,6 +560,18 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 	var _sky = noone
 	
 	with _area {
+		/* ==================
+		   PASS 1
+		   
+		   Draw the sky.
+		   ================== */
+		draw_clear_stencil(0)
+		gpu_set_stencil_ref(0)
+		gpu_set_stencil_func(cmpfunc_always)
+		gpu_set_stencil_pass(stencilop_replace)
+		gpu_set_stencil_fail(stencilop_keep)
+		gpu_set_stencil_depth_fail(stencilop_keep)
+		
 		if _allow_sky {
 			draw_clear_alpha(clear_color[4], clear_color[3])
 			
@@ -579,6 +595,14 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 			draw_clear(c_black)
 		}
 		
+		/* ==================
+		   PASS 2
+		   
+		   Draw the area model, all visible Things and particles.
+		   Things with shadows enabled will be included in pass 3.
+		   ================== */
+		gpu_set_stencil_ref(1)
+		
 		_world_shader.set()
 		global.u_ambient_color.set(ambient_color[0], ambient_color[1], ambient_color[2], ambient_color[3])
 		global.u_fog_distance.set(fog_distance[0], fog_distance[1])
@@ -595,6 +619,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		_active_things = active_things
 		
 		var i = ds_list_size(_active_things)
+		var _camera_shadows = global.camera_shadows
+		var _shadows = 0
 		
 		while i {
 			with _active_things[| --i] {
@@ -602,12 +628,21 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					var _dist = point_distance(_x, _y, sx, sy)
 					
 					if (_dist > cull_draw_near or _z < (sz - height) or _z > sz) and _dist < cull_draw {
-						event_draw()
+						if m_shadow != MShadow.NONE and collider == undefined {
+							gpu_set_stencil_ref(4)
+							event_draw()
+							gpu_set_stencil_ref(1)
+							ds_stack_push(_camera_shadows, self)
+							++_shadows
+						} else {
+							event_draw()
+						}
 					}
 				}
 			}
 		}
 		
+		shadows = _shadows
 		i = 0
 		
 		repeat ds_list_size(particles) {
@@ -634,8 +669,59 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		}
 		
 		batch_submit()
+		
+		/* ==================
+		   PASS 3
+		   
+		   Draw shadows.
+		   ================== */
+		if shadows {
+			gpu_set_zwriteenable(false)
+			gpu_set_stencil_func(cmpfunc_equal)
+			gpu_set_colorwriteenable(false, false, false, false)
+			
+			var _mwp = matrix_get(matrix_world)
+			var _shadow_model = global.shadow_model
+			
+			repeat shadows {
+				var _caster = ds_stack_pop(_camera_shadows)
+				
+				with _caster {
+					var _radius = shadow_radius ?? radius
+					
+					matrix_set(matrix_world, matrix_build(sx, sy, mean(sz, sshadow_z), 0, 0, 0, _radius, _radius, -max(_radius, sshadow_z - sz)))
+					
+					with _shadow_model {
+						gpu_set_stencil_pass(stencilop_incr)
+						gpu_set_cullmode(cull_clockwise)
+						submit()
+						gpu_set_cullmode(cull_counterclockwise)
+						
+						gpu_set_stencil_ref(2)
+						gpu_set_stencil_pass(stencilop_decr)
+						submit()
+						gpu_set_stencil_ref(1)
+					}
+				}
+			}
+			
+			matrix_set(matrix_world, _mwp)
+			gpu_set_colorwriteenable(true, true, true, true)
+			gpu_set_zwriteenable(true)
+		}
+		
 		gpu_set_tex_filter(_gpu_tex_filter)
 		shader_reset()
+		
+		// Darken shadow areas
+		matrix_set(matrix_view, _mvp)
+		matrix_set(matrix_projection, _mpp)
+		gpu_set_stencil_ref(2)
+		gpu_set_stencil_func(cmpfunc_equal)
+		gpu_set_stencil_pass(stencilop_incr)
+		draw_set_alpha(0.4)
+		draw_rectangle_color(0, 0, _width, _height, c_black, c_black, c_black, c_black, false)
+		draw_set_alpha(1)
 		_world_canvas.Finish()
 	}
 	

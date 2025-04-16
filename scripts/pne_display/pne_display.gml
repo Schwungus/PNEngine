@@ -31,6 +31,7 @@ global.canvases = _canvases
 global.bloom = new Bloom(160, 90, 3)
 gpu_set_ztestenable(true)
 gpu_set_zwriteenable(true)
+gpu_set_stencil_enable(true)
 global.current_shader = undefined
 #endregion
 
@@ -39,7 +40,10 @@ global.camera_active = noone
 global.camera_demo = noone
 global.camera_man = noone
 global.camera_man_freeze = true
+
 global.camera_layer = 0
+global.camera_current = noone
+global.camera_shadows = ds_stack_create()
 #endregion
 
 #region Vertex Buffers

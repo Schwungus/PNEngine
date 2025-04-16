@@ -10,7 +10,7 @@ enum MShadow {
 	NONE,
 	NORMAL,
 	BONE,
-	MODEL,
+	POINTS,
 }
 
 enum HitscanFlags {
@@ -84,12 +84,12 @@ wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
 bump_cells = undefined
 
-shadow_x = x
+/*shadow_x = x
 shadow_y = y
+shadow_matrix = matrix_build_identity()*/
 shadow_z = 0
-shadow_radius = undefined
 shadow_ray = raycast_data_create()
-shadow_matrix = matrix_build_identity()
+shadow_radius = undefined
 
 model = undefined
 collider = undefined
@@ -1046,12 +1046,11 @@ event_create = function () {
 		}
 	}
 	
-	imgShadow = global.images.get("imgShadow")
 	interp("x", "sx")
 	interp("y", "sy")
 	interp("z", "sz")
-	interp("shadow_x", "sshadow_x")
-	interp("shadow_y", "sshadow_y")
+	/*interp("shadow_x", "sshadow_x")
+	interp("shadow_y", "sshadow_y")*/
 	interp("shadow_z", "sshadow_z")
 }
 
@@ -1426,7 +1425,11 @@ event_tick = function () {
 		}
 	}
 	
-	switch m_shadow {
+	if m_shadow != MShadow.NONE and raycast(_x, _y, _z, _x, _y, _z + 1024, CollisionFlags.SHADOW, CollisionLayers.ALL, shadow_ray)[RaycastData.HIT] {
+		shadow_z = shadow_ray[RaycastData.Z]
+	}
+	
+	/*switch m_shadow {
 		case MShadow.NONE:
 		default: shadow_ray[RaycastData.HIT] = false break
 		
@@ -1451,6 +1454,12 @@ event_tick = function () {
 					_y = _bone_pos[1]
 					_z = _bone_pos[2]
 				}
+			} else if m_shadow == MShadow.MODEL and model != undefined {
+				var _tick_matrix = model.tick_matrix
+				
+				_x = _tick_matrix[12]
+				_y = _tick_matrix[13]
+				_z = _tick_matrix[14] - height * 0.5
 			} else {
 				_x = x
 				_y = y
@@ -1471,7 +1480,7 @@ event_tick = function () {
 				}
 			}
 		break
-	}
+	}*/
 	
 	if tick_end != undefined {
 		catspeak_execute(tick_end)
@@ -1515,41 +1524,6 @@ event_draw = function () {
 		
 		if draw != undefined {
 			catspeak_execute(draw)
-		}
-	}
-	
-	if m_shadow != MShadow.NONE and shadow_ray[RaycastData.HIT] {
-		if m_shadow == MShadow.MODEL {
-			if model != undefined {
-				var _mwp = matrix_get(matrix_world)
-				var _shadow_ray = shadow_ray
-				
-				with model {
-					matrix_set(matrix_world, matrix_multiply(
-						matrix_build(0, 0, 0, sroll, spitch, syaw, sscale * sx_scale, sscale * sy_scale, 0),
-						matrix_build_normal(sx, sy, other.sshadow_z - 0.01, _shadow_ray[RaycastData.NX], _shadow_ray[RaycastData.NY], _shadow_ray[RaycastData.NZ], 1, other.shadow_matrix)
-					))
-					
-					var _color = color
-					var _alpha = alpha
-					var _stencil_alpha = stencil_alpha
-					
-					color = c_black
-					alpha = 0.5
-					stencil_alpha = 0
-					submit()
-					color = _color
-					alpha = _alpha
-					stencil_alpha = _stencil_alpha
-				}
-				
-				matrix_set(matrix_world, _mwp)
-			}
-		} else {
-			var _radius = (shadow_radius ?? radius) * 2.285714285714286 // 2 * (32 / 28)
-			
-			batch_set_properties()
-			batch_floor_ext(imgShadow, 0, _radius, _radius, sshadow_x, sshadow_y, sshadow_z - 0.01, shadow_ray[RaycastData.NX], shadow_ray[RaycastData.NY], shadow_ray[RaycastData.NZ], c_black, 0.5)
 		}
 	}
 }

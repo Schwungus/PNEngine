@@ -371,7 +371,7 @@ switch load_state {
 						var _bump_y2 = -infinity
 						
 						if is_array(_add_things) {
-							_images.load("imgShadow")
+							_models.load("mdlShadow")
 							
 							var i = 0
 							
@@ -541,6 +541,16 @@ switch load_state {
 		HANDLER_FOREACH_END
 		
 		_images.end_batch()
+		
+		var _mdlShadow = _models.get("mdlShadow")
+		
+		if _mdlShadow == undefined {
+			global.shadow_model = undefined
+		} else with new ModelInstance(_mdlShadow) {
+			color = c_black
+			global.shadow_model = self
+		}
+		
 		load_state = LoadStates.FINISH
 		
 		exit
