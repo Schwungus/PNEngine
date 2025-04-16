@@ -1425,8 +1425,14 @@ event_tick = function () {
 		}
 	}
 	
-	if m_shadow != MShadow.NONE and raycast(_x, _y, _z, _x, _y, _z + 1024, CollisionFlags.SHADOW, CollisionLayers.ALL, shadow_ray)[RaycastData.HIT] {
-		shadow_z = shadow_ray[RaycastData.Z]
+	if m_shadow != MShadow.NONE {
+		var _x = x
+		var _y = y
+		var _z = z - (height * 0.5)
+		
+		if raycast(_x, _y, _z, _x, _y, _z + 1024, CollisionFlags.SHADOW, CollisionLayers.ALL, shadow_ray)[RaycastData.HIT] {
+			shadow_z = shadow_ray[RaycastData.Z]
+		}
 	}
 	
 	/*switch m_shadow {

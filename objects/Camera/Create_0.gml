@@ -630,7 +630,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					var _dist = point_distance(_x, _y, sx, sy)
 					
 					if (_dist > cull_draw_near or _z < (sz - height) or _z > sz) and _dist < cull_draw {
-						if m_shadow != MShadow.NONE and collider == undefined {
+						if m_shadow != MShadow.NONE {
 							gpu_set_stencil_ref(4)
 							event_draw()
 							gpu_set_stencil_ref(1)
