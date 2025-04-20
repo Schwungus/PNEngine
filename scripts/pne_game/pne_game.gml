@@ -41,8 +41,6 @@ global.delta = 1
 global.tick_buffer = buffer_create(1, buffer_grow, 1)
 global.inject_tick_buffer = false
 
-global.mouse_focused = false
-
 global.interps = ds_list_create()
 
 global.saves = ds_list_create()

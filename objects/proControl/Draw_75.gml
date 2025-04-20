@@ -304,11 +304,9 @@ if not global.config.snd_background.value {
 			fmod_channel_control_set_volume(global.master_channel_group, global.master_volume)
 			global.audio_focus = true
 		}
-	} else {
-		if global.audio_focus {
-			fmod_channel_control_set_volume(global.master_channel_group, 0)
-			global.audio_focus = false
-		}
+	} else if global.audio_focus {
+		fmod_channel_control_set_volume(global.master_channel_group, 0)
+		global.audio_focus = false
 	}
 }
 #endregion

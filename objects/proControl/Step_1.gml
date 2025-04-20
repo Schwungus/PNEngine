@@ -544,13 +544,7 @@ switch load_state {
 		
 		var _mdlShadow = _models.get("mdlShadow")
 		
-		if _mdlShadow == undefined {
-			global.shadow_model = undefined
-		} else with new ModelInstance(_mdlShadow) {
-			color = c_black
-			global.shadow_model = self
-		}
-		
+		global.shadow_vbo = _mdlShadow != undefined ? _mdlShadow.submodels[0].vbo : undefined
 		load_state = LoadStates.FINISH
 		
 		exit
@@ -706,32 +700,23 @@ if global.freeze_step {
 
 var _console = global.console
 var _ui = global.ui
-var _mouse_focused = global.mouse_focused
+var _config = global.config
+var _mouse_focused = input_mouse_capture_get().__capture
 
 if _mouse_focused {
-	if not _console and not global.debug_overlay
-	   and window_has_focus()
-	   and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-		mouse_dx += window_mouse_get_delta_x()
-		mouse_dy += window_mouse_get_delta_y()
-	} else {
-		window_mouse_set_locked(false)
-		global.mouse_focused = false
+	if not input_game_has_focus() or not window_has_focus()
+	   or _console or global.debug_overlay
+	   or (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
+		input_mouse_capture_set(false, _config.in_mouse_pan.value)
+		window_set_cursor(cr_default)
 		_mouse_focused = false
-		mouse_dx = 0
-		mouse_dy = 0
 	}
-} else {
-	if not _console and not global.debug_overlay
-	   and window_has_focus()
-	   and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-		window_mouse_set_locked(true)
-		global.mouse_focused = true
-		_mouse_focused = true
-	}
-	
-	mouse_dx = 0
-	mouse_dy = 0
+} else if input_game_has_focus() and window_has_focus()
+          and not _console and not global.debug_overlay
+          and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
+	input_mouse_capture_set(true, _config.in_mouse_pan.value)
+	window_set_cursor(cr_none)
+	_mouse_focused = true
 }
 
 var _tick = global.tick
@@ -742,7 +727,6 @@ global.delta = _tick_inc
 _tick = min(_tick + (_tick_inc * _tick_scale), TICKRATE)
 
 var _interps = global.interps
-var _config = global.config
 
 if _tick >= 1 {
 	__input_system_tick()
@@ -947,8 +931,6 @@ if _tick >= 1 {
 		}
 		
 		if _skip_tick {
-			mouse_dx = 0
-			mouse_dy = 0
 			_ui_tick = 0
 			_game_tick = 0
 		}
@@ -980,8 +962,8 @@ if _tick >= 1 {
 					_ui_input[UIInputs.BACK] = input_check_pressed("pause")
 					
 					if _mouse_focused {
-						_ui_input[UIInputs.MOUSE_X] = (window_mouse_get_x() / window_get_width()) * 480
-						_ui_input[UIInputs.MOUSE_Y] = (window_mouse_get_y() / window_get_height()) * 270
+						_ui_input[UIInputs.MOUSE_X] = input_cursor_x()
+						_ui_input[UIInputs.MOUSE_Y] = input_cursor_y()
 						_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
 					} else {
 						_ui_input[UIInputs.MOUSE_CONFIRM] = false
@@ -1117,9 +1099,6 @@ if _tick >= 1 {
 			// Local input
 			i = 0
 			
-			var _mouse_dx = mouse_dx
-			var _mouse_dy = mouse_dy
-			
 			repeat ds_list_size(_players_active) {
 				with _players_active[| i++] {
 					var j = slot
@@ -1150,31 +1129,25 @@ if _tick >= 1 {
 						)
 						
 						// Camera
-						var _dx_factor = input_value("aim_right", j) - input_value("aim_left", j)
-						var _dy_factor = input_value("aim_down", j) - input_value("aim_up", j)
-						var _dx_angle, _dy_angle
+						var _dx_factor = 0
+						var _dy_factor = 0
 						
 						with _config {
-							_dx_angle = in_pan_x.value * (in_invert_x.value ? -1 : 1)
-							_dy_angle = in_pan_y.value * (in_invert_y.value ? -1 : 1)
-							
-							if j == 0 and _mouse_focused {
-								_dx_factor += _mouse_dx * in_mouse_x.value
-								_dy_factor += _mouse_dy * in_mouse_y.value
-							}
+							_dx_factor += input_cursor_dx(j)
+							_dy_factor += input_cursor_dy(j)
 							
 							if in_gyro.value {
 								var _gyro = input_motion_data_get(j)
 								
 								if _gyro != undefined {
-									_dx_factor += radtodeg(_gyro.angular_velocity_y) * in_gyro_x.value 
-									_dy_factor -= radtodeg(_gyro.angular_velocity_x) * in_gyro_y.value
+									var _in_gyro_pan = in_gyro_pan.value
+									
+									_dx_factor += radtodeg(_gyro.angular_velocity_y) * _in_gyro_pan
+									_dy_factor -= radtodeg(_gyro.angular_velocity_x) * _in_gyro_pan
 								}
 							}
 						}
 						
-						_dx_factor *= _dx_angle
-						_dy_factor *= _dy_angle
 						_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
 						_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
 					}
@@ -1188,9 +1161,6 @@ if _tick >= 1 {
 					buffer_write(_tick_buffer, buffer_s16, _dy % 32768)
 				}
 			}
-			
-			mouse_dx = 0
-			mouse_dy = 0
 			
 			if _recording_demo {
 				with _level {
@@ -1478,7 +1448,7 @@ global.tick = _tick
 #region End Interpolation
 var i = ds_list_size(_interps)
 
-if _tick_inc >= 1 or _config.vid_max_fps.value <= (TICKRATE * _tick_scale) {
+if _config.vid_max_fps.value <= (TICKRATE * _tick_scale) {
 #region Interpolation OFF (FPS <= TICKRATE)
 	while i {
 		var _scope = _interps[| --i]

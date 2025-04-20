@@ -35,11 +35,11 @@
 			
 			"controls": {
 				"title": "Controls",
-				"in_invert_x": "Invert X",
 				"in_invert_y": "Invert Y",
-				"in_pan_x": "X Sensitivity",
-				"in_pan_y": "Y Sensitivity",
+				"in_pan": "Sensitivity",
+				"in_mouse_pan": "Mouse Sensitivity",
 				"in_gyro": "Gyro Aiming",
+				"in_gyro_pan": "Gyro Sensitivity",
 				"up": "Up",
 				"left": "Left",
 				"down": "Down",

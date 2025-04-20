@@ -100,15 +100,20 @@ global.config = {
 		}
 	}),
 	
-	in_invert_x: new CVar(false),
-	in_invert_y: new CVar(false),
-	in_pan_x: new CVar(6),
-	in_pan_y: new CVar(6),
-	in_mouse_x: new CVar(0.0125),
-	in_mouse_y: new CVar(0.0125),
+	in_invert_y: new CVar(false, is_numeric, function (_batch) {
+		input_cursor_inverted_set(value, all)
+	}),
+	
+	in_pan: new CVar(6, is_numeric, function (_batch) {
+		input_cursor_speed_set(value, all)
+	}),
+	
+	in_mouse_pan: new CVar(0.25, is_numeric, function (_batch) {
+		input_mouse_capture_set(input_mouse_capture_get().__capture, value)
+	}),
+	
 	in_gyro: new CVar(false),
-	in_gyro_x: new CVar(0.0125),
-	in_gyro_y: new CVar(0.0125),
+	in_gyro_pan: new CVar(1),
 }
 
 config_load()
