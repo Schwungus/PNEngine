@@ -671,6 +671,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		}
 		
 		batch_submit()
+		shader_reset()
 		
 		/* ==================
 		   PASS 3
@@ -683,27 +684,45 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 			gpu_set_colorwriteenable(false, false, false, false)
 			
 			var _mwp = matrix_get(matrix_world)
-			var _shadow_model = global.shadow_model
+			var _shadow_vbo = global.shadow_vbo
 			
 			repeat shadows {
 				var _caster = ds_stack_pop(_camera_shadows)
 				
 				with _caster {
+					var _shadx, _shady, _shadz
 					var _radius = shadow_radius ?? radius
 					
-					matrix_set(matrix_world, matrix_build(sx, sy, mean(sz, sshadow_z), 0, 0, 0, _radius, _radius, -max(_radius, sshadow_z - sz)))
-					
-					with _shadow_model {
-						gpu_set_stencil_pass(stencilop_incr)
-						gpu_set_cullmode(cull_clockwise)
-						submit()
-						gpu_set_cullmode(cull_counterclockwise)
-						
-						gpu_set_stencil_ref(2)
-						gpu_set_stencil_pass(stencilop_decr)
-						submit()
-						gpu_set_stencil_ref(1)
+					if m_shadow == MShadow.BONE and model != undefined {
+						with model {
+							if torso_bone >= 0 {
+								var _pos = get_node_pos(torso_bone, true)
+								
+								_shadx = _pos[0]
+								_shady = _pos[1]
+								_shadz = _pos[2]
+							} else {
+								_shadx = sx
+								_shady = sy
+								_shadz = sz
+							}
+						}
+					} else {
+						_shadx = sx
+						_shady = sy
+						_shadz = sz
 					}
+					
+					matrix_set(matrix_world, matrix_build(_shadx, _shady, max(_shadz, mean(_shadz, sshadow_z)), 0, 0, 0, _radius, _radius, -max(_radius, sshadow_z - _shadz)))
+					gpu_set_stencil_pass(stencilop_incr)
+					gpu_set_cullmode(cull_clockwise)
+					vertex_submit(_shadow_vbo, pr_trianglelist, -1)
+					gpu_set_cullmode(cull_counterclockwise)
+					
+					gpu_set_stencil_ref(2)
+					gpu_set_stencil_pass(stencilop_decr)
+					vertex_submit(_shadow_vbo, pr_trianglelist, -1)
+					gpu_set_stencil_ref(1)
 				}
 			}
 			
@@ -713,7 +732,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		}
 		
 		gpu_set_tex_filter(_gpu_tex_filter)
-		shader_reset()
 		
 		// Darken shadow areas
 		matrix_set(matrix_view, _mvp)
