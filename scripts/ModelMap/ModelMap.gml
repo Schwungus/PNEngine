@@ -470,20 +470,32 @@ function ModelMap() : AssetMap() constructor {
 #endregion
 			
 #region Points
-			var _points = force_type_fallback(_json[$ "points"], "struct")
-			
-			if _points != undefined {
-				var _names = struct_get_names(_points)
+			with _model {
+				points = force_type_fallback(_json[$ "points"], "struct")
 				
-				i = 0
-				
-				repeat struct_names_count(_points) {
-					var _point = force_type(_points[$ _names[i++]], "array")
+				if points != undefined {
+					var _names = struct_get_names(points)
 					
-					_point[3] = _model.get_node(force_type_fallback(_point[3], "string"))
+					i = 0
+					
+					repeat struct_names_count(points) {
+						var _point = force_type(points[$ _names[i++]], "array")
+						
+						_point[3] = get_node_id(force_type_fallback(_point[3], "string"))
+					}
 				}
 				
-				_model.points = _points
+				var _torso_bone = force_type_fallback(_json[$ "torso_bone"], "string")
+				
+				if _torso_bone != undefined {
+					torso_bone = get_node_id(_torso_bone)
+				}
+				
+				var _hold_bone = force_type_fallback(_json[$ "hold_bone"], "string")
+				
+				if _hold_bone != undefined {
+					hold_bone = get_node_id(_hold_bone)
+				}
 			}
 #endregion
 			

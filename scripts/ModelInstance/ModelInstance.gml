@@ -21,7 +21,6 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	cache = []
 	cache_amount = 0
 	
-	head_bone = _model.head_bone
 	torso_bone = _model.torso_bone
 	hold_bone = _model.hold_bone
 	
@@ -412,8 +411,8 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		var _z = _point[2]
 		var _node = _point[3]
 		
-		if _node != undefined {
-			var _node_pos = dq_transform_point(get_node_dq(_node.index), _x, _y, _z)
+		if _node >= 0 {
+			var _node_pos = dq_transform_point(get_node_dq(_node), _x, _y, _z)
 			
 			_x = _node_pos[0]
 			_y = _node_pos[1]
@@ -436,7 +435,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	static get_node_pos = function (_index, _visual = false) {
 		gml_pragma("forceinline")
 		
-		var _pos = dq_get_translation(get_node_dq(_index))
+		var _pos = dq_get_translation(get_node_dq(_index, _visual))
 		
 		return matrix_transform_point(_visual ? draw_matrix : tick_matrix, _pos[0], _pos[1], _pos[2])
 	}
@@ -472,11 +471,10 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		if animation_main != undefined {
 			var _frame_step = frame_speed * animation_main.frame_speed
 			
-			animation_finished = false
-			
 			if animation_loop {
 				// Looping animation
 				frame += _frame_step
+				animation_finished = false
 			} else {
 				// Animation plays only once
 				var _frames = animation_main.duration - 1

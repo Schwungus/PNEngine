@@ -8,7 +8,6 @@ function Model() : Asset() constructor {
 	collider = undefined
 	
 	bone_offsets = undefined
-	head_bone = -1
 	torso_bone = -1
 	hold_bone = -1
 	hold_offset_matrix = undefined
@@ -50,7 +49,7 @@ function Model() : Asset() constructor {
 			return _node.index
 		}
 		
-		return undefined
+		return -1
 	}
 	
 	static get_branch = function (_id, _array = []) {
