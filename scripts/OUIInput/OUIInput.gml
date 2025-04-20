@@ -1,5 +1,4 @@
-function OUIInput(_name, _default = "", _current = _default, _changed = undefined, _disabled = false) : OUIElement(_name, undefined, _disabled) constructor {
-	default_value = _default
+function OUIInput(_name, _current = "", _changed = undefined, _disabled = false) : OUIElement(_name, undefined, _disabled) constructor {
 	current_value = _current
 	changed = _changed
 	

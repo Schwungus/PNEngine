@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"OUISlider",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"OUISlider",
+  "parent":{
+    "name":"Options",
+    "path":"folders/Scripts/PNEngine/Game/UI/Options.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

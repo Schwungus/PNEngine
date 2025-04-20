@@ -7,24 +7,32 @@ function proOptionsUI() : UI(undefined) constructor {
 	
 #region Controls
 	static controls_menu = new OUIMenu("options.controls.title", [
-		new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, 0, global.config.in_invert_x.value, function (_value) {
-			config_set("in_invert_x", _value)
-		}),
-		
-		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, 0, global.config.in_invert_y.value, function (_value) {
+		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, global.config.in_invert_y.value, function (_value) {
 			config_set("in_invert_y", _value)
 		}),
 		
-		new OUIOption("options.controls.in_pan_x", OUIValues.SENSITIVITY, 5, global.config.in_pan_x.value - 1, function (_value) {
-			config_set("in_pan_x", -~_value)
+		new OUISlider("options.controls.in_pan", global.config.in_pan.value, 1, 1, 10, function () {
+			return $"{(current_value / 6) * 100}%"
+		}, function (_value) {
+			config_set("in_pan", _value)
 		}),
 		
-		new OUIOption("options.controls.in_pan_y", OUIValues.SENSITIVITY, 5, global.config.in_pan_y.value - 1, function (_value) {
-			config_set("in_pan_y", -~_value)
+		new OUISlider("options.controls.in_mouse_pan", global.config.in_mouse_pan.value, 0.05, 0.05, 2, function () {
+			return $"{current_value * 100}%"
+		}, function (_value) {
+			config_set("in_mouse_pan", _value)
 		}),
 		
-		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, 0, global.config.in_gyro.value, function (_value) {
+		undefined,
+		
+		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, global.config.in_gyro.value, function (_value) {
 			config_set("in_gyro", _value)
+		}),
+		
+		new OUISlider("options.controls.in_gyro_pan", global.config.in_gyro_pan.value, 0.05, 0.05, 2, function () {
+			return $"{current_value * 100}%"
+		}, function (_value) {
+			config_set("in_mouse_pan", _value)
 		}),
 		
 		undefined,
@@ -56,11 +64,11 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 #region Video
 		new OUIMenu("options.video.title", [
-			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, 0, global.config.vid_fullscreen.value, function (_value) {
+			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, global.config.vid_fullscreen.value, function (_value) {
 				config_set("vid_fullscreen", _value)
 			}),
 			
-			new OUIOption("options.video.vid_resolution", OUIValues.RESOLUTION, 7, function () {
+			new OUIOption("options.video.vid_resolution", OUIValues.RESOLUTION, function () {
 				var _config = global.config
 				var _width = _config.vid_width.value
 				var _height = _config.vid_height.value
@@ -203,7 +211,7 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_height", _height, false)
 			}),
 			
-			new OUIOption("options.video.vid_max_fps", OUIValues.FRAMERATE, 1, function () {
+			new OUIOption("options.video.vid_max_fps", OUIValues.FRAMERATE, function () {
 				var _fps = global.config.vid_max_fps.value
 				var _preset
 				
@@ -241,21 +249,21 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_max_fps", _fps)
 			}),
 			
-			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, 0, global.config.vid_vsync.value, function (_value) {
+			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, global.config.vid_vsync.value, function (_value) {
 				config_set("vid_vsync", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, 1, global.config.vid_texture_filter.value, function (_value) {
+			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, global.config.vid_texture_filter.value, function (_value) {
 				config_set("vid_texture_filter", _value)
 			}),
 			
-			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, 1, global.config.vid_mipmap_filter.value, function (_value) {
+			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, global.config.vid_mipmap_filter.value, function (_value) {
 				config_set("vid_mipmap_filter", _value)
 			}),
 			
-			new OUIOption("options.video.vid_antialias", OUIValues.ANTIALIAS, 0, function () {
+			new OUIOption("options.video.vid_antialias", OUIValues.ANTIALIAS, function () {
 				var _aa = global.config.vid_antialias.value
 				var _preset
 				
@@ -283,13 +291,13 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_antialias", _aa)
 			}),
 			
-			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, 1, global.config.vid_bloom.value, function (_value) {
+			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, global.config.vid_bloom.value, function (_value) {
 				config_set("vid_bloom", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, 1, global.config.vid_lighting.value, function (_value) {
+			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, global.config.vid_lighting.value, function (_value) {
 				config_set("vid_lighting", _value)
 			}),
 			
@@ -307,21 +315,27 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 #region Audio
 		new OUIMenu("options.audio.title", [
-			new OUIOption("options.audio.snd_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_volume.value, 0, 1) * 20), function (_value) {
-				config_set("snd_volume", _value * 0.05)
+			new OUISlider("options.audio.snd_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+				return $"{current_value * 100}%"
+			}, function (_value) {
+				config_set("snd_volume", _value)
 			}),
 			
-			new OUIOption("options.audio.snd_sound_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_sound_volume.value, 0, 1) * 20), function (_value) {
-				config_set("snd_sound_volume", _value * 0.05)
+			new OUISlider("options.audio.snd_sound_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+				return $"{current_value * 100}%"
+			}, function (_value) {
+				config_set("snd_sound_volume", _value)
 			}),
 			
-			new OUIOption("options.audio.snd_music_volume", OUIValues.VOLUME, 20, floor(clamp(global.config.snd_music_volume.value, 0, 1) * 20), function (_value) {
-				config_set("snd_music_volume", _value * 0.05)
+			new OUISlider("options.audio.snd_music_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+				return $"{current_value * 100}%"
+			}, function (_value) {
+				config_set("snd_music_volume", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, 0, global.config.snd_background.value, function (_value) {
+			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, global.config.snd_background.value, function (_value) {
 				config_set("snd_background", _value)
 			}),
 		]),
@@ -329,23 +343,6 @@ function proOptionsUI() : UI(undefined) constructor {
 		undefined,
 		
 		new OUIOption("options.language", OUIValues.LANGUAGE, function () {
-			var _osl = lexicon_get_os_locale()
-			var _languages = global.oui_values[OUIValues.LANGUAGE]
-			var i = 0
-			var _found = false
-			
-			repeat array_length(_languages) {
-				if _languages[i] == _osl {
-					_found = true
-					
-					break
-				}
-				
-				++i
-			}
-			
-			return _found ? i : 0
-		}(), function () {
 			var _curl = lexicon_language_get()
 			var _languages = global.oui_values[OUIValues.LANGUAGE]
 			var i = 0
@@ -504,7 +501,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			with menu {
 				var _option = contents[option]
 				
-				if not is_instanceof(_option, OUIOption) or _option.disabled {
+				if not (is_instanceof(_option, OUIOption) or is_instanceof(_option, OUISlider)) or _option.disabled {
 					break
 				}
 				
@@ -528,7 +525,7 @@ function proOptionsUI() : UI(undefined) constructor {
 					_option.from = other.menu
 					other.menu = _option
 					_changed = true
-				} else if is_instanceof(_option, OUIButton) or is_instanceof(_option, OUIOption) {
+				} else if is_instanceof(_option, OUIButton) or is_instanceof(_option, OUIOption) or is_instanceof(_option, OUISlider) {
 					_changed = _option.select(1)
 					
 					if not _changed {
@@ -602,6 +599,8 @@ function proOptionsUI() : UI(undefined) constructor {
 					
 					if is_instanceof(_element, OUIOption) {
 						draw_text(32 + string_width(_name), _y, lexicon_text(values[current_value]))
+					} else if is_instanceof(_element, OUISlider) {
+						draw_text(32 + string_width(_name), _y, (format != undefined ? format : string)(current_value))
 					} else if is_instanceof(_element, OUIInput) {
 						var _text
 						
