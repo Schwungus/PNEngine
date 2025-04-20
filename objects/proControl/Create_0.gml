@@ -454,7 +454,6 @@ with Catspeak {
 		"M_SHADOW_NONE", MShadow.NONE,
 		"M_SHADOW_NORMAL", MShadow.NORMAL,
 		"M_SHADOW_BONE", MShadow.BONE,
-		"M_SHADOW_POINTS", MShadow.POINTS,
 		
 		"HSF_IGNORE_HOLDER", HitscanFlags.IGNORE_HOLDER,
 		"HSF_IGNORE_MASTER", HitscanFlags.IGNORE_MASTER,
@@ -1095,9 +1094,4 @@ load_state = LoadStates.START
 if not np_initdiscord(global.game_rpc_id, true, np_steam_app_id_empty) {
 	print("! proControl: Could not initialize Discord Rich Presence")
 }
-#endregion
-
-#region Input
-mouse_dx = 0
-mouse_dy = 0
 #endregion

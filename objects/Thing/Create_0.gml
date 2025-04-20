@@ -10,7 +10,6 @@ enum MShadow {
 	NONE,
 	NORMAL,
 	BONE,
-	POINTS,
 }
 
 enum HitscanFlags {
