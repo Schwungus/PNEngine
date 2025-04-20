@@ -66,6 +66,8 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	
 	node_transforms = []
 	node_post_rotations = undefined
+	from_transforms = []
+	draw_transforms = []
 	tick_sample = []
 	from_sample = []
 	draw_sample = []
@@ -359,6 +361,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		if not _transitioning {
 			output_to_sample(tick_sample)
 			array_copy(from_sample, 0, tick_sample, 0, array_length(tick_sample))
+			array_copy(from_transforms, 0, node_transforms, 0, array_length(node_transforms))
 		}
 	}
 	
@@ -377,6 +380,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		splice_speed = 1
 		output_to_sample(tick_sample)
 		array_copy(from_sample, 0, tick_sample, 0, array_length(tick_sample))
+		array_copy(from_transforms, 0, node_transforms, 0, array_length(node_transforms))
 		interp_skip("sframe")
 	}
 	
@@ -427,7 +431,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		
 		static node_dq = dq_build_identity()
 		
-		array_copy(node_dq, 0, node_transforms, _index * 8, 8)
+		array_copy(node_dq, 0, _visual ? draw_transforms : node_transforms, _index * 8, 8)
 		
 		return node_dq
 	}
@@ -506,6 +510,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		
 		if _update_sample {
 			array_copy(from_sample, 0, tick_sample, 0, array_length(tick_sample))
+			array_copy(from_transforms, 0, node_transforms, 0, array_length(node_transforms))
 			output_to_sample(tick_sample)
 		}
 		
@@ -638,8 +643,12 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 			
 			if sframe == frame {
 				array_copy(draw_sample, 0, tick_sample, 0, array_length(tick_sample))
+				array_copy(draw_transforms, 0, node_transforms, 0, array_length(node_transforms))
 			} else {
-				dq_lerp_array(from_sample, tick_sample, global.tick, draw_sample)
+				var _tick = global.tick
+				
+				dq_lerp_array(from_sample, tick_sample, _tick, draw_sample)
+				dq_lerp_array(from_transforms, node_transforms, _tick, draw_transforms)
 			}
 			
 			global.u_bone_dq.set(draw_sample)
