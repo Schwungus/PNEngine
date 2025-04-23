@@ -104,6 +104,7 @@ f_persistent = false
 f_disposable = false
 f_unique = false
 f_visible = true
+f_xray = false
 f_gravity = false
 f_culled = false
 f_cull_destroy = false

@@ -630,6 +630,20 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					var _dist = point_distance(_x, _y, sx, sy)
 					
 					if (_dist > cull_draw_near or _z < (sz - height) or _z > sz) and _dist < cull_draw {
+						if f_xray {
+							gpu_set_colorwriteenable(false, false, false, false)
+							gpu_set_zwriteenable(false)
+							gpu_set_stencil_ref(2)
+							gpu_set_stencil_pass(stencilop_keep)
+							gpu_set_stencil_depth_fail(stencilop_replace)
+							event_draw()
+							gpu_set_stencil_depth_fail(stencilop_keep)
+							gpu_set_stencil_pass(stencilop_replace)
+							gpu_set_stencil_ref(1)
+							gpu_set_zwriteenable(true)
+							gpu_set_colorwriteenable(true, true, true, true)
+						}
+						
 						if m_shadow != MShadow.NONE {
 							gpu_set_stencil_ref(4)
 							event_draw()
