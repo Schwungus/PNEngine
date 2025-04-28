@@ -85,31 +85,31 @@ global.config = {
 	
 	// INPUT
 	in_mode: new CVar(2, is_numeric, function (_batch) {
-		var _mode = INPUT_SOURCE_MODE.FIXED
+		/*var _mode = INPUT_SOURCE_MODE.FIXED
 		
 		switch value {
 			case 1: _mode = INPUT_SOURCE_MODE.JOIN break
 			case 2: _mode = INPUT_SOURCE_MODE.HOTSWAP break
 			case 3: _mode = INPUT_SOURCE_MODE.MIXED break
-		}
+		}*/
 		
-		global.input_mode = _mode
+		global.input_mode = 2 //_mode
 		
 		if not global[$ "console"] {
-			input_source_mode_set(_mode)
+			//input_source_mode_set(_mode)
 		}
 	}),
 	
 	in_invert_y: new CVar(false, is_numeric, function (_batch) {
-		input_cursor_inverted_set(value, all)
+		//input_cursor_inverted_set(value, all)
 	}),
 	
 	in_pan: new CVar(6, is_numeric, function (_batch) {
-		input_cursor_speed_set(value, all)
+		//input_cursor_speed_set(value, all)
 	}),
 	
 	in_mouse_pan: new CVar(0.25, is_numeric, function (_batch) {
-		input_mouse_capture_set(input_mouse_capture_get().__capture, value)
+		//input_mouse_capture_set(input_mouse_capture_get().__capture, value)
 	}),
 	
 	in_gyro: new CVar(false),

@@ -11,7 +11,7 @@ function cmd_eamb(_args) {
 	var _players = global.players
 	var i = 0
 	
-	repeat INPUT_MAX_PLAYERS {
+	repeat MAX_PLAYERS {
 		var _player = _players[i++]
 		
 		if _player.status != PlayerStatus.ACTIVE {

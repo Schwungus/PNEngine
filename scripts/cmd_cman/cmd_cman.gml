@@ -26,7 +26,7 @@ function cmd_cman(_args) {
 	var _players = global.players
 	var i = 0
 	
-	repeat INPUT_MAX_PLAYERS {
+	repeat MAX_PLAYERS {
 		var _camera = _players[i++].camera
 		
 		if thing_exists(_camera) {

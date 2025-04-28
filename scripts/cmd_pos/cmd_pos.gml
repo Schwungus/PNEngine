@@ -9,7 +9,7 @@ function cmd_pos(_args) {
 		exit
 	}
 	
-	if _slot < 0 or _slot >= INPUT_MAX_PLAYERS {
+	if _slot < 0 or _slot >= MAX_PLAYERS {
 		print("! cmd_pos: Player slot out of range")
 		
 		exit

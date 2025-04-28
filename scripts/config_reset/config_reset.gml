@@ -7,5 +7,5 @@ function config_reset() {
 	})
 	
 	config_update()
-	input_player_reset()
+	//input_player_reset()
 }

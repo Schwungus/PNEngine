@@ -4,7 +4,7 @@ function player_activate(_scope, _loud = true) {
 			status = PlayerStatus.PENDING
 			
 			if _loud {
-				var _device = input_player_get_gamepad_type(slot)
+				var _device = "unknown" //input_player_get_gamepad_type(slot)
 				
 				if _device == "unknown" {
 					_device = "no gamepad"

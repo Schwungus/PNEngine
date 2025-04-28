@@ -9,7 +9,7 @@ function cmd_dend(_args) {
 			global.demo_client = false
 			global.game_status = GameStatus.DEFAULT
 			
-			var _devices = input_players_get_status().__players
+			/*var _devices = 1 input_players_get_status().__players
 			var _players = global.players
 			
 			i = 0
@@ -25,7 +25,7 @@ function cmd_dend(_args) {
 				}
 				
 				++i
-			}
+			}*/
 			
 			global.level.goto("lvlTitle")
 		}

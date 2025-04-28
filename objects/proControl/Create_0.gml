@@ -370,7 +370,7 @@ with Catspeak {
 	
 #region Players
 	addConstant(
-		"MAX_PLAYERS", INPUT_MAX_PLAYERS,
+		"MAX_PLAYERS", MAX_PLAYERS,
 		
 		"PS_INACTIVE", PlayerStatus.INACTIVE,
 		"PS_READY", PlayerStatus.PENDING,
@@ -414,7 +414,7 @@ with Catspeak {
 		},
 		
 		"player_binding_label", function (_verb, _index = 0) {
-			return input_binding_get_name(input_binding_get(_verb, _index))
+			return "" //input_binding_get_name(input_binding_get(_verb, _index))
 		}
 	)
 #endregion
@@ -1044,7 +1044,7 @@ var _players = global.players
 
 i = 0
 
-repeat INPUT_MAX_PLAYERS {
+repeat MAX_PLAYERS {
 	_players[i++].clear_states()
 }
 

@@ -41,7 +41,7 @@ switch load_state {
 		
 		i = 0
 		
-		repeat INPUT_MAX_PLAYERS {
+		repeat MAX_PLAYERS {
 			with _players[i++] {
 				level = undefined
 				area = undefined
@@ -101,11 +101,9 @@ switch load_state {
 						cmd_dend("")
 						show_caption("[c_red]Recording cancelled by title.")
 					}
-				} else {
-					if global.demo_buffer != undefined {
-						cmd_dend("")
-						show_caption("[c_red]Demo ended on title.")
-					}
+				} else if global.demo_buffer != undefined {
+					cmd_dend("")
+					show_caption("[c_red]Demo ended on title.")
 				}
 			}
 			
@@ -134,35 +132,33 @@ switch load_state {
 				
 				if is_string(_music_tracks) {
 					_level.music = [_music_tracks]
-				} else {
-					if is_array(_music_tracks) {
-						i = 0
+				} else if is_array(_music_tracks) {
+					i = 0
+					
+					repeat array_length(_music_tracks) {
+						var _track = _music_tracks[i]
+						var _name
 						
-						repeat array_length(_music_tracks) {
-							var _track = _music_tracks[i]
-							var _name
-							
-							if is_string(_track) {
-								_name = _track
-							} else {
-								if is_struct(_track) {
-									_name = _track[$ "name"]
-									
-									if not is_string(_name) {
-										show_error($"!!! proControl: Level has invalid info for music track {i}, struct must have a 'name' member with string", true)
-									}
-								} else {
-									show_error($"!!! proControl: Level has invalid info for music track {i}, expected string or struct", true)
+						if is_string(_track) {
+							_name = _track
+						} else {
+							if is_struct(_track) {
+								_name = _track[$ "name"]
+								
+								if not is_string(_name) {
+									show_error($"!!! proControl: Level has invalid info for music track {i}, struct must have a 'name' member with string", true)
 								}
+							} else {
+								show_error($"!!! proControl: Level has invalid info for music track {i}, expected string or struct", true)
 							}
-							
-							++i
 						}
 						
-						_level.music = _music_tracks
-					} else {
-						show_error($"!!! proControl: Level has invalid info for music, expected string or array", true)
+						++i
 					}
+					
+					_level.music = _music_tracks
+				} else {
+					show_error($"!!! proControl: Level has invalid info for music, expected string or array", true)
 				}
 			} else {
 				_level.music = []
@@ -579,16 +575,14 @@ switch load_state {
 				if is_string(_track) {
 					_asset = global.music.fetch(_track)
 					music_play(_asset, i)
-				} else {
-					if is_struct(_track) {
-						_asset = global.music.fetch(force_type(_track[$ "name"], "string"))
-						
-						var _priority = force_type_fallback(_track[$ "priority"], "number", i)
-						var _loop = force_type_fallback(_track[$ "loop"], "bool", true)
-						var _active = force_type_fallback(_track[$ "active"], "bool", true)
-						
-						music_play(_asset, _priority, _loop, 1, 0, _active)
-					}
+				} else if is_struct(_track) {
+					_asset = global.music.fetch(force_type(_track[$ "name"], "string"))
+					
+					var _priority = force_type_fallback(_track[$ "priority"], "number", i)
+					var _loop = force_type_fallback(_track[$ "loop"], "bool", true)
+					var _active = force_type_fallback(_track[$ "active"], "bool", true)
+					
+					music_play(_asset, _priority, _loop, 1, 0, _active)
 				}
 				
 				music[i] = _asset;
@@ -602,7 +596,7 @@ switch load_state {
 		
 		i = 0
 		
-		repeat INPUT_MAX_PLAYERS {
+		repeat MAX_PLAYERS {
 			with _players[i++] {
 				level = _level
 				set_state("frozen", false)
@@ -655,10 +649,10 @@ switch load_state {
 			}
 			
 			// States
-			buffer_write(_demo_buffer, buffer_u8, INPUT_MAX_PLAYERS)
+			buffer_write(_demo_buffer, buffer_u8, MAX_PLAYERS)
 			i = 0
 			
-			repeat INPUT_MAX_PLAYERS {
+			repeat MAX_PLAYERS {
 				buffer_write(_demo_buffer, buffer_u8, i)
 				
 				with _players[i++] {
@@ -679,7 +673,7 @@ switch load_state {
 		np_setpresence_timestamps(_level.rp_time ? date_current_datetime() : 0, 0, false)
 		i = 0
 		
-		repeat INPUT_MAX_PLAYERS {
+		repeat MAX_PLAYERS {
 			with _players[i++] {
 				if status == PlayerStatus.ACTIVE {
 					set_area(_load_area, _load_tag)
@@ -701,20 +695,20 @@ if global.freeze_step {
 var _console = global.console
 var _ui = global.ui
 var _config = global.config
-var _mouse_focused = input_mouse_capture_get().__capture
+var _mouse_focused = false //input_mouse_capture_get().__capture
 
 if _mouse_focused {
-	if not input_game_has_focus() or not window_has_focus()
+	if /*not input_game_has_focus() or*/ not window_has_focus()
 	   or _console or global.debug_overlay
 	   or (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-		input_mouse_capture_set(false, _config.in_mouse_pan.value)
+		//input_mouse_capture_set(false, _config.in_mouse_pan.value)
 		window_set_cursor(cr_default)
 		_mouse_focused = false
 	}
-} else if input_game_has_focus() and window_has_focus()
+} else if /*input_game_has_focus() and*/ window_has_focus()
           and not _console and not global.debug_overlay
           and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-	input_mouse_capture_set(true, _config.in_mouse_pan.value)
+	//input_mouse_capture_set(true, _config.in_mouse_pan.value)
 	window_set_cursor(cr_none)
 	_mouse_focused = true
 }
@@ -729,7 +723,7 @@ _tick = min(_tick + (_tick_inc * _tick_scale), TICKRATE)
 var _interps = global.interps
 
 if _tick >= 1 {
-	__input_system_tick()
+	//__input_system_tick()
 	
 	// Cache game session info
 	var _demo_write = global.demo_write
@@ -743,23 +737,23 @@ if _tick >= 1 {
 	var _trans_tick = _tick
 	
 #region Debug
-	if input_check_pressed("debug_overlay") {
+	if false /*input_check_pressed("debug_overlay")*/ {
 		global.debug_overlay = not global.debug_overlay
 		show_debug_overlay(global.debug_overlay)
 	}
 	
-	if input_check_pressed("debug_fps") {
+	if false /*input_check_pressed("debug_fps")*/ {
 		global.debug_fps = not global.debug_fps
 	}
 	
 	if _console {
-		input_verb_consume("leave")
+		//input_verb_consume("leave")
 		
-		if input_check_pressed("debug_console_previous") {
+		if false /*input_check_pressed("debug_console_previous")*/ {
 			keyboard_string = global.console_input_previous
 		}
 		
-		if input_check_pressed("debug_console_submit") {
+		if false /*input_check_pressed("debug_console_submit")*/ {
 			var _input = string_trim(keyboard_string)
 			
 			if _input != "" {
@@ -796,17 +790,17 @@ if _tick >= 1 {
 				_playing_demo = false
 				_recording_demo = false
 			}
-		} else if input_check_pressed("pause") {
+		} else if false /*input_check_pressed("pause")*/ {
 			global.console_input = keyboard_string
 			cmd_close("")
-			input_verb_consume("pause")
+			//input_verb_consume("pause")
 		}
 		
 		_game_tick = 0
 		_ui_tick = 0
 		_trans_tick = 0
-	} else if input_check_pressed("debug_console") {
-		input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
+	} else if false /*input_check_pressed("debug_console")*/ {
+		//input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
 		global.console = true
 		keyboard_string = global.console_input
 		fmod_channel_control_set_paused(global.world_channel_group, true)
@@ -816,7 +810,7 @@ if _tick >= 1 {
 	
 	if not _playing_demo {
 		// Handle player activations by injecting into the tick buffer
-		with input_players_get_status() {
+		/*with input_players_get_status() {
 			if __any_changed {
 				var _tick_buffer = inject_tick_packet()
 				var i = 0
@@ -835,7 +829,7 @@ if _tick >= 1 {
 					++i
 				}
 			}
-		}
+		}*/
 	}
 	
 #region Start Interpolation
@@ -858,14 +852,12 @@ if _tick >= 1 {
 				
 				continue
 			}
+		} else if weak_ref_alive(_scope) {
+			_ref = _scope.ref
 		} else {
-			if weak_ref_alive(_scope) {
-				_ref = _scope.ref
-			} else {
-				_interps[| i] = undefined
-				
-				continue
-			}
+			_interps[| i] = undefined
+			
+			continue
 		}
 		
 		with _ref {
@@ -951,7 +943,7 @@ if _tick >= 1 {
 					_ui_input[UIInputs.CONFIRM] = false
 					_ui_input[UIInputs.BACK] = false
 					_ui_input[UIInputs.MOUSE_CONFIRM] = false
-				} else {
+				} /*else {
 					var _delta = 1 / max(_tick_inc, 1)
 					var _repeat = 2 * _delta
 					var _prerep = 12 * _delta
@@ -968,7 +960,7 @@ if _tick >= 1 {
 					} else {
 						_ui_input[UIInputs.MOUSE_CONFIRM] = false
 					}
-				}
+				}*/
 				
 				var _tick_target = _ui
 				
@@ -1002,7 +994,7 @@ if _tick >= 1 {
 			} else {
 				var _paused = false
 				
-				if not _block_input and input_check_pressed("pause") {
+				if not _block_input and false /*input_check_pressed("pause")*/ {
 					_paused = true
 					i = ds_list_size(_players_active)
 					
@@ -1035,9 +1027,9 @@ if _tick >= 1 {
 			}
 			
 			// Try to clear momentary input if game ticks are skipped
-			if _skip_tick {
+			/*if _skip_tick {
 				input_clear_momentary(true)
-			}
+			}*/
 			
 			--_ui_tick
 		}
@@ -1064,7 +1056,7 @@ if _tick >= 1 {
 	while _game_tick >= 1 {
 #region Cameraman (non-deterministic)
 		if _has_camera_man and _camera_man_freeze {
-			input_clear_momentary(true);
+			//input_clear_momentary(true);
 			--_game_tick
 			
 			continue
@@ -1100,7 +1092,7 @@ if _tick >= 1 {
 			i = 0
 			
 			repeat ds_list_size(_players_active) {
-				with _players_active[| i++] {
+				/*with _players_active[| i++] {
 					var j = slot
 					var _input_up_down, _input_left_right, _input_flags, _dx, _dy
 					
@@ -1159,7 +1151,7 @@ if _tick >= 1 {
 					buffer_write(_tick_buffer, buffer_u8, _input_flags)
 					buffer_write(_tick_buffer, buffer_s16, _dx % 32768)
 					buffer_write(_tick_buffer, buffer_s16, _dy % 32768)
-				}
+				}*/
 			}
 			
 			if _recording_demo {
@@ -1200,7 +1192,7 @@ if _tick >= 1 {
 					with _players[_slot] {
 						if not player_activate(self) {
 							if __show_reconnect_caption {
-								var _device = input_player_get_gamepad_type(_slot)
+								var _device = "unknown" //input_player_get_gamepad_type(_slot)
 								
 								if _device == "unknown" {
 									_device = "no gamepad"
@@ -1289,7 +1281,7 @@ if _tick >= 1 {
 				
 				case TickPackets.SIGNAL: {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
-					var _sender = _slot < INPUT_MAX_PLAYERS ? _players[_slot] : undefined
+					var _sender = _slot < MAX_PLAYERS ? _players[_slot] : undefined
 					var _name = buffer_read(_tick_buffer, buffer_string)
 					var _argc = buffer_read(_tick_buffer, buffer_u8)
 					var _args = global.signal_args
@@ -1435,7 +1427,7 @@ if _tick >= 1 {
 		++_level.time
 #endregion
 		
-		input_clear_momentary(true);
+		//input_clear_momentary(true);
 		--_game_tick
 	}
 #endregion
@@ -1467,14 +1459,12 @@ if _config.vid_max_fps.value <= (TICKRATE * _tick_scale) {
 				
 				continue
 			}
+		} else if weak_ref_alive(_scope) {
+			_ref = _scope.ref
 		} else {
-			if weak_ref_alive(_scope) {
-				_ref = _scope.ref
-			} else {
-				_interps[| i] = undefined
-				
-				continue
-			}
+			_interps[| i] = undefined
+			
+			continue
 		}
 		
 		with _ref {
@@ -1507,14 +1497,12 @@ if _config.vid_max_fps.value <= (TICKRATE * _tick_scale) {
 				
 				continue
 			}
+		} else if weak_ref_alive(_scope) {
+			_ref = _scope.ref
 		} else {
-			if weak_ref_alive(_scope) {
-				_ref = _scope.ref
-			} else {
-				_interps[| i] = undefined
-				
-				continue
-			}
+			_interps[| i] = undefined
+			
+			continue
 		}
 		
 		with _ref {

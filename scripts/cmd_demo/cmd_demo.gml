@@ -88,7 +88,7 @@ function cmd_demo(_args) {
 	repeat _max_players {
 		var _slot = buffer_read(_demo_buffer, buffer_u8)
 		
-		if _slot >= INPUT_MAX_PLAYERS {
+		if _slot >= MAX_PLAYERS {
 			buffer_delete(_demo_buffer)
 			print($"! cmd_demo: '{_filename}' has invalid player index {_slot}")
 			

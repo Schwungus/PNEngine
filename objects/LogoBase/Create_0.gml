@@ -19,7 +19,7 @@ event_create = function () {
 }
 
 event_tick = function () {
-	if input_check_pressed("pause") {
+	if false /*input_check_pressed("pause")*/ {
 		finished = 2
 	}
 	

@@ -4,7 +4,7 @@ function Save(_filename) constructor {
 	code = ""
 	date = 0
 	
-	states = array_create_ext(INPUT_MAX_PLAYERS, function (_index) {
+	states = array_create_ext(MAX_PLAYERS, function (_index) {
 		return {}
 	})
 	
@@ -74,7 +74,7 @@ function Save(_filename) constructor {
 			var i = buffer_read(_buffer, buffer_u8)
 			
 			// Skip excess player slots
-			if i >= INPUT_MAX_PLAYERS {
+			if i >= MAX_PLAYERS {
 				n = buffer_read(_buffer, buffer_u32)
 				
 				repeat n {

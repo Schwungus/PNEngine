@@ -409,28 +409,28 @@ function proOptionsUI() : UI(undefined) constructor {
 	force_option = -1
 	
 	clean_up = function () {
-		input_binding_scan_abort()
+		//input_binding_scan_abort()
 	}
 	
 	tick = function () {
 		if focus != undefined {
-			input_verb_consume("jump")
+			/*input_verb_consume("jump")
 			input_verb_consume("leave")
-			input_verb_consume("debug_console")
+			input_verb_consume("debug_console")*/
 			
 			if input[UIInputs.BACK] {
-				if input_binding_scan_in_progress() {
+				/*if input_binding_scan_in_progress() {
 					input_binding_scan_abort()
-				} else {
+				} else {*/
 					play_sound(back_sound)
-				}
+				//}
 				
 				focus = undefined
 				
 				exit
 			}
 			
-			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] and not input_keyboard_check(vk_space) {
+			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] /*and not input_keyboard_check(vk_space)*/ {
 				play_sound(focus.confirm(keyboard_string) ? select_sound : fail_sound)
 				focus = undefined
 			}
@@ -540,9 +540,9 @@ function proOptionsUI() : UI(undefined) constructor {
 						static _ignore = [vk_escape, vk_backspace, 192, gp_start, gp_select]
 						
 						focus = _option
-						input_binding_scan_params_set(_ignore)
+						//input_binding_scan_params_set(_ignore)
 						
-						input_binding_scan_start(function (_binding) {
+						/*input_binding_scan_start(function (_binding) {
 							input_binding_set_safe(focus.verb, _binding)
 							play_sound(select_sound)
 							focus = undefined
@@ -550,7 +550,7 @@ function proOptionsUI() : UI(undefined) constructor {
 						}, function () {
 							play_sound(back_sound)
 							focus = undefined
-						})
+						})*/
 					}
 					
 					_changed = true

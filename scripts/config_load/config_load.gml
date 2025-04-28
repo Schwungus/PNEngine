@@ -22,7 +22,7 @@ function config_load() {
 	
 	try {
 		_json = json_load(CONTROLS_PATH)
-		input_player_import(_json)
+		//input_player_import(_json)
 	} catch (e) {
 		print($"! config_load: Failed to import controls ({e})")
 	}

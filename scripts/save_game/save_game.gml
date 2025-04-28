@@ -36,12 +36,12 @@ function save_game() {
 	}
 	
 	// States
-	buffer_write(_buffer, buffer_u8, INPUT_MAX_PLAYERS)
+	buffer_write(_buffer, buffer_u8, MAX_PLAYERS)
 	
 	var _players = global.players
 	var i = 0
 	
-	repeat INPUT_MAX_PLAYERS {
+	repeat MAX_PLAYERS {
 		buffer_write(_buffer, buffer_u8, i)
 		_players[i++].write_states(_buffer)
 	}
