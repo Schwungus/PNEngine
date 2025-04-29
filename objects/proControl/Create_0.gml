@@ -383,13 +383,39 @@ with Catspeak {
 		"INPUT_JUMP", PlayerInputs.JUMP,
 		"INPUT_INTERACT", PlayerInputs.INTERACT,
 		"INPUT_ATTACK", PlayerInputs.ATTACK,
-		"INPUT_INVENTORY_UP", PlayerInputs.INVENTORY_UP,
-		"INPUT_INVENTORY_LEFT", PlayerInputs.INVENTORY_LEFT,
-		"INPUT_INVENTORY_DOWN", PlayerInputs.INVENTORY_DOWN,
-		"INPUT_INVENTORY_RIGHT", PlayerInputs.INVENTORY_RIGHT,
+		"INPUT_INVENTORY1", PlayerInputs.INVENTORY1,
+		"INPUT_INVENTORY2", PlayerInputs.INVENTORY2,
+		"INPUT_INVENTORY3", PlayerInputs.INVENTORY3,
+		"INPUT_INVENTORY4", PlayerInputs.INVENTORY4,
 		"INPUT_AIM", PlayerInputs.AIM,
 		"INPUT_AIM_UP_DOWN", PlayerInputs.AIM_UP_DOWN,
 		"INPUT_AIM_LEFT_RIGHT", PlayerInputs.AIM_LEFT_RIGHT,
+		
+		"VERB_UP", INPUT_VERB.UP,
+		"VERB_LEFT", INPUT_VERB.LEFT,
+		"VERB_DOWN", INPUT_VERB.DOWN,
+		"VERB_RIGHT", INPUT_VERB.RIGHT,
+		"VERB_WALK", INPUT_VERB.WALK,
+		"VERB_JUMP", INPUT_VERB.JUMP,
+		"VERB_INTERACT", INPUT_VERB.INTERACT,
+		"VERB_ATTACK", INPUT_VERB.ATTACK,
+		"VERB_INVENTORY1", INPUT_VERB.INVENTORY1,
+		"VERB_INVENTORY2", INPUT_VERB.INVENTORY2,
+		"VERB_INVENTORY3", INPUT_VERB.INVENTORY3,
+		"VERB_INVENTORY4", INPUT_VERB.INVENTORY4,
+		"VERB_AIM", INPUT_VERB.AIM,
+		"VERB_AIM_UP", INPUT_VERB.AIM_UP,
+		"VERB_AIM_LEFT", INPUT_VERB.AIM_LEFT,
+		"VERB_AIM_DOWN", INPUT_VERB.AIM_DOWN,
+		"VERB_AIM_RIGHT", INPUT_VERB.AIM_RIGHT,
+		"VERB_PAUSE", INPUT_VERB.PAUSE,
+		"VERB_LEAVE", INPUT_VERB.LEAVE,
+		"VERB_UI_UP", INPUT_VERB.UI_UP,
+		"VERB_UI_LEFT", INPUT_VERB.UI_LEFT,
+		"VERB_UI_DOWN", INPUT_VERB.UI_DOWN,
+		"VERB_UI_RIGHT", INPUT_VERB.UI_RIGHT,
+		"VERB_UI_ENTER", INPUT_VERB.UI_ENTER,
+		"VERB_UI_CLICK", INPUT_VERB.UI_CLICK
 	)
 	
 	addFunction(
@@ -412,10 +438,6 @@ with Catspeak {
 		"player_active_get", function (_index) {
 			return global.players_active[| _index]
 		},
-		
-		"player_binding_label", function (_verb, _index = 0) {
-			return "" //input_binding_get_name(input_binding_get(_verb, _index))
-		}
 	)
 #endregion
 	
@@ -1088,6 +1110,10 @@ load_level = "lvlLogo"
 load_area = 0
 load_tag = ThingTags.NONE
 load_state = LoadStates.START
+#endregion
+
+#region Input
+mouse_focused = false
 #endregion
 
 #region Discord

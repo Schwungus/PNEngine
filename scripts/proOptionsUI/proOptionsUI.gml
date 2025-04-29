@@ -36,25 +36,25 @@ function proOptionsUI() : UI(undefined) constructor {
 		}),
 		
 		undefined,
-		new OUIBinding("options.controls.up", "up"),
-		new OUIBinding("options.controls.left", "left"),
-		new OUIBinding("options.controls.down", "down"),
-		new OUIBinding("options.controls.right", "right"),
-		new OUIBinding("options.controls.walk", "walk"),
-		new OUIBinding("options.controls.jump", "jump"),
-		new OUIBinding("options.controls.interact", "interact"),
-		new OUIBinding("options.controls.attack", "attack"),
+		new OUIBinding("options.controls.up", INPUT_VERB.UP),
+		new OUIBinding("options.controls.left", INPUT_VERB.LEFT),
+		new OUIBinding("options.controls.down", INPUT_VERB.DOWN),
+		new OUIBinding("options.controls.right", INPUT_VERB.RIGHT),
+		new OUIBinding("options.controls.walk", INPUT_VERB.WALK),
+		new OUIBinding("options.controls.jump", INPUT_VERB.JUMP),
+		new OUIBinding("options.controls.interact", INPUT_VERB.INTERACT),
+		new OUIBinding("options.controls.attack", INPUT_VERB.ATTACK),
 		undefined,
-		new OUIBinding("options.controls.aim", "aim"),
-		new OUIBinding("options.controls.aim_up", "aim_up"),
-		new OUIBinding("options.controls.aim_left", "aim_left"),
-		new OUIBinding("options.controls.aim_down", "aim_down"),
-		new OUIBinding("options.controls.aim_right", "aim_right"),
+		new OUIBinding("options.controls.aim", INPUT_VERB.AIM),
+		new OUIBinding("options.controls.aim_up", INPUT_VERB.AIM_UP),
+		new OUIBinding("options.controls.aim_left", INPUT_VERB.AIM_LEFT),
+		new OUIBinding("options.controls.aim_down", INPUT_VERB.AIM_DOWN),
+		new OUIBinding("options.controls.aim_right", INPUT_VERB.AIM_RIGHT),
 		undefined,
-		new OUIBinding("options.controls.inventory_up", "inventory_up"),
-		new OUIBinding("options.controls.inventory_left", "inventory_left"),
-		new OUIBinding("options.controls.inventory_down", "inventory_down"),
-		new OUIBinding("options.controls.inventory_right", "inventory_right"),
+		new OUIBinding("options.controls.inventory1", INPUT_VERB.INVENTORY1),
+		new OUIBinding("options.controls.inventory2", INPUT_VERB.INVENTORY2),
+		new OUIBinding("options.controls.inventory3", INPUT_VERB.INVENTORY3),
+		new OUIBinding("options.controls.inventory4", INPUT_VERB.INVENTORY4),
 	])
 #endregion
 	
@@ -414,9 +414,9 @@ function proOptionsUI() : UI(undefined) constructor {
 	
 	tick = function () {
 		if focus != undefined {
-			/*input_verb_consume("jump")
-			input_verb_consume("leave")
-			input_verb_consume("debug_console")*/
+			InputVerbConsume(INPUT_VERB.JUMP)
+			InputVerbConsume(INPUT_VERB.LEAVE)
+			InputVerbConsume(INPUT_VERB.DEBUG_CONSOLE)
 			
 			if input[UIInputs.BACK] {
 				/*if input_binding_scan_in_progress() {
@@ -430,7 +430,7 @@ function proOptionsUI() : UI(undefined) constructor {
 				exit
 			}
 			
-			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] /*and not input_keyboard_check(vk_space)*/ {
+			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] and not keyboard_check(vk_space) {
 				play_sound(focus.confirm(keyboard_string) ? select_sound : fail_sound)
 				focus = undefined
 			}
@@ -537,7 +537,7 @@ function proOptionsUI() : UI(undefined) constructor {
 					_changed = true
 				} else if is_instanceof(_option, OUIBinding) {
 					with other {
-						static _ignore = [vk_escape, vk_backspace, 192, gp_start, gp_select]
+						static _ignore = [vk_escape, vk_backspace, vk_backtick, gp_start, gp_select]
 						
 						focus = _option
 						//input_binding_scan_params_set(_ignore)
@@ -635,15 +635,15 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 		if focus != undefined {
 			if is_instanceof(focus, OUIInput) {
-				_indicator += $"[{string_input("ui_enter")}] {lexicon_text("options.hud.confirm")}"
+				_indicator += $"[{string_input(INPUT_VERB.UI_ENTER)}] {lexicon_text("options.hud.confirm")}"
 			}
 			
-			_indicator += $"\n\n[{string_input("pause")}] {lexicon_text("options.hud.cancel")}"
+			_indicator += $"\n\n[{string_input(INPUT_VERB.PAUSE)}] {lexicon_text("options.hud.cancel")}"
 		} else {
-			_indicator += $"[{string_input("ui_up")}/{string_input("ui_down")}] {lexicon_text("options.hud.select")}"
-			_indicator += $"\n\n[{string_input("ui_left")}/{string_input("ui_right")}] {lexicon_text("options.hud.change")}"
-			_indicator += $"\n\n[{string_input("ui_enter")}] {lexicon_text("options.hud.confirm")}"
-			_indicator += $"\n\n[{string_input("pause")}] {lexicon_text(menu.from != undefined ? "options.hud.back" : "options.hud.exit")}"
+			_indicator += $"[{string_input(INPUT_VERB.UI_UP)}/{string_input(INPUT_VERB.UI_DOWN)}] {lexicon_text("options.hud.select")}"
+			_indicator += $"\n\n[{string_input(INPUT_VERB.UI_LEFT)}/{string_input(INPUT_VERB.UI_RIGHT)}] {lexicon_text("options.hud.change")}"
+			_indicator += $"\n\n[{string_input(INPUT_VERB.UI_ENTER)}] {lexicon_text("options.hud.confirm")}"
+			_indicator += $"\n\n[{string_input(INPUT_VERB.PAUSE)}] {lexicon_text(menu.from != undefined ? "options.hud.back" : "options.hud.exit")}"
 		}
 		
 		draw_set_valign(fa_middle)

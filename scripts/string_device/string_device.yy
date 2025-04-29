@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"string_device",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"string_device",
+  "parent":{
+    "name":"String",
+    "path":"folders/Scripts/PNEngine/String.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

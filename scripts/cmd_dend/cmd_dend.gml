@@ -9,23 +9,21 @@ function cmd_dend(_args) {
 			global.demo_client = false
 			global.game_status = GameStatus.DEFAULT
 			
-			/*var _devices = 1 input_players_get_status().__players
 			var _players = global.players
+			var i = 0
 			
-			i = 0
-			
-			repeat INPUT_MAX_PLAYERS {
+			repeat MAX_PLAYERS {
 				var _player = _players[i]
-				var _status = _devices[i]
+				var _status = InputPlayerGetStatus(i)
 				
-				if _status == INPUT_STATUS.NEWLY_CONNECTED or _status == INPUT_STATUS.CONNECTED {
+				if _status == INPUT_PLAYER_STATUS.NEWLY_CONNECTED or _status == INPUT_PLAYER_STATUS.CONNECTED {
 					player_activate(_player, false)
 				} else {
 					player_deactivate(_player, false)
 				}
 				
 				++i
-			}*/
+			}
 			
 			global.level.goto("lvlTitle")
 		}

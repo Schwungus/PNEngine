@@ -6,7 +6,8 @@
 #macro SAVES_PATH game_save_id + "saves/"
 #macro DEMOS_PATH game_save_id + "demos/"
 #macro CONFIG_PATH game_save_id + "config.json"
-#macro CONTROLS_PATH game_save_id + "controls.json"
+#macro KEYBOARD_PATH game_save_id + "keyboard.json"
+#macro GAMEPAD_PATH game_save_id + "gamepad.json"
 
 global.config = {
 	// DEBUG

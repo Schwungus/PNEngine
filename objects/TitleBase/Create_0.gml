@@ -144,7 +144,7 @@ event_tick = function () {
 			}
 		}
 	
-		var _change_option = 0 //input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, 3, 12)
+		var _change_option = InputOpposingRepeat(INPUT_VERB.UI_UP, INPUT_VERB.UI_DOWN)
 	
 		if _change_option != 0 and global.title_delete_state <= 1 {
 			var _previous = menu.option
@@ -180,7 +180,7 @@ event_tick = function () {
 		}
 	
 		// Select option
-		if false /*input_check_pressed("ui_enter")*/ {
+		if InputPressed(INPUT_VERB.UI_ENTER) {
 			var _curopt = menu.option
 			var _options = menu.options
 			var _option = _options[_curopt]
@@ -331,7 +331,7 @@ event_tick = function () {
 		}
 	
 		// Return to previous menu
-		if false /*input_check_pressed("pause")*/ {
+		if InputPressed(INPUT_VERB.PAUSE) {
 			if global.title_delete_state {
 				catspeak_execute(change_delete_state, -1)
 				global.title_delete_state = -1

@@ -4,13 +4,7 @@ function player_activate(_scope, _loud = true) {
 			status = PlayerStatus.PENDING
 			
 			if _loud {
-				var _device = "unknown" //input_player_get_gamepad_type(slot)
-				
-				if _device == "unknown" {
-					_device = "no gamepad"
-				}
-				
-				show_caption($"[c_lime]{lexicon_text("hud.caption.player.ready", -~slot)} ({_device})")
+				show_caption($"[c_lime]{lexicon_text("hud.caption.player.ready", -~slot)} ({string_device(slot)})")
 			}
 			
 			ds_list_add(global.players_ready, self)

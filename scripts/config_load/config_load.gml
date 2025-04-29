@@ -21,9 +21,16 @@ function config_load() {
 	config_update()
 	
 	try {
-		_json = json_load(CONTROLS_PATH)
-		//input_player_import(_json)
+		_json = json_load(KEYBOARD_PATH)
+		InputBindingsImport(false, _json)
 	} catch (e) {
-		print($"! config_load: Failed to import controls ({e})")
+		print($"! config_load: Failed to import keyboard+mouse controls ({e})")
+	}
+	
+	try {
+		_json = json_load(GAMEPAD_PATH)
+		InputBindingsImport(true, _json)
+	} catch (e) {
+		print($"! config_load: Failed to import keyboard+mouse controls ({e})")
 	}
 }

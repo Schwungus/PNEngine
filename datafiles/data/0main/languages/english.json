@@ -165,5 +165,6 @@
 		},
 		
 		"paused": "Paused",
+		"not_bound": "not bound",
     },
 }

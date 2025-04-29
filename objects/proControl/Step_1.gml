@@ -695,21 +695,21 @@ if global.freeze_step {
 var _console = global.console
 var _ui = global.ui
 var _config = global.config
-var _mouse_focused = false //input_mouse_capture_get().__capture
+var _mouse_focused = mouse_focused
 
 if _mouse_focused {
-	if /*not input_game_has_focus() or*/ not window_has_focus()
+	if not InputGameHasFocus()
 	   or _console or global.debug_overlay
 	   or (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-		//input_mouse_capture_set(false, _config.in_mouse_pan.value)
 		window_set_cursor(cr_default)
+		mouse_focused = false
 		_mouse_focused = false
 	}
-} else if /*input_game_has_focus() and*/ window_has_focus()
+} else if InputGameHasFocus()
           and not _console and not global.debug_overlay
           and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
-	//input_mouse_capture_set(true, _config.in_mouse_pan.value)
 	window_set_cursor(cr_none)
+	mouse_focused = true
 	_mouse_focused = true
 }
 
@@ -719,12 +719,11 @@ var _tick_scale = global.tick_scale
 
 global.delta = _tick_inc
 _tick = min(_tick + (_tick_inc * _tick_scale), TICKRATE)
+InputManualCollect()
 
 var _interps = global.interps
 
 if _tick >= 1 {
-	//__input_system_tick()
-	
 	// Cache game session info
 	var _demo_write = global.demo_write
 	var _demo_buffer = global.demo_buffer
@@ -737,23 +736,24 @@ if _tick >= 1 {
 	var _trans_tick = _tick
 	
 #region Debug
-	if false /*input_check_pressed("debug_overlay")*/ {
+	if InputPressed(INPUT_VERB.DEBUG_OVERLAY) {
 		global.debug_overlay = not global.debug_overlay
 		show_debug_overlay(global.debug_overlay)
 	}
 	
-	if false /*input_check_pressed("debug_fps")*/ {
+	if InputPressed(INPUT_VERB.DEBUG_FPS) {
 		global.debug_fps = not global.debug_fps
 	}
 	
 	if _console {
-		//input_verb_consume("leave")
+		InputManualUpdate()
+		InputVerbConsume(INPUT_VERB.LEAVE)
 		
-		if false /*input_check_pressed("debug_console_previous")*/ {
+		if InputPressed(INPUT_VERB.DEBUG_CONSOLE_PREVIOUS) {
 			keyboard_string = global.console_input_previous
 		}
 		
-		if false /*input_check_pressed("debug_console_submit")*/ {
+		if InputPressed(INPUT_VERB.DEBUG_CONSOLE_SUBMIT) {
 			var _input = string_trim(keyboard_string)
 			
 			if _input != "" {
@@ -790,16 +790,16 @@ if _tick >= 1 {
 				_playing_demo = false
 				_recording_demo = false
 			}
-		} else if false /*input_check_pressed("pause")*/ {
+		} else if InputPressed(INPUT_VERB.PAUSE) {
 			global.console_input = keyboard_string
 			cmd_close("")
-			//input_verb_consume("pause")
+			InputVerbConsume(INPUT_VERB.PAUSE)
 		}
 		
 		_game_tick = 0
 		_ui_tick = 0
 		_trans_tick = 0
-	} else if false /*input_check_pressed("debug_console")*/ {
+	} else if InputPressed(INPUT_VERB.DEBUG_CONSOLE) {
 		//input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
 		global.console = true
 		keyboard_string = global.console_input
@@ -808,9 +808,9 @@ if _tick >= 1 {
 	}
 #endregion
 	
-	if not _playing_demo {
+	/*if not _playing_demo {
 		// Handle player activations by injecting into the tick buffer
-		/*with input_players_get_status() {
+		with input_players_get_status() {
 			if __any_changed {
 				var _tick_buffer = inject_tick_packet()
 				var i = 0
@@ -829,8 +829,8 @@ if _tick >= 1 {
 					++i
 				}
 			}
-		}*/
-	}
+		}
+	}*/
 	
 #region Start Interpolation
 	var i = ds_list_size(_interps)
@@ -923,6 +923,7 @@ if _tick >= 1 {
 		}
 		
 		if _skip_tick {
+			InputManualUpdate()
 			_ui_tick = 0
 			_game_tick = 0
 		}
@@ -943,24 +944,20 @@ if _tick >= 1 {
 					_ui_input[UIInputs.CONFIRM] = false
 					_ui_input[UIInputs.BACK] = false
 					_ui_input[UIInputs.MOUSE_CONFIRM] = false
-				} /*else {
-					var _delta = 1 / max(_tick_inc, 1)
-					var _repeat = 2 * _delta
-					var _prerep = 12 * _delta
-					
-					_ui_input[UIInputs.UP_DOWN] = input_check_opposing_pressed("ui_up", "ui_down", 0, true) + input_check_opposing_repeat("ui_up", "ui_down", 0, true, _repeat, _prerep)
-					_ui_input[UIInputs.LEFT_RIGHT] = input_check_opposing_pressed("ui_left", "ui_right", 0, true) + input_check_opposing_repeat("ui_left", "ui_right", 0, true, _repeat, _prerep)
-					_ui_input[UIInputs.CONFIRM] = input_check_pressed("ui_enter")
-					_ui_input[UIInputs.BACK] = input_check_pressed("pause")
+				} else {
+					_ui_input[UIInputs.UP_DOWN] = InputOpposingRepeat(INPUT_VERB.UI_UP, INPUT_VERB.UI_DOWN)
+					_ui_input[UIInputs.LEFT_RIGHT] = InputOpposingRepeat(INPUT_VERB.UI_LEFT, INPUT_VERB.UI_RIGHT)
+					_ui_input[UIInputs.CONFIRM] = InputPressed(INPUT_VERB.UI_ENTER)
+					_ui_input[UIInputs.BACK] = InputPressed(INPUT_VERB.PAUSE)
 					
 					if _mouse_focused {
-						_ui_input[UIInputs.MOUSE_X] = input_cursor_x()
-						_ui_input[UIInputs.MOUSE_Y] = input_cursor_y()
-						_ui_input[UIInputs.MOUSE_CONFIRM] = input_check_pressed("ui_click")
+						_ui_input[UIInputs.MOUSE_X] = InputMouseGuiX()
+						_ui_input[UIInputs.MOUSE_Y] = InputMouseGuiY()
+						_ui_input[UIInputs.MOUSE_CONFIRM] = InputPressed(INPUT_VERB.UI_CLICK)
 					} else {
 						_ui_input[UIInputs.MOUSE_CONFIRM] = false
 					}
-				}*/
+				}
 				
 				var _tick_target = _ui
 				
@@ -994,7 +991,7 @@ if _tick >= 1 {
 			} else {
 				var _paused = false
 				
-				if not _block_input and false /*input_check_pressed("pause")*/ {
+				if not _block_input and InputPressed(INPUT_VERB.PAUSE) {
 					_paused = true
 					i = ds_list_size(_players_active)
 					
@@ -1027,9 +1024,9 @@ if _tick >= 1 {
 			}
 			
 			// Try to clear momentary input if game ticks are skipped
-			/*if _skip_tick {
-				input_clear_momentary(true)
-			}*/
+			if _skip_tick {
+				InputManualUpdate()
+			}
 			
 			--_ui_tick
 		}
@@ -1056,7 +1053,7 @@ if _tick >= 1 {
 	while _game_tick >= 1 {
 #region Cameraman (non-deterministic)
 		if _has_camera_man and _camera_man_freeze {
-			//input_clear_momentary(true);
+			InputManualUpdate()
 			--_game_tick
 			
 			continue
@@ -1092,7 +1089,7 @@ if _tick >= 1 {
 			i = 0
 			
 			repeat ds_list_size(_players_active) {
-				/*with _players_active[| i++] {
+				with _players_active[| i++] {
 					var j = slot
 					var _input_up_down, _input_left_right, _input_flags, _dx, _dy
 					
@@ -1104,24 +1101,24 @@ if _tick >= 1 {
 						_dy = 0
 					} else {
 						// Main
-						var _move_range = input_check("walk", j) ? 64 : 127
+						var _move_range = InputCheck(INPUT_VERB.WALK, j) ? 64 : 127
 						
-						_input_up_down = floor((input_value("down", j) - input_value("up", j)) * _move_range)
-						_input_left_right = floor((input_value("right", j) - input_value("left", j)) * _move_range)
+						_input_up_down = floor((InputValue(INPUT_VERB.DOWN, j) - InputValue(INPUT_VERB.UP, j)) * _move_range)
+						_input_left_right = floor((InputValue(INPUT_VERB.RIGHT, j) - InputValue(INPUT_VERB.LEFT, j)) * _move_range)
 						
 						_input_flags = player_input_to_flags(
-							input_check("jump", j),
-							input_check("interact", j),
-							input_check("attack", j),
-							input_check("inventory_up", j),
-							input_check("inventory_left", j),
-							input_check("inventory_down", j),
-							input_check("inventory_right", j),
-							input_check("aim", j)
+							InputCheck(INPUT_VERB.JUMP, j),
+							InputCheck(INPUT_VERB.INTERACT, j),
+							InputCheck(INPUT_VERB.ATTACK, j),
+							InputCheck(INPUT_VERB.INVENTORY1, j),
+							InputCheck(INPUT_VERB.INVENTORY2, j),
+							InputCheck(INPUT_VERB.INVENTORY3, j),
+							InputCheck(INPUT_VERB.INVENTORY4, j),
+							InputCheck(INPUT_VERB.AIM, j)
 						)
 						
 						// Camera
-						var _dx_factor = 0
+						/*var _dx_factor = 0
 						var _dy_factor = 0
 						
 						with _config {
@@ -1138,10 +1135,10 @@ if _tick >= 1 {
 									_dy_factor -= radtodeg(_gyro.angular_velocity_x) * _in_gyro_pan
 								}
 							}
-						}
+						}*/
 						
-						_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
-						_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
+						_dx = 0 //floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
+						_dy = 0 //floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
 					}
 					
 					buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
@@ -1151,7 +1148,7 @@ if _tick >= 1 {
 					buffer_write(_tick_buffer, buffer_u8, _input_flags)
 					buffer_write(_tick_buffer, buffer_s16, _dx % 32768)
 					buffer_write(_tick_buffer, buffer_s16, _dy % 32768)
-				}*/
+				}
 			}
 			
 			if _recording_demo {
@@ -1192,13 +1189,7 @@ if _tick >= 1 {
 					with _players[_slot] {
 						if not player_activate(self) {
 							if __show_reconnect_caption {
-								var _device = "unknown" //input_player_get_gamepad_type(_slot)
-								
-								if _device == "unknown" {
-									_device = "no gamepad"
-								}
-								
-								show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({_device})")
+								show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({string_device(_slot)})")
 							} else {
 								__show_reconnect_caption = true
 							}
@@ -1231,10 +1222,10 @@ if _tick >= 1 {
 						input[PlayerInputs.JUMP] = (_input_flags & PIFlags.JUMP) != 0
 						input[PlayerInputs.INTERACT] = (_input_flags & PIFlags.INTERACT) != 0
 						input[PlayerInputs.ATTACK] = (_input_flags & PIFlags.ATTACK) != 0
-						input[PlayerInputs.INVENTORY_UP] = (_input_flags & PIFlags.INVENTORY_UP) != 0
-						input[PlayerInputs.INVENTORY_LEFT] = (_input_flags & PIFlags.INVENTORY_LEFT) != 0
-						input[PlayerInputs.INVENTORY_DOWN] = (_input_flags & PIFlags.INVENTORY_DOWN) != 0
-						input[PlayerInputs.INVENTORY_RIGHT] = (_input_flags & PIFlags.INVENTORY_RIGHT) != 0
+						input[PlayerInputs.INVENTORY1] = (_input_flags & PIFlags.INVENTORY1) != 0
+						input[PlayerInputs.INVENTORY2] = (_input_flags & PIFlags.INVENTORY2) != 0
+						input[PlayerInputs.INVENTORY3] = (_input_flags & PIFlags.INVENTORY3) != 0
+						input[PlayerInputs.INVENTORY4] = (_input_flags & PIFlags.INVENTORY4) != 0
 						input[PlayerInputs.AIM] = (_input_flags & PIFlags.AIM) != 0
 						input[PlayerInputs.AIM_LEFT_RIGHT] = buffer_read(_tick_buffer, buffer_s16)
 						input[PlayerInputs.AIM_UP_DOWN] = buffer_read(_tick_buffer, buffer_s16)
@@ -1427,7 +1418,7 @@ if _tick >= 1 {
 		++_level.time
 #endregion
 		
-		//input_clear_momentary(true);
+		InputManualUpdate()
 		--_game_tick
 	}
 #endregion
