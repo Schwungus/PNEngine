@@ -564,7 +564,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   PASS 1
 		   
 		   Draw the sky.
-		   Stencil 0: Background
 		   ================== */
 		draw_clear_stencil(0)
 		gpu_set_stencil_ref(0)
@@ -601,11 +600,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   
 		   Draw the area model, all visible Things and particles.
 		   Things with shadows enabled will be included in pass 3.
-		   Stencil 1: Foreground
-		   Stencil 2: Shadow
-		   Stencil 3: Don't shadow
 		   ================== */
-		gpu_set_stencil_ref(1)
+		gpu_set_stencil_ref(16)
 		_world_shader.set()
 		global.u_ambient_color.set(ambient_color[0], ambient_color[1], ambient_color[2], ambient_color[3])
 		global.u_fog_distance.set(fog_distance[0], fog_distance[1])
@@ -634,7 +630,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 						ds_priority_add(_camera_sort, self, f_xray ? -_dist : _dist)
 						
 						if m_shadow != MShadow.NONE {
-							ds_priority_add(_camera_shadows, self, _dist)
+							ds_stack_push(_camera_shadows, self)
 						}
 					}
 				}
@@ -646,7 +642,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 				if f_xray {
 					gpu_set_colorwriteenable(false, false, false, false)
 					gpu_set_zwriteenable(false)
-					gpu_set_stencil_ref(2)
+					gpu_set_stencil_ref(17)
 					gpu_set_stencil_pass(stencilop_keep)
 					gpu_set_stencil_depth_fail(stencilop_replace)
 					event_draw()
@@ -656,12 +652,12 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					gpu_set_colorwriteenable(true, true, true, true)
 				}
 				
-				gpu_set_stencil_ref(m_shadow != MShadow.NONE ? 3 : 1)
+				gpu_set_stencil_ref(m_shadow == MShadow.NONE ? 16 : 0)
 				event_draw()
 			}
 		}
 		
-		gpu_set_stencil_ref(1)
+		gpu_set_stencil_ref(0)
 		i = 0
 		
 		repeat ds_list_size(particles) {
@@ -695,18 +691,18 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   
 		   Draw shadows.
 		   ================== */
-		i = ds_priority_size(_camera_shadows)
+		i = ds_stack_size(_camera_shadows)
 		
 		if i {
 			gpu_set_zwriteenable(false)
-			gpu_set_stencil_func(cmpfunc_equal)
 			gpu_set_colorwriteenable(false, false, false, false)
 			
 			var _mwp = matrix_get(matrix_world)
 			var _shadow_vbo = global.shadow_vbo
+			var _shadow_id = 16
 			
 			repeat i {
-				var _caster = ds_priority_delete_min(_camera_shadows)
+				var _caster = ds_stack_pop(_camera_shadows)
 				
 				with _caster {
 					var _shadx, _shady, _shadz
@@ -733,15 +729,13 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					}
 					
 					matrix_set(matrix_world, matrix_build(_shadx, _shady, max(_shadz, mean(_shadz, sshadow_z)), 0, 0, 0, _radius, _radius, -max(_radius, sshadow_z - _shadz)))
+					gpu_set_stencil_ref(_shadow_id++)
 					gpu_set_stencil_pass(stencilop_incr)
 					gpu_set_cullmode(cull_clockwise)
 					vertex_submit(_shadow_vbo, pr_trianglelist, -1)
 					gpu_set_cullmode(cull_counterclockwise)
-					
-					gpu_set_stencil_ref(2)
 					gpu_set_stencil_pass(stencilop_decr)
 					vertex_submit(_shadow_vbo, pr_trianglelist, -1)
-					gpu_set_stencil_ref(1)
 				}
 			}
 			
@@ -755,9 +749,9 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		// Darken shadow areas
 		matrix_set(matrix_view, _mvp)
 		matrix_set(matrix_projection, _mpp)
-		gpu_set_stencil_ref(2)
-		gpu_set_stencil_func(cmpfunc_equal)
-		gpu_set_stencil_pass(stencilop_incr)
+		gpu_set_stencil_ref(16)
+		gpu_set_stencil_func(cmpfunc_less)
+		gpu_set_stencil_pass(stencilop_keep)
 		draw_set_alpha(0.4)
 		draw_rectangle_color(0, 0, _width, _height, c_black, c_black, c_black, c_black, false)
 		draw_set_alpha(1)
