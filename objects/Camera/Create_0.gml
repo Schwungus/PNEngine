@@ -91,7 +91,6 @@ interp("quake_y", "squake_y")
 interp("quake_z", "squake_z")
 
 alpha = 1
-shadows = 0
 output = (new Canvas(1, 1)).SetDepthDisabled(true)
 
 listener_pos = new FmodVector()
@@ -498,7 +497,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		return _render
 	}
 	
-	global.camera_current = self
 	output.Resize(_width, _height)
 	
 	if lerp_time < lerp_duration {
@@ -566,6 +564,7 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   PASS 1
 		   
 		   Draw the sky.
+		   Stencil 0: Background
 		   ================== */
 		draw_clear_stencil(0)
 		gpu_set_stencil_ref(0)
@@ -602,9 +601,11 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   
 		   Draw the area model, all visible Things and particles.
 		   Things with shadows enabled will be included in pass 3.
+		   Stencil 1: Foreground
+		   Stencil 2: Shadow
+		   Stencil 3: Don't shadow
 		   ================== */
 		gpu_set_stencil_ref(1)
-		
 		_world_shader.set()
 		global.u_ambient_color.set(ambient_color[0], ambient_color[1], ambient_color[2], ambient_color[3])
 		global.u_fog_distance.set(fog_distance[0], fog_distance[1])
@@ -621,8 +622,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		_active_things = active_things
 		
 		var i = ds_list_size(_active_things)
+		var _camera_sort = global.camera_sort
 		var _camera_shadows = global.camera_shadows
-		var _shadows = 0
 		
 		while i {
 			with _active_things[| --i] {
@@ -630,35 +631,37 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					var _dist = point_distance(_x, _y, sx, sy)
 					
 					if (_dist > cull_draw_near or _z < (sz - height) or _z > sz) and _dist < cull_draw {
-						if f_xray {
-							gpu_set_colorwriteenable(false, false, false, false)
-							gpu_set_zwriteenable(false)
-							gpu_set_stencil_ref(2)
-							gpu_set_stencil_pass(stencilop_keep)
-							gpu_set_stencil_depth_fail(stencilop_replace)
-							event_draw()
-							gpu_set_stencil_depth_fail(stencilop_keep)
-							gpu_set_stencil_pass(stencilop_replace)
-							gpu_set_stencil_ref(1)
-							gpu_set_zwriteenable(true)
-							gpu_set_colorwriteenable(true, true, true, true)
-						}
+						ds_priority_add(_camera_sort, self, f_xray ? -_dist : _dist)
 						
 						if m_shadow != MShadow.NONE {
-							gpu_set_stencil_ref(4)
-							event_draw()
-							gpu_set_stencil_ref(1)
-							ds_stack_push(_camera_shadows, self)
-							++_shadows
-						} else {
-							event_draw()
+							ds_priority_add(_camera_shadows, self, _dist)
 						}
 					}
 				}
 			}
 		}
 		
-		shadows = _shadows
+		repeat ds_priority_size(_camera_sort) {
+			with ds_priority_delete_max(_camera_sort) {
+				if f_xray {
+					gpu_set_colorwriteenable(false, false, false, false)
+					gpu_set_zwriteenable(false)
+					gpu_set_stencil_ref(2)
+					gpu_set_stencil_pass(stencilop_keep)
+					gpu_set_stencil_depth_fail(stencilop_replace)
+					event_draw()
+					gpu_set_stencil_depth_fail(stencilop_keep)
+					gpu_set_stencil_pass(stencilop_replace)
+					gpu_set_zwriteenable(true)
+					gpu_set_colorwriteenable(true, true, true, true)
+				}
+				
+				gpu_set_stencil_ref(m_shadow != MShadow.NONE ? 3 : 1)
+				event_draw()
+			}
+		}
+		
+		gpu_set_stencil_ref(1)
 		i = 0
 		
 		repeat ds_list_size(particles) {
@@ -692,7 +695,9 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		   
 		   Draw shadows.
 		   ================== */
-		if shadows {
+		i = ds_priority_size(_camera_shadows)
+		
+		if i {
 			gpu_set_zwriteenable(false)
 			gpu_set_stencil_func(cmpfunc_equal)
 			gpu_set_colorwriteenable(false, false, false, false)
@@ -700,8 +705,8 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 			var _mwp = matrix_get(matrix_world)
 			var _shadow_vbo = global.shadow_vbo
 			
-			repeat shadows {
-				var _caster = ds_stack_pop(_camera_shadows)
+			repeat i {
+				var _caster = ds_priority_delete_min(_camera_shadows)
 				
 				with _caster {
 					var _shadx, _shady, _shadz

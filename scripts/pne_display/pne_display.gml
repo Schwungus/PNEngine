@@ -41,8 +41,8 @@ global.camera_man = noone
 global.camera_man_freeze = true
 
 global.camera_layer = 0
-global.camera_current = noone
-global.camera_shadows = ds_stack_create()
+global.camera_sort = ds_priority_create()
+global.camera_shadows = ds_priority_create()
 #endregion
 
 #region Vertex Buffers
