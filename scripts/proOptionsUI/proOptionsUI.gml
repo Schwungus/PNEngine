@@ -9,6 +9,7 @@ function proOptionsUI() : UI(undefined) constructor {
 	var _config = global.config
 	
 	menu = new OUIMenu("options.title", [
+#region Controls
 		new OUIMenu("options.controls.title", [
 			new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, _config.in_invert_x.value, function (_value) {
 				config_set("in_invert_x", _value)
@@ -95,6 +96,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			new OUIBinding("options.controls.inventory3", INPUT_VERB.INVENTORY3),
 			new OUIBinding("options.controls.inventory4", INPUT_VERB.INVENTORY4),
 		]),
+#endregion
 		
 #region Video
 		new OUIMenu("options.video.title", [
@@ -439,10 +441,12 @@ function proOptionsUI() : UI(undefined) constructor {
 #endregion
 	
 	focus = undefined
+	focus_cooldown = false
 	force_option = -1
+	device = -1
 	
 	clean_up = function () {
-		//input_binding_scan_abort()
+		InputDeviceStopAllRebinding()
 	}
 	
 	tick = function () {
@@ -452,21 +456,45 @@ function proOptionsUI() : UI(undefined) constructor {
 			InputVerbConsume(INPUT_VERB.DEBUG_CONSOLE)
 			
 			if input[UIInputs.BACK] {
-				/*if input_binding_scan_in_progress() {
-					input_binding_scan_abort()
-				} else {*/
-					play_sound(back_sound)
-				//}
+				if InputDeviceGetRebinding(device) {
+					InputDeviceSetRebinding(device, false)
+					InputVerbConsumeAll()
+					focus_cooldown = 2
+				}
 				
+				play_sound(back_sound)
 				focus = undefined
 				
 				exit
 			}
 			
-			if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] and not keyboard_check(vk_space) {
+			if is_instanceof(focus, OUIBinding) {
+				var _result = InputDeviceGetRebindingResult(device)
+				
+				if _result != undefined {
+					if _result == vk_escape or _result == gp_start {
+						play_sound(back_sound)
+					} else {
+						InputBindingSet(InputDeviceIsGamepad(device), focus.verb, _result)
+						play_sound(select_sound)
+					}
+					
+					InputDeviceSetRebinding(device, false)
+					InputVerbConsumeAll()
+					focus = undefined
+					focus_cooldown = 2
+				}
+			} else if is_instanceof(focus, OUIInput) and input[UIInputs.CONFIRM] /* GROSS HACK */ and not keyboard_check(vk_space) {
 				play_sound(focus.confirm(keyboard_string) ? select_sound : fail_sound)
 				focus = undefined
 			}
+			
+			exit
+		}
+		
+		// GROSS HACK: Needed for rebinding
+		if focus_cooldown {
+			--focus_cooldown
 			
 			exit
 		}
@@ -575,20 +603,11 @@ function proOptionsUI() : UI(undefined) constructor {
 					_changed = true
 				} else if is_instanceof(_option, OUIBinding) {
 					with other {
-						static _ignore = [vk_escape, vk_backspace, vk_backtick, gp_start, gp_select]
+						static _ignore = [vk_backspace, vk_backtick, gp_select]
 						
 						focus = _option
-						//input_binding_scan_params_set(_ignore)
-						
-						/*input_binding_scan_start(function (_binding) {
-							input_binding_set_safe(focus.verb, _binding)
-							play_sound(select_sound)
-							focus = undefined
-							input_verb_consume(all)
-						}, function () {
-							play_sound(back_sound)
-							focus = undefined
-						})*/
+						device = InputPlayerGetDevice()
+						InputDeviceSetRebinding(device, true, _ignore)
 					}
 					
 					_changed = true
