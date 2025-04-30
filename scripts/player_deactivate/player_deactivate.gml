@@ -26,6 +26,7 @@ function player_deactivate(_scope, _loud = true) {
 			}
 			
 			status = PlayerStatus.INACTIVE
+			input_active = false
 			
 			HANDLER_FOREACH_START
 				if player_deactivated != undefined {

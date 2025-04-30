@@ -1,5 +1,5 @@
 function cmd_close(_args) {
-	//input_source_mode_set(global.input_mode)
+	InputSetHotswap(not InputPartyGetJoin())
 	global.console = false
 	
 	var _ui = global.ui

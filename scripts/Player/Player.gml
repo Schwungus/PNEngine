@@ -12,9 +12,9 @@ function Player() constructor {
 	states = ds_map_create()
 	
 	// Input
+	input_active = false
 	input = array_create(PlayerInputs.__SIZE, 0)
 	input_previous = array_create(PlayerInputs.__SIZE, 0)
-	__show_reconnect_caption = true
 	
 	static respawn = function () {
 		if status != PlayerStatus.ACTIVE or area == undefined {

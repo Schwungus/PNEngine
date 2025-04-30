@@ -22,7 +22,7 @@
 			"caption.player": {
 				"reconnect": "Player {0} reconnected",
 				"disconnect": "Player {0} disconnected",
-				"last_disconnect": "Player {0} disconnected. Press any button to reconnect.",
+				"last_disconnect": "Player {0} disconnected. Press {1} to reconnect.",
 				"ready": "Player {0} readied",
 				"unready": "Player {0} unreadied",
 			},

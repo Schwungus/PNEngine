@@ -86,19 +86,7 @@ global.config = {
 	
 	// INPUT
 	in_mode: new CVar(2, is_numeric, function (_batch) {
-		/*var _mode = INPUT_SOURCE_MODE.FIXED
-		
-		switch value {
-			case 1: _mode = INPUT_SOURCE_MODE.JOIN break
-			case 2: _mode = INPUT_SOURCE_MODE.HOTSWAP break
-			case 3: _mode = INPUT_SOURCE_MODE.MIXED break
-		}*/
-		
-		global.input_mode = 2 //_mode
-		
-		if not global[$ "console"] {
-			//input_source_mode_set(_mode)
-		}
+		InputPartySetJoin(value == 1, value == 2)
 	}),
 	
 	in_invert_x: new CVar(false),

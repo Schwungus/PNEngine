@@ -50,8 +50,7 @@ repeat MAX_PLAYERS {
 		slot = i
 		
 		if i == 0 {
-			__show_reconnect_caption = false
-			player_activate(self)
+			player_activate(self, false)
 		}
 	}
 	
@@ -59,7 +58,4 @@ repeat MAX_PLAYERS {
 }
 
 global.players = _players
-global.input_mode = 2 //INPUT_SOURCE_MODE.FIXED
-/*input_join_params_set(1, MAX_PLAYERS, "leave", undefined, false)
-input_source_mode_set(global.input_mode)
-input_cursor_coord_space_set(INPUT_COORD_SPACE.GUI, all)*/
+InputPartySetParams(INPUT_VERB.UI_ENTER, 1, MAX_PLAYERS, false, INPUT_VERB.LEAVE)

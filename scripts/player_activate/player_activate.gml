@@ -1,6 +1,7 @@
 function player_activate(_scope, _loud = true) {
 	with _scope {
 		if status == PlayerStatus.INACTIVE {
+			input_active = true
 			status = PlayerStatus.PENDING
 			
 			if _loud {

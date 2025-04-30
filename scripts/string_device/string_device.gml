@@ -21,6 +21,7 @@ function string_device(_player_index) {
 				case INPUT_GAMEPAD_TYPE_PS4: _device = "PlayStation 4" break
 				case INPUT_GAMEPAD_TYPE_PS5: _device = "PlayStation 5" break
 				case INPUT_GAMEPAD_TYPE_SWITCH: _device = "Switch Pro" break
+				case INPUT_GAMEPAD_TYPE_XBOX: _device = "Xbox" break
 				case INPUT_GAMEPAD_TYPE_UNKNOWN: _device = "Other" break
 			}
 		}

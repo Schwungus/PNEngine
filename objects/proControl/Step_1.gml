@@ -811,37 +811,13 @@ if _tick >= 1 {
 		_ui_tick = 0
 		_trans_tick = 0
 	} else if InputPressed(INPUT_VERB.DEBUG_CONSOLE) {
-		//input_source_mode_set(INPUT_SOURCE_MODE.FIXED)
+		InputSetHotswap(false)
 		global.console = true
 		keyboard_string = global.console_input
 		fmod_channel_control_set_paused(global.world_channel_group, true)
 		_block_input = true
 	}
 #endregion
-	
-	/*if not _playing_demo {
-		// Handle player activations by injecting into the tick buffer
-		with input_players_get_status() {
-			if __any_changed {
-				var _tick_buffer = inject_tick_packet()
-				var i = 0
-				
-				repeat array_length(__new_connections) {
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, __new_connections[i]);
-					++i
-				}
-				
-				i = 0
-				
-				repeat array_length(__new_disconnections) {
-					buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
-					buffer_write(_tick_buffer, buffer_u8, __new_disconnections[i]);
-					++i
-				}
-			}
-		}
-	}*/
 	
 #region Start Interpolation
 	var i = ds_list_size(_interps)
@@ -891,6 +867,39 @@ if _tick >= 1 {
 	var _players = global.players
 	var _players_active = global.players_active
 	var _level = global.level
+	
+	// Handle player activations by injecting into the tick buffer
+	if not _playing_demo and InputPartyGetJoin() {
+		var i = 0
+		
+		repeat MAX_PLAYERS {
+			var _status = InputPlayerGetStatus(i)
+			
+			if (_status == INPUT_PLAYER_STATUS.NEWLY_CONNECTED or _status == INPUT_PLAYER_STATUS.CONNECTED) {
+				with _players[i] {
+					if not input_active {
+						var _tick_buffer = inject_tick_packet()
+						
+						buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
+						buffer_write(_tick_buffer, buffer_u8, i)
+						input_active = true
+					}
+				}
+			} else if (_status == INPUT_PLAYER_STATUS.NEWLY_DISCONNECTED or _status == INPUT_PLAYER_STATUS.DISCONNECTED) {
+				with _players[i] {
+					if input_active {
+						var _tick_buffer = inject_tick_packet()
+						
+						buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
+						buffer_write(_tick_buffer, buffer_u8, i)
+						input_active = false
+					}
+				}
+			}
+			
+			++i
+		}
+	}
 	
 	// Transition (non-deterministic)
 	if instance_exists(proTransition) {
@@ -1211,11 +1220,7 @@ if _tick >= 1 {
 					
 					with _players[_slot] {
 						if not player_activate(self) {
-							if __show_reconnect_caption {
-								show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({string_device(_slot)})")
-							} else {
-								__show_reconnect_caption = true
-							}
+							show_caption($"[c_lime]{lexicon_text("hud.caption.player.reconnect", -~_slot)} ({string_device(_slot)})")
 						}
 					}
 					
@@ -1226,7 +1231,7 @@ if _tick >= 1 {
 					var _slot = buffer_read(_tick_buffer, buffer_u8)
 					
 					if not player_deactivate(_players[_slot]) {
-						show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot)}")
+						show_caption($"[c_red]{lexicon_text("hud.caption.player.last_disconnect", -~_slot, string_input(INPUT_VERB.JUMP, _slot))}")
 					}
 					
 					break
