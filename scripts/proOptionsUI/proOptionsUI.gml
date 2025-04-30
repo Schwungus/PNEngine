@@ -5,66 +5,100 @@ function proOptionsUI() : UI(undefined) constructor {
 	fail_sound = global.fail_sound
 	back_sound = global.back_sound
 	
-#region Controls
-	static controls_menu = new OUIMenu("options.controls.title", [
-		new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, global.config.in_invert_y.value, function (_value) {
-			config_set("in_invert_y", _value)
-		}),
-		
-		new OUISlider("options.controls.in_pan", global.config.in_pan.value, 1, 1, 10, function () {
-			return $"{(current_value / 6) * 100}%"
-		}, function (_value) {
-			config_set("in_pan", _value)
-		}),
-		
-		new OUISlider("options.controls.in_mouse_pan", global.config.in_mouse_pan.value, 0.05, 0.05, 2, function () {
-			return $"{current_value * 100}%"
-		}, function (_value) {
-			config_set("in_mouse_pan", _value)
-		}),
-		
-		undefined,
-		
-		new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, global.config.in_gyro.value, function (_value) {
-			config_set("in_gyro", _value)
-		}),
-		
-		new OUISlider("options.controls.in_gyro_pan", global.config.in_gyro_pan.value, 0.05, 0.05, 2, function () {
-			return $"{current_value * 100}%"
-		}, function (_value) {
-			config_set("in_mouse_pan", _value)
-		}),
-		
-		undefined,
-		new OUIBinding("options.controls.up", INPUT_VERB.UP),
-		new OUIBinding("options.controls.left", INPUT_VERB.LEFT),
-		new OUIBinding("options.controls.down", INPUT_VERB.DOWN),
-		new OUIBinding("options.controls.right", INPUT_VERB.RIGHT),
-		new OUIBinding("options.controls.walk", INPUT_VERB.WALK),
-		new OUIBinding("options.controls.jump", INPUT_VERB.JUMP),
-		new OUIBinding("options.controls.interact", INPUT_VERB.INTERACT),
-		new OUIBinding("options.controls.attack", INPUT_VERB.ATTACK),
-		undefined,
-		new OUIBinding("options.controls.aim", INPUT_VERB.AIM),
-		new OUIBinding("options.controls.aim_up", INPUT_VERB.AIM_UP),
-		new OUIBinding("options.controls.aim_left", INPUT_VERB.AIM_LEFT),
-		new OUIBinding("options.controls.aim_down", INPUT_VERB.AIM_DOWN),
-		new OUIBinding("options.controls.aim_right", INPUT_VERB.AIM_RIGHT),
-		undefined,
-		new OUIBinding("options.controls.inventory1", INPUT_VERB.INVENTORY1),
-		new OUIBinding("options.controls.inventory2", INPUT_VERB.INVENTORY2),
-		new OUIBinding("options.controls.inventory3", INPUT_VERB.INVENTORY3),
-		new OUIBinding("options.controls.inventory4", INPUT_VERB.INVENTORY4),
-	])
-#endregion
+#region Menus
+	var _config = global.config
 	
-#region Main Menu
-	static main_menu = new OUIMenu("options.title", [
-		controls_menu,
+	menu = new OUIMenu("options.title", [
+		new OUIMenu("options.controls.title", [
+			new OUIOption("options.controls.in_invert_x", OUIValues.NO_YES, _config.in_invert_x.value, function (_value) {
+				config_set("in_invert_x", _value)
+			}),
+		
+			new OUIOption("options.controls.in_invert_y", OUIValues.NO_YES, _config.in_invert_y.value, function (_value) {
+				config_set("in_invert_y", _value)
+			}),
+		
+			new OUISlider("options.controls.in_aim_x", _config.in_aim_x.value, 1, 1, 10, function () {
+				return $"{round(current_value * 16.66666666666667)}%" // 100 / 6
+			}, function (_value) {
+				config_set("in_aim_x", _value)
+			}),
+		
+			new OUISlider("options.controls.in_aim_y", _config.in_aim_y.value, 1, 1, 10, function () {
+				return $"{round(current_value * 16.66666666666667)}%" // 100 / 6
+			}, function (_value) {
+				config_set("in_aim_y", _value)
+			}),
+		
+			undefined,
+		
+			new OUIOption("options.controls.in_mouse", OUIValues.OFF_ON, _config.in_mouse.value, function (_value) {
+				config_set("in_mouse", _value)
+			}),
+		
+			new OUISlider("options.controls.in_mouse_x", _config.in_mouse_x.value, 0.05, 0.05, 2, function () {
+				return $"{round(current_value * 100)}%"
+			}, function (_value) {
+				config_set("in_mouse_x", _value)
+			}, function () {
+				return not global.config.in_mouse.value
+			}),
+		
+			new OUISlider("options.controls.in_mouse_y", _config.in_mouse_y.value, 0.05, 0.05, 2, function () {
+				return $"{round(current_value * 100)}%"
+			}, function (_value) {
+				config_set("in_mouse_y", _value)
+			}, function () {
+				return not global.config.in_mouse.value
+			}),
+		
+			undefined,
+		
+			new OUIOption("options.controls.in_gyro", OUIValues.OFF_ON, _config.in_gyro.value, function (_value) {
+				config_set("in_gyro", _value)
+			}),
+		
+			new OUISlider("options.controls.in_gyro_x", _config.in_gyro_x.value, 0.05, 0.05, 2, function () {
+				return $"{round(current_value * 100)}%"
+			}, function (_value) {
+				config_set("in_gyro_x", _value)
+			}, function () {
+				return not global.config.in_gyro.value
+			}),
+		
+			new OUISlider("options.controls.in_gyro_y", _config.in_gyro_y.value, 0.05, 0.05, 2, function () {
+				return $"{round(current_value * 100)}%"
+			}, function (_value) {
+				config_set("in_gyro_y", _value)
+			}, function () {
+				return not global.config.in_gyro.value
+			}),
+		
+			undefined,
+			new OUIBinding("options.controls.up", INPUT_VERB.UP),
+			new OUIBinding("options.controls.left", INPUT_VERB.LEFT),
+			new OUIBinding("options.controls.down", INPUT_VERB.DOWN),
+			new OUIBinding("options.controls.right", INPUT_VERB.RIGHT),
+			new OUIBinding("options.controls.walk", INPUT_VERB.WALK),
+			new OUIBinding("options.controls.jump", INPUT_VERB.JUMP),
+			new OUIBinding("options.controls.interact", INPUT_VERB.INTERACT),
+			new OUIBinding("options.controls.attack", INPUT_VERB.ATTACK),
+			undefined,
+			new OUIBinding("options.controls.aim", INPUT_VERB.AIM),
+			new OUIBinding("options.controls.aim_up", INPUT_VERB.AIM_UP),
+			new OUIBinding("options.controls.aim_left", INPUT_VERB.AIM_LEFT),
+			new OUIBinding("options.controls.aim_down", INPUT_VERB.AIM_DOWN),
+			new OUIBinding("options.controls.aim_right", INPUT_VERB.AIM_RIGHT),
+			undefined,
+			new OUIBinding("options.controls.inventory1", INPUT_VERB.INVENTORY1),
+			new OUIBinding("options.controls.inventory2", INPUT_VERB.INVENTORY2),
+			new OUIBinding("options.controls.inventory3", INPUT_VERB.INVENTORY3),
+			new OUIBinding("options.controls.inventory4", INPUT_VERB.INVENTORY4),
+		]),
 		
 #region Video
 		new OUIMenu("options.video.title", [
-			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, global.config.vid_fullscreen.value, function (_value) {
+			new OUIOption("options.video.vid_fullscreen", OUIValues.OFF_ON, _config.vid_fullscreen.value, function (_value) {
 				config_set("vid_fullscreen", _value)
 			}),
 			
@@ -249,17 +283,17 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_max_fps", _fps)
 			}),
 			
-			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, global.config.vid_vsync.value, function (_value) {
+			new OUIOption("options.video.vid_vsync", OUIValues.OFF_ON, _config.vid_vsync.value, function (_value) {
 				config_set("vid_vsync", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, global.config.vid_texture_filter.value, function (_value) {
+			new OUIOption("options.video.vid_texture_filter", OUIValues.TEXTURE, _config.vid_texture_filter.value, function (_value) {
 				config_set("vid_texture_filter", _value)
 			}),
 			
-			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, global.config.vid_mipmap_filter.value, function (_value) {
+			new OUIOption("options.video.vid_mipmap_filter", OUIValues.MIPMAP, _config.vid_mipmap_filter.value, function (_value) {
 				config_set("vid_mipmap_filter", _value)
 			}),
 			
@@ -291,13 +325,13 @@ function proOptionsUI() : UI(undefined) constructor {
 				config_set("vid_antialias", _aa)
 			}),
 			
-			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, global.config.vid_bloom.value, function (_value) {
+			new OUIOption("options.video.vid_bloom", OUIValues.OFF_ON, _config.vid_bloom.value, function (_value) {
 				config_set("vid_bloom", _value)
 			}),
 			
 			undefined,
 			
-			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, global.config.vid_lighting.value, function (_value) {
+			new OUIOption("options.video.vid_lighting", OUIValues.LEVEL, _config.vid_lighting.value, function (_value) {
 				config_set("vid_lighting", _value)
 			}),
 			
@@ -315,19 +349,19 @@ function proOptionsUI() : UI(undefined) constructor {
 		
 #region Audio
 		new OUIMenu("options.audio.title", [
-			new OUISlider("options.audio.snd_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+			new OUISlider("options.audio.snd_volume", _config.snd_volume.value, 0.05, 0, 1, function () {
 				return $"{current_value * 100}%"
 			}, function (_value) {
 				config_set("snd_volume", _value)
 			}),
 			
-			new OUISlider("options.audio.snd_sound_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+			new OUISlider("options.audio.snd_sound_volume", _config.snd_volume.value, 0.05, 0, 1, function () {
 				return $"{current_value * 100}%"
 			}, function (_value) {
 				config_set("snd_sound_volume", _value)
 			}),
 			
-			new OUISlider("options.audio.snd_music_volume", global.config.snd_volume.value, 0.05, 0, 1, function () {
+			new OUISlider("options.audio.snd_music_volume", _config.snd_volume.value, 0.05, 0, 1, function () {
 				return $"{current_value * 100}%"
 			}, function (_value) {
 				config_set("snd_music_volume", _value)
@@ -335,7 +369,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			
 			undefined,
 			
-			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, global.config.snd_background.value, function (_value) {
+			new OUIOption("options.audio.snd_background", OUIValues.NO_YES, _config.snd_background.value, function (_value) {
 				config_set("snd_background", _value)
 			}),
 		]),
@@ -404,7 +438,6 @@ function proOptionsUI() : UI(undefined) constructor {
 #endregion
 #endregion
 	
-	menu = main_menu
 	focus = undefined
 	force_option = -1
 	
@@ -479,12 +512,15 @@ function proOptionsUI() : UI(undefined) constructor {
 						
 						var _element = contents[option]
 						
-						if is_instanceof(_element, OUIElement) and not _element.disabled {
+						if is_instanceof(_element, OUIElement) and not is_instanceof(_element, OUIText) and (_element.disabled == undefined or not _element.disabled()) {
 							break
 						}
 					}
 					
-					_changed = _next != option
+					if _next != option {
+						global.oui_current[? name] = option
+						_changed = true
+					}
 				}
 				
 				if _changed {
@@ -501,7 +537,7 @@ function proOptionsUI() : UI(undefined) constructor {
 			with menu {
 				var _option = contents[option]
 				
-				if not (is_instanceof(_option, OUIOption) or is_instanceof(_option, OUISlider)) or _option.disabled {
+				if not (is_instanceof(_option, OUIOption) or is_instanceof(_option, OUISlider)) or (_option.disabled != undefined and _option.disabled()) {
 					break
 				}
 				
@@ -517,11 +553,13 @@ function proOptionsUI() : UI(undefined) constructor {
 			with menu {
 				var _option = contents[option]
 				
-				if is_instanceof(_option, OUIMenu)  {
-					if _option.disabled {
-						break
-					}
+				if is_instanceof(_option, OUIElement) and _option.disabled != undefined and _option.disabled() {
+					play_sound(fail_sound)
 					
+					break
+				}
+				
+				if is_instanceof(_option, OUIMenu)  {
 					_option.from = other.menu
 					other.menu = _option
 					_changed = true
@@ -593,14 +631,15 @@ function proOptionsUI() : UI(undefined) constructor {
 				var _color = is_instanceof(_element, OUIText) ? c_white : (option == i ? c_yellow : C_AB_GREEN)
 				
 				with _element {
+					var _alpha = ((disabled != undefined and disabled()) ? 0.5 : 1)
 					var _name = lexicon_text(name)
 					
-					draw_text_color(24, _y, _name, _color, _color, _color, _color, 1)
+					draw_text_color(24, _y, _name, _color, _color, _color, _color, _alpha)
 					
 					if is_instanceof(_element, OUIOption) {
-						draw_text(32 + string_width(_name), _y, lexicon_text(values[current_value]))
+						draw_text_color(32 + string_width(_name), _y, lexicon_text(values[current_value]), c_white, c_white, c_white, c_white, _alpha)
 					} else if is_instanceof(_element, OUISlider) {
-						draw_text(32 + string_width(_name), _y, (format != undefined ? format : string)(current_value))
+						draw_text_color(32 + string_width(_name), _y, (format != undefined ? format : string)(current_value), c_white, c_white, c_white, c_white, _alpha)
 					} else if is_instanceof(_element, OUIInput) {
 						var _text
 						
@@ -614,11 +653,11 @@ function proOptionsUI() : UI(undefined) constructor {
 							_text = current_value
 						}
 						
-						draw_text(32 + string_width(_name), _y, _text)
+						draw_text_color(32 + string_width(_name), _y, _text, c_white, c_white, c_white, c_white, _alpha)
 					} else if is_instanceof(_element, OUIBinding) {
 						var _text = _focus == _element ? lexicon_text("value.press_any_key") : string_input(verb)
 						
-						draw_text(32 + string_width(_name), _y, _text)
+						draw_text_color(32 + string_width(_name), _y, _text, c_white, c_white, c_white, c_white, _alpha)
 					}
 				}
 				

@@ -698,17 +698,21 @@ var _config = global.config
 var _mouse_focused = mouse_focused
 
 if _mouse_focused {
-	if not InputGameHasFocus()
+	if not InputGameHasFocus() or not _config.in_mouse.value
 	   or _console or global.debug_overlay
 	   or (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
+		window_mouse_set_locked(false)
 		window_set_cursor(cr_default)
 		mouse_focused = false
 		_mouse_focused = false
 	}
-} else if InputGameHasFocus()
+} else if InputGameHasFocus() and _config.in_mouse.value
           and not _console and not global.debug_overlay
           and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
+	window_mouse_set_locked(true)
 	window_set_cursor(cr_none)
+	mouse_dx = 0
+	mouse_dy = 0
 	mouse_focused = true
 	_mouse_focused = true
 }
@@ -720,6 +724,11 @@ var _tick_scale = global.tick_scale
 global.delta = _tick_inc
 _tick = min(_tick + (_tick_inc * _tick_scale), TICKRATE)
 InputManualCollect()
+
+if _mouse_focused {
+	mouse_dx += window_mouse_get_delta_x()
+	mouse_dy += window_mouse_get_delta_y()
+}
 
 var _interps = global.interps
 
@@ -747,6 +756,8 @@ if _tick >= 1 {
 	
 	if _console {
 		InputManualUpdate()
+		mouse_dx = 0
+		mouse_dy = 0
 		InputVerbConsume(INPUT_VERB.LEAVE)
 		
 		if InputPressed(INPUT_VERB.DEBUG_CONSOLE_PREVIOUS) {
@@ -924,6 +935,8 @@ if _tick >= 1 {
 		
 		if _skip_tick {
 			InputManualUpdate()
+			mouse_dx = 0
+			mouse_dy = 0
 			_ui_tick = 0
 			_game_tick = 0
 		}
@@ -1026,6 +1039,8 @@ if _tick >= 1 {
 			// Try to clear momentary input if game ticks are skipped
 			if _skip_tick {
 				InputManualUpdate()
+				mouse_dx = 0
+				mouse_dy = 0
 			}
 			
 			--_ui_tick
@@ -1054,6 +1069,8 @@ if _tick >= 1 {
 #region Cameraman (non-deterministic)
 		if _has_camera_man and _camera_man_freeze {
 			InputManualUpdate()
+			mouse_dx = 0
+			mouse_dy = 0
 			--_game_tick
 			
 			continue
@@ -1086,6 +1103,9 @@ if _tick >= 1 {
 			buffer_resize(_tick_buffer, _tick_size)
 		} else {
 			// Local input
+			var _mouse_dx = mouse_dx
+			var _mouse_dy = mouse_dy
+			
 			i = 0
 			
 			repeat ds_list_size(_players_active) {
@@ -1118,27 +1138,30 @@ if _tick >= 1 {
 						)
 						
 						// Camera
-						/*var _dx_factor = 0
+						var _dx_factor = 0
 						var _dy_factor = 0
 						
 						with _config {
-							_dx_factor += input_cursor_dx(j)
-							_dy_factor += input_cursor_dy(j)
+							_dx_factor += (InputValue(INPUT_VERB.AIM_RIGHT, j) - InputValue(INPUT_VERB.AIM_LEFT, j)) * in_aim_x.value
+							_dy_factor += (InputValue(INPUT_VERB.AIM_DOWN, j) - InputValue(INPUT_VERB.AIM_UP, j)) * in_aim_y.value
+							
+							if _mouse_focused and InputPlayerUsingKbm(j) {
+								_dx_factor += _mouse_dx * in_mouse_x.value
+								_dy_factor += _mouse_dy * in_mouse_y.value
+							}
 							
 							if in_gyro.value {
-								var _gyro = input_motion_data_get(j)
+								var _gyro = InputMotionGet(j)
 								
 								if _gyro != undefined {
-									var _in_gyro_pan = in_gyro_pan.value
-									
-									_dx_factor += radtodeg(_gyro.angular_velocity_y) * _in_gyro_pan
-									_dy_factor -= radtodeg(_gyro.angular_velocity_x) * _in_gyro_pan
+									_dx_factor += radtodeg(_gyro.angularVelocityY) * in_gyro_y.value
+									_dy_factor -= radtodeg(_gyro.angularVelocityX) * in_gyro_x.value
 								}
 							}
-						}*/
+						}
 						
-						_dx = 0 //floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
-						_dy = 0 //floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
+						_dx = floor((abs(_dx_factor) * 0.0027777777777778) * 32768) * sign(_dx_factor)
+						_dy = floor((abs(_dy_factor) * 0.0027777777777778) * 32768) * sign(_dy_factor)
 					}
 					
 					buffer_write(_tick_buffer, buffer_u8, TickPackets.INPUT)
@@ -1419,6 +1442,8 @@ if _tick >= 1 {
 #endregion
 		
 		InputManualUpdate()
+		mouse_dx = 0
+		mouse_dy = 0
 		--_game_tick
 	}
 #endregion

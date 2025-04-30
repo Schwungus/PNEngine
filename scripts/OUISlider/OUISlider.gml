@@ -1,4 +1,4 @@
-function OUISlider(_name, _current = 0, _step = 1, _min = -infinity, _max = infinity, _format = undefined, _changed = undefined, _disabled = false) : OUIElement(_name, undefined, _disabled) constructor {
+function OUISlider(_name, _current = 0, _step = 1, _min = -infinity, _max = infinity, _format = undefined, _changed = undefined, _disabled = undefined) : OUIElement(_name, undefined, _disabled) constructor {
 	current_value = _current
 	step_value = _step
 	min_value = _min

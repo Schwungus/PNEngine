@@ -1,1 +1,1 @@
-function OUIButton(_name, _callback = undefined, _disabled = false) : OUIElement(_name, _callback, _disabled) constructor {}
+function OUIButton(_name, _callback = undefined, _disabled = undefined) : OUIElement(_name, _callback, _disabled) constructor {}

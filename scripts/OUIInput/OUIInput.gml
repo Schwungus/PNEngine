@@ -1,4 +1,4 @@
-function OUIInput(_name, _current = "", _changed = undefined, _disabled = false) : OUIElement(_name, undefined, _disabled) constructor {
+function OUIInput(_name, _current = "", _changed = undefined, _disabled = undefined) : OUIElement(_name, undefined, _disabled) constructor {
 	current_value = _current
 	changed = _changed
 	

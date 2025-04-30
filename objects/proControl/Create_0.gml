@@ -1114,6 +1114,8 @@ load_state = LoadStates.START
 
 #region Input
 mouse_focused = false
+mouse_dx = 0
+mouse_dy = 0
 #endregion
 
 #region Discord

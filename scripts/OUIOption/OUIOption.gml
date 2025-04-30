@@ -1,4 +1,4 @@
-function OUIOption(_name, _values = OUIValues.UNDEFINED, _current = 0, _changed = undefined, _disabled = false) : OUIElement(_name, undefined, _disabled) constructor {
+function OUIOption(_name, _values = OUIValues.UNDEFINED, _current = 0, _changed = undefined, _disabled = undefined) : OUIElement(_name, undefined, _disabled) constructor {
 	values = global.oui_values[_values]
 	current_value = _current
 	changed = _changed

@@ -1,4 +1,4 @@
-function OUIElement(_name, _callback = undefined, _disabled = false) constructor {
+function OUIElement(_name, _callback = undefined, _disabled = undefined) constructor {
 	menu = undefined
 	slot = -1
 	
