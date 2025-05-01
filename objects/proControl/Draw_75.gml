@@ -282,8 +282,30 @@ if _console {
 	draw_set_font(-1)
 }
 
-if global.debug_fps {
-	var _fps = $"{fps} FPS"
+var _debug_fps = global.debug_fps
+var _debug_input = global.debug_input
+
+if _debug_fps or _debug_input {
+	var _fps = ""
+	
+	if _debug_fps {
+		_fps += $"{fps} FPS\n"
+	}
+	
+	if _debug_input {
+		_fps += $"STEAMWORKS: {InputGetSteamInfo(INPUT_STEAM_INFO.STEAMWORKS)}\n"
+		_fps += $"GYRO/CALIB: {InputMotionSupported()}/{InputMotionIsCalibrated()}\n"
+		
+		var _gyro = InputMotionGet()
+		
+		if _gyro != undefined {
+			if InputCheck(INPUT_VERB.AIM) {
+				InputMotionCalibrate()
+			}
+			
+			_fps += $"({_gyro.angularVelocityX}, {_gyro.angularVelocityY}, {_gyro.angularVelocityZ}) rad\n"
+		}
+	}
 	
 	draw_set_alpha(0.5)
 	draw_rectangle_color(0, 0, string_width(_fps), string_height(_fps), c_black, c_black, c_black, c_black, false)

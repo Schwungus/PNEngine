@@ -1,6 +1,7 @@
 #region Profiling
 global.debug_overlay = false
 global.debug_fps = false
+global.debug_input = false
 
 dbg_view("Resource Counts", false)
 global.resource_counts = ""

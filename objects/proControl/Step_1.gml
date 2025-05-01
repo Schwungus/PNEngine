@@ -756,6 +756,10 @@ if _tick >= 1 {
 		global.debug_fps = not global.debug_fps
 	}
 	
+	if InputPressed(INPUT_VERB.DEBUG_INPUT) {
+		global.debug_input = not global.debug_input
+	}
+	
 	if _console {
 		InputManualUpdate()
 		mouse_dx = 0
