@@ -698,7 +698,8 @@ var _config = global.config
 var _mouse_focused = mouse_focused
 
 if _mouse_focused {
-	if not InputGameHasFocus() or not _config.in_mouse.value
+	if not InputGameHasFocus() or not window_has_focus()
+	   or not _config.in_mouse.value
 	   or _console or global.debug_overlay
 	   or (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
 		window_mouse_set_locked(false)
@@ -706,7 +707,8 @@ if _mouse_focused {
 		mouse_focused = false
 		_mouse_focused = false
 	}
-} else if InputGameHasFocus() and _config.in_mouse.value
+} else if InputGameHasFocus() and window_has_focus()
+          and _config.in_mouse.value
           and not _console and not global.debug_overlay
           and not (ui_exists(_ui) and (_ui.f_blocking or _ui.f_block_input)) {
 	window_mouse_set_locked(true)
@@ -1077,6 +1079,61 @@ if _tick >= 1 {
 	while _game_tick >= 1 {
 #region Cameraman (non-deterministic)
 		if _has_camera_man and _camera_man_freeze {
+			var _dyaw = 0
+			var _dpitch = 0
+			var _droll = 0
+			
+			with _config {
+				_dyaw += (InputValue(INPUT_VERB.AIM_RIGHT) - InputValue(INPUT_VERB.AIM_LEFT)) * in_aim_x.value
+				_dpitch += (InputValue(INPUT_VERB.AIM_DOWN) - InputValue(INPUT_VERB.AIM_UP)) * in_aim_y.value
+				
+				if _mouse_focused {
+					_dyaw += other.mouse_dx * in_mouse_x.value
+					_dpitch += other.mouse_dy * in_mouse_y.value
+				}
+				
+				if in_gyro.value {
+					var _gyro = InputMotionGet()
+					
+					if _gyro != undefined {
+						_dyaw += radtodeg(_gyro.angularVelocityY) * in_gyro_y.value
+						_dpitch -= radtodeg(_gyro.angularVelocityX) * in_gyro_x.value
+					}
+				}
+			}
+			
+			with _camera_man {
+				if InputPressed(INPUT_VERB.INTERACT) {
+					roll = 0
+					fov = 45
+				}
+				
+				if InputCheck(INPUT_VERB.AIM) {
+					roll += _dyaw
+					fov += _dpitch
+				} else {
+					yaw += _dyaw
+					pitch += _dpitch
+				}
+				
+				var _speed = power(2, (not InputCheck(INPUT_VERB.WALK)) + InputCheck(INPUT_VERB.ATTACK))
+				var _forward = (InputValue(INPUT_VERB.UP) - InputValue(INPUT_VERB.DOWN)) * _speed
+				var _side = (InputValue(INPUT_VERB.LEFT) - InputValue(INPUT_VERB.RIGHT)) * _speed
+				
+				_forward = lengthdir_3d(_forward, yaw, pitch)
+				
+				var _dx = _forward[0]
+				var _dy = _forward[1]
+				var _dz = _forward[2]
+				
+				_side = lengthdir_3d(_side, yaw - 90, -roll)
+				_dx += _side[0]
+				_dy += _side[1]
+				_dz += _side[2]
+				
+				set_position(x + _dx, y + _dy, z + _dz)
+			}
+			
 			InputManualUpdate()
 			mouse_dx = 0
 			mouse_dy = 0
