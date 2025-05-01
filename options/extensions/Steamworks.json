@@ -8,8 +8,16 @@
       }
     },
     "c37a2e1d-c82f-4d90-9d0a-b4a2b3b3da08": null,
-    "2d512363-a8c0-4025-8b9f-b53e231b025d": null,
-    "96a61e5d-c4ac-4104-b5ac-c8ef936e2609": null,
+    "2d512363-a8c0-4025-8b9f-b53e231b025d": {
+      "Default": {
+        "value": "378090"
+      }
+    },
+    "96a61e5d-c4ac-4104-b5ac-c8ef936e2609": {
+      "Default": {
+        "value": "Auto"
+      }
+    },
     "6fb808c0-c204-4477-9ad2-f05b3a5b9eeb": null,
     "4bf243ec-4e30-4c6d-86fd-9207893f0784": null,
     "3c048609-3c36-48e2-88c3-d1c216e84e6b": null,
