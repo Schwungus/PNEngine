@@ -2,8 +2,10 @@
 /// @desc Saves the console log to a text file with a prefix and optional context.
 /// @return {String} The filename.
 function console_save(_prefix, _context = "") {
-	var _filename = _prefix + "_" + string_replace_all(date_datetime_string(date_current_datetime()), "/", ".") + ".txt"
+	var _filename = $"{_prefix}_{date_datetime_string(date_current_datetime())}.txt"
 	
+	_filename = string_replace_all(_filename, "/", ".")
+	_filename = string_replace_all(_filename, ":", ".")
 	print($"console_save: Saved console output to '{_filename}'")
 	
 	var _log = buffer_create(1, buffer_grow, 1)
@@ -39,7 +41,6 @@ function console_save(_prefix, _context = "") {
 	
 	switch os_type {
 		case os_windows:
-		case os_win8native:
 			_os = "Windows"
 			
 			switch os_version {

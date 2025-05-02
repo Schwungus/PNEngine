@@ -40,6 +40,7 @@ function __InputConfigVerbs()
 		
 		DEBUG_OVERLAY,
 		DEBUG_FPS,
+		DEBUG_INPUT,
 		DEBUG_CONSOLE,
 		DEBUG_CONSOLE_SUBMIT,
 		DEBUG_CONSOLE_PREVIOUS,
@@ -89,6 +90,7 @@ function __InputConfigVerbs()
 	
 	InputDefineVerb(INPUT_VERB.DEBUG_OVERLAY, "debug_overlay", vk_f1, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_FPS, "debug_fps", vk_f2, undefined);
+	InputDefineVerb(INPUT_VERB.DEBUG_INPUT, "debug_input", vk_f3, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE, "debug_console", vk_backtick, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE_PREVIOUS, "debug_console_previous", vk_up, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE_SUBMIT, "debug_console_submit", vk_enter, undefined);

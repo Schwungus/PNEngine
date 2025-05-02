@@ -31,6 +31,6 @@ function config_load() {
 		_json = json_load(GAMEPAD_PATH)
 		InputBindingsImport(true, _json)
 	} catch (e) {
-		print($"! config_load: Failed to import keyboard+mouse controls ({e})")
+		print($"! config_load: Failed to import gamepad controls ({e})")
 	}
 }
