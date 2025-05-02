@@ -132,8 +132,8 @@ exit /b 0
     call %Utils% pathResolveExisting "%YYprojectDir%" "%LINUX_SDK_PATH%" SDK_PATH
 
     :: Get library file paths
-    set SDK_CORE_SOURCE="%SDK_PATH%\api\core\lib\x86_64\libfmod.so.13"
-    set SDK_STUDIO_SOURCE="%SDK_PATH%\api\studio\lib\x86_64\libfmodstudio.so.13"
+    set SDK_CORE_SOURCE="%SDK_PATH%\api\core\lib\x86_64\libfmod.so.14"
+    set SDK_STUDIO_SOURCE="%SDK_PATH%\api\studio\lib\x86_64\libfmodstudio.so.14"
 
     :: Asset hash match
     :: call %Utils% assertFileHashEquals %SDK_CORE_SOURCE% %LINUX_SDK_HASH% "%ERROR_SDK_HASH%"
