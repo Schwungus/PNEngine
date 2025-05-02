@@ -1120,6 +1120,12 @@ mouse_dy = 0
 
 #region Discord
 if not np_initdiscord(global.game_rpc_id, true, np_steam_app_id_empty) {
-	print("! proControl: Could not initialize Discord Rich Presence")
+	print("! proControl: Discord Rich Presence not initialized")
+}
+#endregion
+
+#region Steam
+if not steam_initialised() {
+	print("! proControl: Steam not initialized")
 }
 #endregion
