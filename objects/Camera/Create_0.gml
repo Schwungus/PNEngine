@@ -699,7 +699,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 			
 			var _mwp = matrix_get(matrix_world)
 			var _shadow_vbo = global.shadow_vbo
-			var _shadow_id = 16
 			
 			repeat i {
 				var _caster = ds_stack_pop(_camera_shadows)
@@ -729,7 +728,6 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 					}
 					
 					matrix_set(matrix_world, matrix_build(_shadx, _shady, max(_shadz, mean(_shadz, sshadow_z)), 0, 0, 0, _radius, _radius, -max(_radius, sshadow_z - _shadz)))
-					gpu_set_stencil_ref(_shadow_id++)
 					gpu_set_stencil_pass(stencilop_incr)
 					gpu_set_cullmode(cull_clockwise)
 					vertex_submit(_shadow_vbo, pr_trianglelist, -1)
