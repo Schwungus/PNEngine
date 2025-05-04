@@ -15,6 +15,8 @@ global.transition_canvas = (new Canvas(1, 1)).SetDepthDisabled(true)
 #endregion
 
 #region Rendering
+#macro SHADOW_TINT 0x999999
+
 enum Canvases {
 	WORLD,
 	RENDER,

@@ -750,9 +750,9 @@ render = function (_width, _height, _update_listener = false, _allow_sky = true,
 		gpu_set_stencil_ref(16)
 		gpu_set_stencil_func(cmpfunc_less)
 		gpu_set_stencil_pass(stencilop_keep)
-		draw_set_alpha(0.4)
-		draw_rectangle_color(0, 0, _width, _height, c_black, c_black, c_black, c_black, false)
-		draw_set_alpha(1)
+		gpu_set_blendmode_ext_sepalpha(bm_dest_color, bm_zero, bm_src_alpha, bm_one)
+		draw_rectangle_color(0, 0, _width, _height, SHADOW_TINT, SHADOW_TINT, SHADOW_TINT, SHADOW_TINT, false)
+		gpu_set_blendmode(bm_normal)
 		_world_canvas.Finish()
 	}
 	
