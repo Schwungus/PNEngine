@@ -156,4 +156,16 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		
 		return check_surface(surfaces[0])
 	}
+	
+	static clear = function () {
+		var i = 0
+		
+		repeat array_length(surfaces) {
+			with surfaces[i++] {
+				if surface_exists(surface) {
+					surface_free(surface)
+				}
+			}
+		}
+	}
 }

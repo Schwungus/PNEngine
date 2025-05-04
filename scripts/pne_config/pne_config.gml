@@ -64,7 +64,12 @@ global.config = {
 		display_reset(value, global.config.vid_vsync.value)
 	}),
 	
-	vid_bloom: new CVar(true),
+	vid_bloom: new CVar(true, is_numeric, function (_batch) {
+		if not value {
+			global.bloom.clear()
+		}
+	}),
+	
 	vid_bloom_threshold: new CVar(0.85),
 	vid_bloom_intensity: new CVar(0.2),
 	vid_lighting: new CVar(1),
