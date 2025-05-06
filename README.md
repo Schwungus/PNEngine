@@ -16,7 +16,7 @@ to enable join mode (use value `2` to revert back to hotswap). If you save your
 current settings after doing this, it will persist until you reset your
 settings to defaults.
 
-You can assign a new player to an input device by pressing any button on it.
+You can assign a new player to an input device by pressing Jump on it.
 Once assigned, that player is readied and will be able to play when the level
 changes.
 
@@ -31,11 +31,11 @@ The curve shader is from **[Mors](https://mors-games.com/)**' [Super Mario 64 Pl
 
 ### Special Thanks
 
-- **[Alynne Keith](https://offalynne.neocities.org)** and **[Co](https://offalynne.github.io/Input/#/6.0/Credits)** for [Input](https://github.com/offalynne/Input)
-- **Jaydex**, **[nonk](https://nonk.dev)**, **[Sable](https://github.com/circuitsable)** and **Soh** for beta testing
+- **[Alynne Keith](https://offalynne.neocities.org)**, **[Juju Adams](https://www.jujuadams.com)** and **[Co](https://offalynne.github.io/Input/#/6.0/Credits)** for [Input](https://github.com/offalynne/Input)
+- **Jaydex**, **[NiK0](https://github.com/NiKled)**, **[nonk](https://nonk.dev)**, **[Sable](https://github.com/circuitsable)**, **Soh** and **[TabularElf](https://tabularelf.com)** for beta testing
 - **[Juju Adams](https://www.jujuadams.com)** for [Scribble](https://github.com/JujuAdams/Scribble)
 - **[katsaii](https://www.katsaii.com)** for [Catspeak](https://www.katsaii.com/catspeak-lang)
 - **[Nikita Krapivin](https://github.com/nkrapivin)** for [NekoPresence](https://github.com/nkrapivin/NekoPresence)
 - **[Patrik Kraif](https://github.com/kraifpatrik)** for [BBMOD](https://blueburn.cz/bbmod)
 - **[TabularElf](https://tabularelf.com)** for [Canvas](https://github.com/tabularelf/Canvas), [Collage](https://github.com/tabularelf/Collage), [Lexicon](https://github.com/tabularelf/lexicon) and [MultiClient](https://github.com/tabularelf/MultiClient)
-- **[YoYo Games](https://yoyogames.com)** for [GMEXT-FMOD](https://github.com/YoYoGames/GMEXT-FMOD)
+- **[YoYo Games](https://yoyogames.com)** for [GMEXT-FMOD](https://github.com/YoYoGames/GMEXT-FMOD) and [GMEXT-Steamworks](https://github.com/YoYoGames/GMEXT-Steamworks)
