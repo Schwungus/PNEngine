@@ -54,7 +54,7 @@ switch load_state {
 		global.materials.clear()
 		global.models.clear()
 		global.animations.clear()
-		//global.fonts.clear()
+		global.fonts.clear()
 		global.sounds.clear()
 		global.music.clear()
 		
