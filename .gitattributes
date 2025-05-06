@@ -1,1 +1,9 @@
 *.yy linguist-language=Game Maker Language
+*.html -linguist-detectable
+*.css -linguist-detectable
+*.js -linguist-detectable
+*.c -linguist-detectable
+*.h -linguist-detectable
+*.cpp -linguist-detectable
+*.hpp -linguist-detectable
+*.java -linguist-detectable
