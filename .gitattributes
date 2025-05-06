@@ -1,2 +1,2 @@
 *.yy linguist-language=Game Maker Language
-extensions/* -linguist-detectable
+extensions/** -linguist-detectable
