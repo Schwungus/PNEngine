@@ -41,9 +41,16 @@ function __InputConfigVerbs()
 		DEBUG_OVERLAY,
 		DEBUG_FPS,
 		DEBUG_INPUT,
+		
 		DEBUG_CONSOLE,
 		DEBUG_CONSOLE_SUBMIT,
 		DEBUG_CONSOLE_PREVIOUS,
+		
+		DEBUG_CAMERA1,
+		DEBUG_CAMERA2,
+		DEBUG_CAMERA3,
+		DEBUG_CAMERA4,
+		DEBUG_CAMERA_OFF,
     }
     
     enum INPUT_CLUSTER
@@ -94,6 +101,12 @@ function __InputConfigVerbs()
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE, "debug_console", vk_backtick, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE_PREVIOUS, "debug_console_previous", vk_up, undefined);
 	InputDefineVerb(INPUT_VERB.DEBUG_CONSOLE_SUBMIT, "debug_console_submit", vk_enter, undefined);
+	
+	InputDefineVerb(INPUT_VERB.DEBUG_CAMERA1, "debug_camera1", "6", undefined);
+	InputDefineVerb(INPUT_VERB.DEBUG_CAMERA2, "debug_camera2", "7", undefined);
+	InputDefineVerb(INPUT_VERB.DEBUG_CAMERA3, "debug_camera3", "8", undefined);
+	InputDefineVerb(INPUT_VERB.DEBUG_CAMERA4, "debug_camera4", "9", undefined);
+	InputDefineVerb(INPUT_VERB.DEBUG_CAMERA_OFF, "debug_camera_off", "0", undefined);
     
     //Define a cluster of verbs for moving around
     InputDefineCluster(INPUT_CLUSTER.MOVE, INPUT_VERB.UP, INPUT_VERB.RIGHT, INPUT_VERB.DOWN, INPUT_VERB.LEFT);

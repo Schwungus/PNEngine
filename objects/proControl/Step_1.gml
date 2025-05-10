@@ -819,6 +819,29 @@ if _tick >= 1 {
 		keyboard_string = global.console_input
 		fmod_channel_control_set_paused(global.world_channel_group, true)
 		_block_input = true
+	} else if _playing_demo {
+		var _demo_target = MAX_PLAYERS
+		
+		if InputPressed(INPUT_VERB.DEBUG_CAMERA1) _demo_target = 0
+		else if InputPressed(INPUT_VERB.DEBUG_CAMERA2) _demo_target = 1
+		else if InputPressed(INPUT_VERB.DEBUG_CAMERA3) _demo_target = 2
+		else if InputPressed(INPUT_VERB.DEBUG_CAMERA4) _demo_target = 3
+		
+		if _demo_target < MAX_PLAYERS {
+			with global.players[_demo_target] {
+				if status != PlayerStatus.ACTIVE or area == undefined or not thing_exists(thing) {
+					global.camera_demo = noone
+					
+					break
+				}
+				
+				global.camera_demo = area.nearest(thing.x, thing.y, thing.z, DemoCamera)
+			}
+		}
+		
+		if InputPressed(INPUT_VERB.DEBUG_CAMERA_OFF) {
+			global.camera_demo = noone
+		}
 	}
 #endregion
 	
