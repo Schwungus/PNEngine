@@ -1,3 +1,8 @@
+/// @func mod_find_file(filename, [exclude])
+/// @desc Finds a file from any Mod and returns its full path.
+/// @param {String} filename File name.
+/// @param {String} [exclude] File extension to ignore when searching.
+/// @return {String} Full path to the file (empty if not found).
 function mod_find_file(_filename, _exclude = "") {
 	var _mods = global.mods
 	var _key = ds_map_find_last(_mods)

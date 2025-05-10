@@ -1,6 +1,6 @@
-/// @param {buffer} buffer
-/// @param {int} bytesPerRow
-/// @returns {string} text representation
+/// @param {Id.Buffer} buffer
+/// @param {Real} bytes_per_row
+/// @return {String}
 function buffer_prettyprint(_buf, _per_row = 20) {
 	// Source: https://yal.cc/gamemaker-buffer-pretty-print/
 	static _out = buffer_create(16, buffer_grow, 1)

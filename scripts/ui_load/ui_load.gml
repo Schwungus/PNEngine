@@ -1,6 +1,8 @@
-/// @func ui_load(type)
-/// @desc Loads a type of UI for use in the current level.
-/// @param {(UI|string)} type The type of UI to load.
+/// @func ui_load(type, [special])
+/// @desc Loads a type of UI.
+/// @param {Function.UI|String} type UI type.
+/// @param {Any} [special] Custom properties to specify while loading.
+/// @return {Bool} Whether or not the UI was successfully loaded.
 function ui_load(_type, _special = undefined) {
 	if is_string(_type) {
 		var _scripts = global.scripts

@@ -1,3 +1,6 @@
+/// @param {Any} value
+/// @param {String} type
+/// @return {Any}
 function force_type(_value, _type) {
 	gml_pragma("forceinline")
 	

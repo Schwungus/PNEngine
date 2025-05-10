@@ -1,3 +1,10 @@
+/// @func MusicInstance(music, priority, [loop], [gain], [offset], [active])
+/// @param {Struct.Music} music Music to play.
+/// @param {Real} priority Priority to play at. Higher values will fade out lower instances.
+/// @param {Bool} [loop] Whether to loop or not.
+/// @param {Real} [gain] Instance volume.
+/// @param {Real} [offset] Music position in samples.
+/// @param {Bool} [active] Whether or not the instance is active.
 function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, _active = true) constructor {
 	stopping = false
 	
@@ -20,12 +27,21 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 	fmod_channel_control_set_volume(sound_instance, gain[0] * gain[1] * gain[2] * gain[3])
 	fmod_channel_set_position(sound_instance, _offset, FMOD_TIMEUNIT.PCM)
 	
+	/// @func set_gain(gain, [time])
+	/// @desc Sets the volume.
+	/// @param {Real} gain Target volume.
+	/// @param {Real} [time] Fading time in milliseconds.
+	/// @context MusicInstance
 	static set_gain = function (_gain, _time = 0) {
 		gml_pragma("forceinline")
 		
 		set_gain_common(0, _gain, _time)
 	}
 	
+	/// @param {Real} slot
+	/// @param {Real} gain
+	/// @param {Real} [time]
+	/// @context MusicInstance
 	static set_gain_common = function (_slot, _gain, _time = 0) {
 		if _slot == 2 and stopping {
 			exit
@@ -45,6 +61,10 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		gain_end[_slot] = _gain
 	}
 	
+	/// @func set_position(position)
+	/// @desc Seeks to the specified position.
+	/// @param {Real} position Target position in samples.
+	/// @context MusicInstance
 	static set_position = function (_position) {
 		fmod_channel_set_position(sound_instance, _position, FMOD_TIMEUNIT.PCM)
 	}
@@ -66,6 +86,11 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 	
 	fmod_channel_control_set_paused(sound_instance, false)
 	
+	/// @func set_active(active)
+	/// @desc Whether to activate or deactivate the instance.
+	///       When deactivated, lower priority tracks will fade back in.
+	/// @param {Bool} active
+	/// @context MusicInstance
 	static set_active = function (_active) {
 		if active == _active {
 			return false
@@ -103,6 +128,10 @@ function MusicInstance(_music, _priority, _loop = true, _gain = 1, _offset = 0, 
 		return true
 	}
 	
+	/// @func stop([fade])
+	/// @desc Stops and eventually destroys the instance.
+	/// @param {Bool} [fade] Whether or not the music should fade out before stopping.
+	/// @context MusicInstance
 	static stop = function (_fade = false) {
 		if _fade {
 			set_gain_common(2, 0, music.fade_out)

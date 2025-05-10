@@ -6,6 +6,9 @@ function Node() constructor {
 	is_bone = false
 	dq = dq_build_identity()
 	
+	/// @param {Id.Buffer} buffer
+	/// @return {Struct.Node}
+	/// @context Node
 	static from_buffer = function (_buffer) {
 		name = buffer_read(_buffer, buffer_string)
 		index = buffer_read(_buffer, buffer_f32)
@@ -41,6 +44,8 @@ function Node() constructor {
 		return self
 	}
 	
+	/// @param {Array} array
+	/// @context Node
 	static push_branch = function (_array) {
 		array_push(_array, self)
 		
@@ -51,6 +56,8 @@ function Node() constructor {
 		}
 	}
 	
+	/// @param {Array} array
+	/// @context Node
 	static push_branch_id = function (_array) {
 		array_push(_array, index)
 		

@@ -1,3 +1,4 @@
+/// @param {Struct.Area} area
 function area_destroy(_scope) {
 	with _scope {
 		var i = ds_list_size(active_things)

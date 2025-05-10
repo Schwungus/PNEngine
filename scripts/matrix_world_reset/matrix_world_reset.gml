@@ -1,5 +1,4 @@
-// Script assets have changed for v2.3.0 see
-// https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
+/// @func matrix_world_reset()
 function matrix_world_reset() {
 	gml_pragma("forceinline")
 	

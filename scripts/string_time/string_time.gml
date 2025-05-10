@@ -1,3 +1,6 @@
+/// @func string_time(ticks)
+/// @param {Real} ticks
+/// @return {String}
 function string_time(_ticks) {
 	var _full_seconds = _ticks / TICKRATE
 	var _full_minutes = _full_seconds * 0.0166666666666667

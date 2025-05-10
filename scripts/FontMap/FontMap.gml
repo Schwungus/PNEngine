@@ -1,4 +1,9 @@
 function FontMap() : AssetMap() constructor {
+	/// @func load(name)
+	/// @desc Loads a Font from "fonts/" and its properties if a JSON file is found.
+	///       Extensions: .ttf, .png
+	/// @param {String} name Font file name.
+	/// @context FontMap
 	static load = function (_name) {
 		if ds_map_exists(assets, _name) {
 			exit
@@ -99,6 +104,11 @@ function FontMap() : AssetMap() constructor {
 		print($"FontMap.load: Added '{_name}' ({_font})")
 	}
 	
+	/// @func get_font(name)
+	/// @desc Returns the font handle of a Font.
+	/// @param {String} name Font name.
+	/// @return {Asset.GMFont} Font handle (-1 if not found).
+	/// @context FontMap
 	static get_font = function (_name) {
 		var _font = get(_name)
 		
@@ -109,6 +119,11 @@ function FontMap() : AssetMap() constructor {
 		return -1
 	}
 	
+	/// @func fetch_font(name)
+	/// @desc Loads a Font then returns its font handle.
+	/// @param {String} name Font name or file name.
+	/// @return {Asset.GMFont} Font handle (-1 if not found).
+	/// @context FontMap
 	static fetch_font = function (_name) {
 		var _font = fetch(_name)
 		

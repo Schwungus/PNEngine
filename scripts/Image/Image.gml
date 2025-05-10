@@ -8,6 +8,8 @@ function Image() : Asset() constructor {
 	y_repeat = true
 	mipmaps = undefined
 	
+	/// @param {String} palette
+	/// @return {Struct.__CollageImageClass|Undefined}
 	static get_variant = function (_palette) {
 		gml_pragma("forceinline")
 		

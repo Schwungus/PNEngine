@@ -1,3 +1,7 @@
+/// @func quat_to_matrix(q, [matrix])
+/// @param {Array<Real>} q
+/// @param {Array<Real>} [matrix]
+/// @return {Array<Real>}
 function quat_to_matrix(_q, _matrix = matrix_build_identity()) {
 	var _x = _q[0]
 	var _y = _q[1]

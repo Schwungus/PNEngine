@@ -40,6 +40,9 @@ function Uniform(_name, _type) constructor {
 		}
 	}
 	
+	/// @func set([values...])
+	/// @desc Sets a uniform's value(s) on the current shader.
+	/// @param {Any} [values...]
 	static set = function () {
 		static _args = []
 		

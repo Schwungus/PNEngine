@@ -3,12 +3,14 @@ function ImageMap() : AssetMap() constructor {
 	collage = new Collage()
 	batch = false
 	
+	/// @context ImageMap
 	static start_batch = function () {
 		gml_pragma("forceinline")
 		
 		batch = true
 	}
 	
+	/// @context ImageMap
 	static end_batch = function () {
 		gml_pragma("forceinline")
 		
@@ -19,6 +21,7 @@ function ImageMap() : AssetMap() constructor {
 		batch = false
 	}
 	
+	/// @context ImageMap
 	static post_batch = function () {
 		// 1. Collage batch
 		collage.StartBatch()
@@ -274,6 +277,11 @@ function ImageMap() : AssetMap() constructor {
 		}
 	}
 	
+	/// @func load(name, [palette])
+	/// @desc Loads an Image from "images/" and its properties if a JSON file is found.
+	/// @param {String} name Image file name.
+	/// @param {String} [palette] The name of the palette to apply from "palettes/".
+	/// @context ImageMap
 	static load = function (_name, _palette = "default") {
 		var _image = queue[? _name] ?? assets[? _name]
 		
@@ -422,6 +430,12 @@ function ImageMap() : AssetMap() constructor {
 		return _image
 	}
 	
+	/// @func get(name, [palette])
+	/// @desc Returns an Image, or a palette variant of it when specified.
+	/// @param {String} name Image name.
+	/// @param {String} [palette] Palette name.
+	/// @return {Struct.__CollageImageClass|Undefined}
+	/// @context ImageMap
 	static get = function (_name, _palette = "default") {
 		gml_pragma("forceinline")
 		
@@ -443,6 +457,12 @@ function ImageMap() : AssetMap() constructor {
 		return undefined
 	}
 	
+	/// @func fetch(name, [palette])
+	/// @desc Loads an Image then returns it, or a palette variant when specified.
+	/// @param {String} name Image name.
+	/// @param {String} [palette] Palette name.
+	/// @return {Struct.__CollageImageClass|Undefined}
+	/// @context ImageMap
 	static fetch = function (_name, _palette = "default") {
 		gml_pragma("forceinline")
 		
@@ -451,6 +471,9 @@ function ImageMap() : AssetMap() constructor {
 		return get(_name, _palette)
 	}
 	
+	/// @func clear()
+	/// @desc Destroys all Images.
+	/// @context ImageMap
 	static clear = function () {
 		gml_pragma("forceinline")
 		

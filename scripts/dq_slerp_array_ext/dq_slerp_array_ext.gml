@@ -1,3 +1,10 @@
+/// @func dq_slerp_array_ext(dq1, dq2, amount, [out])
+/// @param {Array<Real>} dq1
+/// @param {Array<Real>} dq2
+/// @param {Real} amount
+/// @param {Real} offset
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_slerp_array_ext(_dq1, _dq2, _amount, _offset, _dq = dq_build_identity()) {
 	gml_pragma("forceinline")
 	

@@ -1,30 +1,19 @@
 // Credit: JujuAdams
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Real} max_iterations
 function Bloom(_width, _height, _max_iterations) constructor {
 	width = _width
 	height = _height
 	max_iterations = _max_iterations
 	
 	var n = -~_max_iterations
-	var i = 0
 	
 	surfaces = array_create(n)
 	
-	repeat n {
-		var _struct = {
-			width: _width,
-			height: _height,
-			surface: -1,
-			texel_width: 1,
-			texel_height: 1,
-		}
-		
-		surfaces[i] = _struct
-		check_surface(_struct)
-		_width = _width div 2
-		_height = _height div 2;
-		++i
-	}
-	
+	/// @param {Real} width
+	/// @param {Real} height
+	/// @context Bloom
 	static resize = function (_width, _height) {
 		var i = 0
 		
@@ -39,6 +28,9 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		}
 	}
 	
+	/// @param {Real} [iterations]
+	/// @return {Bool}
+	/// @context Bloom
 	static blur = function (_iterations = max_iterations) {
 		var i = 0
 		
@@ -65,13 +57,10 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		repeat _iterations {
 			var _previous = surfaces[i - 1]
 			var _next = surfaces[i]
-			var _width, _height
+			var _width = _next.width
+			var _height = _next.height
 			
-			with _next {
-				surface_set_target(surface)
-				_width = width
-				_height = height
-			}
+			surface_set_target(_next.surface)
 			
 			with _previous {
 				_u_texel.set(texel_width, texel_height)
@@ -88,13 +77,10 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		repeat _iterations {
 			var _previous = surfaces[i]
 			var _next = surfaces[i - 1]
-			var _width, _height
+			var _width = _next.width
+			var _height = _next.height
 			
-			with _next {
-				surface_set_target(surface)
-				_width = width
-				_height = height
-			}
+			surface_set_target(_next.surface)
 			
 			with _previous {
 				_u_texel.set(texel_width, texel_height)
@@ -113,6 +99,9 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		return true
 	}
 	
+	/// @param {Struct} struct
+	/// @return {Id.Surface}
+	/// @context Bloom
 	static check_surface = function (_struct) {
 		var _width, _height, _surface
 		
@@ -151,12 +140,15 @@ function Bloom(_width, _height, _max_iterations) constructor {
 		return _surface
 	}
 	
+	/// @return {Id.Surface}
+	/// @context Bloom
 	static get_surface = function () {
 		gml_pragma("forceinline")
 		
 		return check_surface(surfaces[0])
 	}
 	
+	/// @context Bloom
 	static clear = function () {
 		var i = 0
 		
@@ -167,5 +159,23 @@ function Bloom(_width, _height, _max_iterations) constructor {
 				}
 			}
 		}
+	}
+	
+	var i = 0
+	
+	repeat n {
+		var _struct = {
+			width: _width,
+			height: _height,
+			surface: -1,
+			texel_width: 1,
+			texel_height: 1,
+		}
+		
+		surfaces[i] = _struct
+		check_surface(_struct)
+		_width = _width div 2
+		_height = _height div 2;
+		++i
 	}
 }

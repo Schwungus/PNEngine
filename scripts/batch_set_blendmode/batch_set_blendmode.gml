@@ -1,4 +1,6 @@
-/// @desc Sets the current alpha testing threshold of the batch. This can cause batch breaks!
+/// @func batch_set_blendmode(blendmode)
+/// @desc Sets the blending mode for the batch. Causes batch breaks.
+/// @param {Constant.BlendMode} blendmode
 function batch_set_blendmode(_blendmode) {
 	gml_pragma("forceinline")
 	

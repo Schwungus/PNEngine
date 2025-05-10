@@ -1,6 +1,11 @@
 function MaterialMap() : AssetMap() constructor {
 	queue = ds_map_create()
 	
+	/// @func load(name, [strict])
+	/// @desc Loads a Material from "materials/".
+	/// @param {String} name Material file name.
+	/// @param {Bool} [strict] Whether or not the Material isn't loaded as a placeholder if not found.
+	/// @context MaterialMap
 	static load = function (_name, _strict = false) {
 		if ds_map_exists(assets, _name) or ds_map_exists(queue, _name) {
 			exit
@@ -57,12 +62,10 @@ function MaterialMap() : AssetMap() constructor {
 			_wind_lock_bottom = force_type_fallback(_json[$ "wind_lock_bottom"], "number", 1)
 			_wind_speed = force_type_fallback(_json[$ "wind_speed"], "number", 1)
 			_color = color_to_vec5(_json[$ "color"])
-		} else {
-			if _strict {
-				print($"! MaterialMap.load: '{_name}' not found")
-				
-				exit
-			}
+		} else if _strict {
+			print($"! MaterialMap.load: '{_name}' not found")
+			
+			exit
 		}
 		
 		var _material = new Material()
@@ -115,7 +118,7 @@ function MaterialMap() : AssetMap() constructor {
 				}
 			
 				if not _batch {
-					finish_batch()
+					end_batch()
 				}
 			}
 		}

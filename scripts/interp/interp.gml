@@ -1,3 +1,9 @@
+/// @func interp(in, out, [angle], [scope])
+/// @desc Adds a variable to interpolate.
+/// @param {String} in Input variable name.
+/// @param {String} out Output variable name.
+/// @param {Bool} [angle] Whether or not to consider the variable an angle.
+/// @param {Struct|Id.Instance} [scope] The scope to assign the output variable to.
 function interp(_in, _out, _angle = false, _scope = undefined) {
 	static __interp_hash = variable_get_hash("__interp")
 	

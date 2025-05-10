@@ -1,4 +1,8 @@
-/// @desc Returns the translation of a given dual quaternion
+/// @func dq_get_translation(dq, [out])
+/// @desc Returns the translation of a dual quaternion.
+/// @param {Array<Real>} dq
+/// @param {Array<Real>} [out]
+/// @return {Array<Real}
 function dq_get_translation(_dq, _out = undefined) {
 	gml_pragma("forceinline")
 	

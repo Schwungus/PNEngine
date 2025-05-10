@@ -8,6 +8,14 @@ cutoff_inner = 0
 cutoff_outer = 1
 
 #region Virtual Functions
+/// @func update_args(nx, ny, nz, range, cutoff_inner, cutoff_outer)
+/// @param {Real} nx
+/// @param {Real} ny
+/// @param {Real} nz
+/// @param {Real} range
+/// @param {Real} cutoff_inner
+/// @param {Real} cutoff_outer
+/// @context SpotLight
 update_args = function (_nx, _ny, _nz, _range, _cutoff_inner, _cutoff_outer) {
 	nx = _nx
 	ny = _ny

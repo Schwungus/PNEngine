@@ -6,6 +6,13 @@ enum LineBoxClip {
 	TOP = 8,
 }
 
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} x1
+/// @param {Real} y1
+/// @param {Real} x2
+/// @param {Real} y2
+/// @return {Real}
 function __line_in_rectangle_get_outcode(_x, _y, _x1, _y1, _x2, _y2) {
 	gml_pragma("forceinline")
 	
@@ -26,6 +33,15 @@ function __line_in_rectangle_get_outcode(_x, _y, _x1, _y1, _x2, _y2) {
 	return _code
 }
 
+/// @param {Real} lx1
+/// @param {Real} ly1
+/// @param {Real} lx2
+/// @param {Real} ly2
+/// @param {Real} x1
+/// @param {Real} y1
+/// @param {Real} x2
+/// @param {Real} y2
+/// @return {Bool}
 function line_in_rectangle(_lx1, _ly1, _lx2, _ly2, _x1, _y1, _x2, _y2) {
 	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
 	var _out1 = __line_in_rectangle_get_outcode(_lx1, _ly1, _x1, _y1, _x2, _y2)

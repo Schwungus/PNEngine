@@ -1,4 +1,14 @@
+/// @func batch_floor(image, frame, width, height, x, y, z, [color], [alpha])
 /// @desc Adds a flat image to the batch.
+/// @param {Struct.__CollageImageClass} image
+/// @param {Real} frame
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Constant.Color} [color]
+/// @param {Real} [alpha]
 function batch_floor(_image, _frame, _width, _height, _x, _y, _z, _color = c_white, _alpha = 1) {
 	var _texture = _image.GetTexture(_frame)
 	

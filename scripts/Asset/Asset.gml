@@ -4,6 +4,7 @@ function Asset() constructor {
 	
 	static destroy = function () {}
 	
+	/// @param {Array} array
 	static destroy_array = function (_array) {
 		if not is_array(_array) {
 			exit

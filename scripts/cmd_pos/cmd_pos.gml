@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_pos(_args) {
 	var _slot = _args == "" ? "0" : _args
 	

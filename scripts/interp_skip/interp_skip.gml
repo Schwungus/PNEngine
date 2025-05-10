@@ -1,3 +1,8 @@
+/// @func interp_skip(out, [scope])
+/// @desc Snaps the interpolated variable to its target value.
+/// @param {String} out Output variable name.
+/// @param {Struct|Id.Instance} [scope] Interpolation scope.
+/// @return {Bool} Whether or not the skip was successful.
 function interp_skip(_out, _scope = undefined) {
 	static __interp_hash = variable_get_hash("__interp")
 	

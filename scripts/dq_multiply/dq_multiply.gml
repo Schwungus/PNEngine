@@ -1,3 +1,8 @@
+/// @func dq_multiply(dq1, dq2, [out])
+/// @param {Array<Real>} dq1
+/// @param {Array<Real>} dq2
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_multiply(_dq1, _dq2, _dq = dq_build_identity()) {
 	gml_pragma("forceinline")
 	

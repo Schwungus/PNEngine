@@ -1,3 +1,15 @@
+/// @func ModelInstance(model, [x], [y], [z], [yaw], [pitch], [roll], [scale], [x_scale], [y_scale], [z_scale])
+/// @param {Struct.Model} model
+/// @param {Real} [x]
+/// @param {Real} [y]
+/// @param {Real} [z]
+/// @param {Real} [yaw]
+/// @param {Real} [pitch]
+/// @param {Real} [roll]
+/// @param {Real} [scale]
+/// @param {Real} [x_scale]
+/// @param {Real} [y_scale]
+/// @param {Real} [z_scale]
 function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _roll = 0, _scale = 1, _x_scale = 1, _y_scale = 1, _z_scale = 1) constructor {
 	model = _model
 	submodels = _model.submodels
@@ -27,6 +39,11 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	hold_offset_matrix = _model.hold_offset_matrix
 	points = _model.points
 	
+	/// @func set_skin(submodel, skin)
+	/// @desc Changes the skin of a submodel. Causes a cache update.
+	/// @param {Real} submodel Submodel index.
+	/// @param {Real} skin Skin index. -1 hides the submodel.
+	/// @context ModelInstance
 	static set_skin = function (_submodel, _skin) {
 		gml_pragma("forceinline")
 		
@@ -36,6 +53,11 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		}
 	}
 	
+	/// @func override_texture(submodel, image)
+	/// @desc Overrides the image on a submodel's material. Causes a cache update.
+	/// @param {Real} submodel Submodel index.
+	/// @param {Struct.__CollageImageClass|Struct.Canvas} texture Image or Canvas to use.
+	/// @context ModelInstance
 	static override_texture = function (_submodel, _texture) {
 		gml_pragma("forceinline")
 		
@@ -84,6 +106,11 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	sync_parent = undefined
 	sync_child = undefined
 	
+	/// @func output_to_sample(sample)
+	/// @desc Bakes the instance's animation data into an array.
+	/// @param {Array<Real>} sample Target array.
+	/// @return {Array<Real>}
+	/// @context ModelInstance
 	static output_to_sample = function (_sample) {
 		static _transframe = []
 		
@@ -249,6 +276,14 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return _sample
 	}
 	
+	/// @func set_animation([animation], [frame], [loop], [time], [blend])
+	/// @desc Sets the instance's current animation or blend targets.
+	/// @param {Struct.Animation|Array<Struct.Animation>|Undefined} [animation] The animation or blend targets to play.
+	/// @param {Real} [frame] Frame to start at.
+	/// @param {Bool} [loop] Whether the animation loops or stops on the last frame.
+	/// @param {Real} [time] Time to blend to the target animation in ticks.
+	/// @param {Real} [blend] Blend target to start at, ranging from 0 to n-1.
+	/// @context ModelInstance
 	static set_animation = function (_animation = undefined, _frame = 0, _loop = false, _time = 0, _blend = 0) {
 		if _animation == undefined {
 			animation_name = ""
@@ -365,6 +400,13 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		}
 	}
 	
+	/// @func set_splice_animation([animation], [branch], [frame], [loop])
+	/// @desc Sets the instance's current splice animation.
+	/// @param {Struct.Animation|Undefined} [animation] The animation to use for splicing.
+	/// @param {Array<Real>|Undefined} [branch] The branch of Node IDs to splice.
+	/// @param {Real} [frame] Frame to start at.
+	/// @param {Bool} [loop] Whether the animation loops or stops on the last frame.
+	/// @context ModelInstance
 	static set_splice_animation = function (_animation = undefined, _branch = undefined, _frame = 0, _loop = false) {
 		if _frame < 0 and _animation != undefined {
 			_frame = _animation.duration - 1
@@ -384,30 +426,56 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		interp_skip("sframe")
 	}
 	
+	/// @func get_node(name_or_id)
+	/// @desc Searches for a Node and returns it.
+	/// @param {String|Real} name_or_id Node name or ID.
+	/// @return {Struct.Node|Undefined}
+	/// @context ModelInstance
 	static get_node = function (_id) {
 		gml_pragma("forceinline")
 		
 		return model.get_node(_id)
 	}
 	
+	/// @func get_node_id(name_or_id)
+	/// @desc Searches for a Node and returns its ID.
+	/// @param {String|Real} name_or_id Node name or ID.
+	/// @return {Real} Node ID (-1 if not found).
+	/// @context ModelInstance
 	static get_node_id = function (_id) {
 		gml_pragma("forceinline")
 		
 		return model.get_node_id(_id)
 	}
 	
+	/// @func get_branch(name_or_id)
+	/// @desc Searches for a Node and outputs its branch into an array.
+	/// @param {String|Real} name_or_id Node name or ID.
+	/// @return {Array} An array containing the Node and its children.
+	/// @context ModelInstance
 	static get_branch = function (_id) {
 		gml_pragma("forceinline")
 		
 		return model.get_branch(_id)
 	}
 	
+	/// @func get_branch_id(name_or_id)
+	/// @desc Searches for a Node and outputs its branch into an array as IDs.
+	/// @param {String|Real} name_or_id Node name or ID.
+	/// @return {Array} An array containing IDs of the Node and its children.
+	/// @context ModelInstance
 	static get_branch_id = function (_id) {
 		gml_pragma("forceinline")
 		
 		return model.get_branch_id(_id)
 	}
 	
+	/// @func get_point(name, [visual])
+	/// @desc Gets a transformed point defined in the Model.
+	/// @param {String} name Point name.
+	/// @param {Bool} [visual] false for tick (DETERMINISTIC), true for interpolated (NON-DETERMINISTIC).
+	/// @return {Array<Real>} XYZ array.
+	/// @context ModelInstance
 	static get_point = function (_name, _visual = false) {
 		var _point = points[$ _name]
 		var _x = _point[0]
@@ -416,7 +484,7 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		var _node = _point[3]
 		
 		if _node >= 0 {
-			var _node_pos = dq_transform_point(get_node_dq(_node), _x, _y, _z)
+			var _node_pos = dq_transform_point(get_node_dq(_node, _visual), _x, _y, _z)
 			
 			_x = _node_pos[0]
 			_y = _node_pos[1]
@@ -426,6 +494,12 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return matrix_transform_point(_visual ? draw_matrix : tick_matrix, _x, _y, _z)
 	}
 	
+	/// @func get_node_dq(index, [visual])
+	/// @desc Gets the dual quaternion of a Node.
+	/// @param {Real} index Node ID.
+	/// @param {Bool} [visual] false for tick (DETERMINISTIC), true for interpolated (NON-DETERMINISTIC).
+	/// @return {Array<Real>} Dual quaternion.
+	/// @context ModelInstance
 	static get_node_dq = function (_index, _visual = false) {
 		gml_pragma("forceinline")
 		
@@ -436,6 +510,12 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return node_dq
 	}
 	
+	/// @func get_node_pos(index, [visual])
+	/// @desc Gets the transformed position of a Node.
+	/// @param {Real} index Node ID.
+	/// @param {Bool} [visual] false for tick (DETERMINISTIC), true for interpolated (NON-DETERMINISTIC).
+	/// @return {Array<Real>} XYZ array.
+	/// @context ModelInstance
 	static get_node_pos = function (_index, _visual = false) {
 		gml_pragma("forceinline")
 		
@@ -444,6 +524,15 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return matrix_transform_point(_visual ? draw_matrix : tick_matrix, _pos[0], _pos[1], _pos[2])
 	}
 	
+	/// @func post_rotate_node(index, x, y, z, [global])
+	/// @desc Applies post-rotation to a Node.
+	/// @param {Real} index Node ID.
+	/// @param {Real} x Euler angle in X-axis.
+	/// @param {Real} y Euler angle in Y-axis.
+	/// @param {Real} z Euler angle in Z-axis.
+	/// @param {Bool} [global] Whether or not to rotate in global space.
+	/// @return {Array<Real>} Quaternion.
+	/// @context ModelInstance
 	static post_rotate_node = function (_index, _x, _y, _z, _global = false) {
 		var _quat = node_post_rotations[_index]
 		
@@ -458,6 +547,13 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return _quat
 	}
 	
+	/// @func post_rotate_node_quat(index, quat, [global])
+	/// @desc Applies post-rotation to a Node using a quaternion.
+	/// @param {Real} index Node ID.
+	/// @param {Array<Real>} quat Quaternion.
+	/// @param {Bool} [global] Whether or not to rotate in global space.
+	/// @return {Array<Real>} Quaternion.
+	/// @context ModelInstance
 	static post_rotate_node_quat = function (_index, _quat, _global = false) {
 		gml_pragma("forceinline")
 		
@@ -467,6 +563,8 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return _quat
 	}
 	
+	/// @param {Bool} update_matrix
+	/// @context ModelInstance
 	static force_tick = function (_update_matrix) {
 		gml_pragma("forceinline")
 		
@@ -523,6 +621,10 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		}
 	}
 	
+	/// @func tick([update_matrix])
+	/// @desc Updates the instance if no sync parent is specified.
+	/// @param {Bool} [update_matrix]
+	/// @context ModelInstance
 	static tick = function (_update_matrix = true) {
 		if sync_parent != undefined {
 			return
@@ -531,6 +633,11 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		force_tick(_update_matrix)
 	}
 	
+	/// @func sync_with(model)
+	/// @desc Sets a target model instance for syncing animations.
+	///       When defined, the target will only tick alongside this instance.
+	/// @param {Struct.ModelInstance|Undefined} model Target model instance.
+	/// @context ModelInstance
 	static sync_with = function (_model) {
 		if sync_child != undefined {
 			sync_child.sync_parent = undefined
@@ -580,6 +687,13 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	interp("y_scale", "sy_scale")
 	interp("z_scale", "sz_scale")
 	
+	/// @func move(x, y, z)
+	/// @desc Moves the instance without interpolation.
+	/// @param {Real} x
+	/// @param {Real} y
+	/// @param {Real} z
+	/// @return {Struct.ModelInstance}
+	/// @context ModelInstance
 	static move = function (_x, _y, _z) {
 		x = _x
 		y = _y
@@ -591,6 +705,13 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return self
 	}
 	
+	/// @func move(yaw, pitch, roll)
+	/// @desc Rotates the instance without interpolation.
+	/// @param {Real} yaw
+	/// @param {Real} pitch
+	/// @param {Real} roll
+	/// @return {Struct.ModelInstance}
+	/// @context ModelInstance
 	static rotate = function (_yaw, _pitch, _roll) {
 		yaw = _yaw
 		pitch = _pitch
@@ -602,6 +723,14 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		return self
 	}
 	
+	/// @func resize(scale, x_scale, y_scale, z_scale)
+	/// @desc Resizes the instance without interpolation.
+	/// @param {Real} scale
+	/// @param {Real} x_scale
+	/// @param {Real} y_scale
+	/// @param {Real} z_scale
+	/// @return {Struct.ModelInstance}
+	/// @context ModelInstance
 	static resize = function (_scale, _x_scale = x_scale, _y_scale = y_scale, _z_scale = z_scale) {
 		scale = _scale
 		x_scale = _x_scale
@@ -624,11 +753,14 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 	stencil = c_white
 	stencil_alpha = 0
 	
+	/// @func submit()
+	/// @desc Draws the model without transformations.
+	/// @context ModelInstance
 	static submit = function () {
-		var _blendmode = gpu_get_blendmode()
-		
 		global.u_color.set(color_get_red(color) * COLOR_INVERSE, color_get_green(color) * COLOR_INVERSE, color_get_blue(color) * COLOR_INVERSE, alpha)
 		global.u_stencil.set(color_get_red(stencil) * COLOR_INVERSE, color_get_green(stencil) * COLOR_INVERSE, color_get_blue(stencil) * COLOR_INVERSE, stencil_alpha)
+		
+		var _blendmode = gpu_get_blendmode()
 		
 		if shader_current() == shSky and blendmode == bm_normal {
 			gpu_set_blendmode_ext_sepalpha(bm_src_alpha, bm_inv_src_alpha, bm_src_alpha, bm_one)
@@ -797,6 +929,9 @@ function ModelInstance(_model, _x = 0, _y = 0, _z = 0, _yaw = 0, _pitch = 0, _ro
 		gpu_set_blendmode(_blendmode)
 	}
 	
+	/// @func draw()
+	/// @desc Draws the model in its current position.
+	/// @context ModelInstance
 	static draw = function () {
 		var _mwp = matrix_get(matrix_world)
 		

@@ -1,3 +1,4 @@
+/// @param {Struct.Level} level
 function level_destroy(_scope) {
 	with _scope {
 		repeat ds_map_size(areas) {

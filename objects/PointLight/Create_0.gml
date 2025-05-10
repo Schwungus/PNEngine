@@ -4,6 +4,10 @@ near = 0
 far = 0
 
 #region Virtual Functions
+/// @func update_args(near, far)
+/// @param {Real} near
+/// @param {Real} far
+/// @context PointLight
 update_args = function (_near, _far) {
 	near = _near
 	far = _far

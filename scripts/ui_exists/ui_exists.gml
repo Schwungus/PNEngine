@@ -1,3 +1,6 @@
+/// @func ui_exists(ui)
+/// @param {Struct.UI} ui
+/// @return {Bool}
 function ui_exists(_ui) {
 	gml_pragma("forceinline")
 	

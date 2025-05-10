@@ -15,6 +15,11 @@ function ColliderInstance(_collider) constructor {
 	delta_matrix = matrix_build_identity()
 	is_static = true
 	
+	/// @func set_matrix(matrix)
+	/// @desc Sets the instance's transform matrix and flags it as dynamic.
+	/// @param {Array<Real>} matrix
+	/// @return {Bool} Whether or not the matrix is valid.
+	/// @context ColliderInstance
 	static set_matrix = function (_matrix) {
 		var _inverse = matrix_inverse(_matrix)
 		
@@ -33,6 +38,9 @@ function ColliderInstance(_collider) constructor {
 		return true
 	}
 	
+	/// @func reset_matrix()
+	/// @desc Resets the instance's transformation and flags it back to being static.
+	/// @context ColliderInstance
 	static reset_matrix = function () {
 		static _identity = matrix_build_identity()
 		
@@ -44,6 +52,18 @@ function ColliderInstance(_collider) constructor {
 #endregion
 	
 #region Collision
+	/// @func raycast(x1, y1, z1, x2, y2, z2, [flags], [layers])
+	/// @desc Casts a ray on the instance.
+	/// @param {Real} x1 Starting X.
+	/// @param {Real} y1 Starting Y.
+	/// @param {Real} z1 Starting Z.
+	/// @param {Real} x2 Target X.
+	/// @param {Real} y2 Target Y.
+	/// @param {Real} z2 Target Z.
+	/// @param {Real|Enum.CollisionFlags} [flags] Filter for triangles with specific flags.
+	/// @param {Real|Enum.CollisionLayers} [layers] Filter for triangles in specific layers.
+	/// @return {Array<Any>} Raycast data array. Use "RaycastData" enum or "RAY_*" constants for indices.
+	/// @context ColliderInstance
 	static raycast = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _layers = CollisionLayers.ALL) {
 		static _result = raycast_data_create()
 		
@@ -147,7 +167,8 @@ function ColliderInstance(_collider) constructor {
 								var _iy = lerp(_y1, _y2, _dot)
 								var _iz = lerp(_z1, _z2, _dot)
 								
-								// Check if the intersection is inside the triangle.
+								// Check if the intersection is inside the
+								// triangle.
 								var _tx2 = _triangle[3]
 								var _ty2 = _triangle[4]
 								var _tz2 = _triangle[5]
@@ -189,7 +210,8 @@ function ColliderInstance(_collider) constructor {
 									continue
 								}
 								
-								// There is an intersection, apply it for further iterations.
+								// There is an intersection, apply it for
+								// further iterations.
 								_hit = true
 								_x2 = _ix
 								_y2 = _iy

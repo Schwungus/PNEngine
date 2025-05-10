@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_cman(_args) {
 	var _camera_man = global.camera_man
 	

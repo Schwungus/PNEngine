@@ -1,3 +1,9 @@
+/// @func dq_transform_point(dq, x, y, z)
+/// @param {Array<Real>} dq
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @return {Array<Real>} XYZ array.
 function dq_transform_point(_dq, _x, _y, _z) {
 	gml_pragma("forceinline")
 	

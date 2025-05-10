@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_eamb(_args) {
 	if _args == "" {
 		print("Usage: eamb <vec5>")

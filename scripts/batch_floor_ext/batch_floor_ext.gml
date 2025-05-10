@@ -1,4 +1,17 @@
+/// @func batch_floor_angle(image, frame, width, height, x, y, z, nx, ny, nz, [color], [alpha])
 /// @desc Adds a flat angled image to the batch.
+/// @param {Struct.__CollageImageClass} image
+/// @param {Real} frame
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real} nx
+/// @param {Real} ny
+/// @param {Real} nz
+/// @param {Constant.Color} [color]
+/// @param {Real} [alpha]
 function batch_floor_ext(_image, _frame, _width, _height, _x, _y, _z, _nx, _ny, _nz, _color = c_white, _alpha = 1) {
 	var _texture = _image.GetTexture(_frame)
 	

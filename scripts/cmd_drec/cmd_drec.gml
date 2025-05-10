@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_drec(_args) {
 	if global.demo_write {
 		print("! cmd_drec: Already recording")

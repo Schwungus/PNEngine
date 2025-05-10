@@ -1,3 +1,4 @@
+/// @param {String} filename
 function Save(_filename) constructor {
 	name = string_copy(_filename, 1, string_last_pos(".", _filename) - 1)
 	filename = _filename

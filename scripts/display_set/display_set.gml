@@ -1,7 +1,6 @@
-/// @desc Safely change the game's display.
-/// @param {bool} fullscreen
-/// @param {real} width
-/// @param {real} height
+/// @param {Bool} fullscreen
+/// @param {Real} width
+/// @param {Real} height
 function display_set(_fullscreen, _width, _height) {
 	if _fullscreen {
 		window_set_fullscreen(true)

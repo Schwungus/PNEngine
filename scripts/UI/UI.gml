@@ -26,6 +26,10 @@ function UI(_ui_script) constructor {
 	f_block_input = false
 	f_draw_screen = true
 	
+	/// @func destroy()
+	/// @desc Destroys the UI.
+	/// @return {Bool} Successful or not.
+	/// @context UI
 	static destroy = function () {
 		if not exists {
 			return false
@@ -57,6 +61,12 @@ function UI(_ui_script) constructor {
 		return true
 	}
 	
+	/// @func link(type, [special])
+	/// @desc Creates a new UI and links it as a child.
+	/// @param {Function.UI|String} type UI type.
+	/// @param {Any} [special] Custom properties for special behaviour.
+	/// @return {Struct.UI|Undefined} New UI (undefined if unsuccessful).
+	/// @context UI
 	static link = function (_type, _special = undefined) {
 		gml_pragma("forceinline")
 		
@@ -74,12 +84,23 @@ function UI(_ui_script) constructor {
 		return _ui
 	}
 	
+	/// @func replace(type, [special])
+	/// @desc Replaces the calling UI with a new UI.
+	/// @param {Function.UI|String} type UI type.
+	/// @param {Any} [special] Custom properties for special behaviour.
+	/// @return {Struct.UI|Undefined} New UI (undefined if unsuccessful).
+	/// @context UI
 	static replace = function (_type, _special = undefined) {
 		gml_pragma("forceinline")
 		
 		return ui_exists(parent) ? parent.link(_type) : ui_create(_type, _special, global.ui == self)
 	}
 	
+	/// @func is_ancestor(type)
+	/// @desc Checks if the UI type or family tree matches.
+	/// @param {Function.UI|String} type UI type.
+	/// @return {Bool}
+	/// @context UI
 	static is_ancestor = function (_type) {
 		if is_string(_type) {
 			return ui_script != undefined and ui_script.is_ancestor(_type)
@@ -88,18 +109,37 @@ function UI(_ui_script) constructor {
 		return is_instanceof(self, _type)
 	}
 	
+	/// @func play_sound(sound, [loop], [offset], [pitch])
+	/// @desc Plays a sound in the UI scope.
+	/// @param {Struct.Sound|Array<Struct.Sound>} sound Sound to play.
+	/// @param {Bool} loop Whether to loop or not.
+	/// @param {Real} offset Starting position in samples.
+	/// @param {Real} pitch Base pitch.
+	/// @return {Real|Undefined} Sound instance handle (undefined if unsuccessful).
+	/// @context UI
 	static play_sound = function (_sound, _loop = false, _offset = 0, _pitch = 1) {
 		gml_pragma("forceinline")
 		
 		return global.ui_sounds.play(_sound, _loop, _offset, _pitch)
 	}
 	
+	/// @func open_options()
+	/// @desc Opens the hardcoded options menu.
+	/// @return {Struct.UI|Undefined} New UI (undefined if unsuccessful).
+	/// @context UI
 	static open_options = function () {
 		gml_pragma("forceinline")
 		
 		return link(proOptionsUI)
 	}
 	
+	/// @func goto(level, [area], [tag], [transition])
+	/// @desc Moves to another level.
+	/// @param {String|Undefined} level Level name. Set to undefined to close the game.
+	/// @param {Real} area Area ID.
+	/// @param {Real|Enum.ThingTags} tag Thing tag to use for entrance points.
+	/// @param {Asset.GMObject|String} transition Transition type.
+	/// @context UI
 	static goto = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
 		var _inject = false
 		
@@ -133,6 +173,14 @@ function UI(_ui_script) constructor {
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
+	/// @func leave(level, [area], [tag], [transition])
+	/// @desc Safely leave the game to another level.
+	///       This will end demo recording and disconnect from netgames.
+	/// @param {String|Undefined} level Level name. Set to undefined to close the game.
+	/// @param {Real} area Area ID.
+	/// @param {Real|Enum.ThingTags} tag Thing tag to use for entrance points.
+	/// @param {Asset.GMObject|String} transition Transition type.
+	/// @context UI
 	static leave = function (_level, _area = 0, _tag = ThingTags.NONE, _transition = noone) {
 		// This is a safe method for leaving the game, i.e. ending
 		// demos/disconnecting.
@@ -150,6 +198,12 @@ function UI(_ui_script) constructor {
 		global.level.goto(_level, _area, _tag, _transition)
 	}
 	
+	/// @func send_signal(name, [args...])
+	/// @desc Writes a signal to the tick buffer for processing via Handlers.
+	///       This allows the UI to deterministically interact with the level.
+	/// @param {String} name Signal name.
+	/// @param {Any} [args...] Arguments for special behaviour.
+	/// @context UI
 	static send_signal = function (_name) {
 		if global.demo_buffer != undefined and not global.demo_write {
 			exit

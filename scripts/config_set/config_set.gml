@@ -1,3 +1,7 @@
+/// @param {String} key
+/// @param {Any} value
+/// @param {Bool} [update]
+/// @return {Bool}
 function config_set(_key, _value, _update = true) {
 	var _cvar = global.config[$ _key]
 	

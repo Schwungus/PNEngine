@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_esun(_args) {
 	if _args == "" {
 		print("Usage: esun <vec5>")

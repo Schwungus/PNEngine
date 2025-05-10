@@ -1,3 +1,4 @@
+/// @param {Struct.Area} area
 function area_deactivate(_scope) {
 	with _scope {
 		if not active {

@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_efogr(_args) {
 	if _args == "" {
 		print("Usage: efogr <vec2>")

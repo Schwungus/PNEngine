@@ -12,6 +12,10 @@ to_area = 0
 to_tag = ThingTags.NONE
 
 #region Functions
+/// @func is_ancestor(type)
+/// @param {Asset.GMObject|String} type
+/// @return {Bool}
+/// @context proTransition
 is_ancestor = function (_type) {
 	if is_string(_type) {
 		if transition_script != undefined {
@@ -28,10 +32,19 @@ is_ancestor = function (_type) {
 	return object_index == _type or object_is_ancestor(object_index, _type)
 }
 
+/// @func destroy()
+/// @context proTransition
 destroy = function () {
 	instance_destroy()
 }
 
+/// @func play_sound_ui(sound, [loop], [offset], [pitch])
+/// @param {Struct.Sound|Array<Struct.Sound>} sound
+/// @param {Bool} [loop]
+/// @param {Real} [offset]
+/// @param {Real} [pitch]
+/// @return {Real|Undefined}
+/// @context proTransition
 play_sound_ui = function (_sound, _loop = false, _offset = 0, _pitch = 1) {
 	return global.ui_sounds.play(_sound, _loop, _offset, _pitch)
 }

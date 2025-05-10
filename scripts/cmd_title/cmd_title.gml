@@ -1,3 +1,3 @@
-function cmd_title(_args) {
+function cmd_title() {
 	cmd_level("lvlTitle")
 }

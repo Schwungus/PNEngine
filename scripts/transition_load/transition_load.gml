@@ -1,6 +1,7 @@
 /// @func transition_load(type)
-/// @desc Loads a type of Transition for use in the current level.
-/// @param {Asset.GMObject or string} type The type of Transition to load.
+/// @desc Loads a type of Transition.
+/// @param {Asset.GMObject|String} Transition type.
+/// @return {Bool} Whether or not the Transition was successfully loaded.
 function transition_load(_type) {
 	if is_string(_type) {
 		var _scripts = global.scripts

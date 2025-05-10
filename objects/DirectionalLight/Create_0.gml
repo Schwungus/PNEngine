@@ -6,6 +6,11 @@ ny = 0
 nz = -1
 
 #region Virtual Functions
+/// @func update_args(nx, ny, nz)
+/// @param {Real} nx
+/// @param {Real} ny
+/// @param {Real} nz
+/// @context DirectionalLight
 update_args = function (_nx, _ny, _nz) {
 	nx = _nx
 	ny = _ny

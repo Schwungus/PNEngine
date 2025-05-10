@@ -81,8 +81,6 @@ function Level() constructor {
 		return ds_map_exists(areas, _id)
 	}
 	
-	/// @func count(type)
-	/// @desc Returns the amount of the specified Thing and its children in all active areas.
 	static count = function (_type) {
 		var _count = 0
 		var _key = ds_map_find_first(areas)

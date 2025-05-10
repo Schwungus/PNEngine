@@ -5,6 +5,9 @@ function Script() : Asset() constructor {
 	main = undefined
 	load = undefined
 	
+	/// @param {String} _type
+	/// @return {Bool}
+	/// @context Script
 	static is_ancestor = function (_type) {
 		if name == _type {
 			return true

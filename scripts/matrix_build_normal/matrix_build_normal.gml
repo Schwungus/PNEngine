@@ -1,3 +1,13 @@
+/// @func matrix_build_normal(x, y, z, nx, ny, nz, scale, [matrix])
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real} nx
+/// @param {Real} ny
+/// @param {Real} nz
+/// @param {Real} scale
+/// @param {Array<Real>} [matrix]
+/// @return {Array<Real>}
 function matrix_build_normal(_x, _y, _z, _nx, _ny, _nz, _scale, _matrix = matrix_build_identity()) {
 	// Normalize the input normal
 	var l = sqr(_nx) + sqr(_ny) + sqr(_nz)

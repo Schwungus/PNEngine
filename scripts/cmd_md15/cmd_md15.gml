@@ -1,3 +1,6 @@
+/// @param {String} args
+/// @param {Bool} [loud]
+/// @return {String}
 function cmd_md15(_args, _loud = true) {
 	var _buffer = buffer_create(1, buffer_grow, 1)
 	var _mods = global.mods

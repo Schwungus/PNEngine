@@ -1,4 +1,8 @@
 function SoundMap() : AssetMap() constructor {
+	/// @func load(name)
+	/// @desc Loads a Sound from "sounds/" and its properties if a JSON file is found.
+	/// @param {String} name Sound file name.
+	/// @context SoundMap
 	static load = function (_name) {
 		if ds_map_exists(assets, _name) {
 			exit

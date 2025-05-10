@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_dend(_args) {
 	if not global.demo_write {
 		if global.demo_buffer == undefined {

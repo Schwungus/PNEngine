@@ -38,6 +38,15 @@ function Area() constructor {
 	
 	/// @func add(type, [x], [y], [z], [angle], [tag], [special])
 	/// @desc Creates a new Thing.
+	/// @param {Asset.GMObject|String} type Thing type.
+	/// @param {Real} [x] X position.
+	/// @param {Real} [y] Y position.
+	/// @param {Real} [z] Z position.
+	/// @param {Real} [angle] Initial angle.
+	/// @param {Real} [tag] Tag for special behaviour.
+	/// @param {Real} [Any] Custom properties for special behaviour.
+	/// @return {Id.Instance}
+	/// @context Area
 	static add = function (_type, _x = 0, _y = 0, _z = 0, _angle = 0, _tag = 0, _special = undefined) {
 		var _thing = noone
 		
@@ -59,16 +68,14 @@ function Area() constructor {
 				
 				_thing = instance_create_depth(_x, _y, 0, _idx)
 			}
-		} else {
-			if object_exists(_type) {
-				if not object_is_ancestor(_type, Thing) {
-					print($"! Area.add: Tried to add non-Thing '{_type}'")
-					
-					return noone
-				}
+		} else if object_exists(_type) {
+			if not object_is_ancestor(_type, Thing) {
+				print($"! Area.add: Tried to add non-Thing '{_type}'")
 				
-				_thing = instance_create_depth(_x, _y, 0, _type)
+				return noone
 			}
+			
+			_thing = instance_create_depth(_x, _y, 0, _type)
 		}
 		
 		if _thing == noone {
@@ -126,7 +133,12 @@ function Area() constructor {
 	}
 	
 	/// @func add_particle(x, y, z)
-	/// @desc Creates a new particle as long as there are less than MAX_PARTICLES.
+	/// @desc Creates a new particle.
+	/// @param {Real} x
+	/// @param {Real} y
+	/// @param {Real} z
+	/// @return {Array<Any>} Particle data.
+	/// @context Area
 	static add_particle = function (_x, _y, _z) {
 		var _particle
 		var _dead_particle = ds_stack_pop(global.dead_particles)
@@ -193,6 +205,9 @@ function Area() constructor {
 	
 	/// @func count(type)
 	/// @desc Returns the amount of the specified Thing and its children in the area.
+	/// @param {Asset.GMObject|String} type
+	/// @return {Real}
+	/// @context Area
 	static count = function (_type) {
 		var n = 0
 		var i = ds_list_size(active_things)
@@ -208,6 +223,12 @@ function Area() constructor {
 	
 	/// @func nearest(x, y, z, type)
 	/// @desc Returns the specified Thing or its children nearest to the given point.
+	/// @param {Real} x
+	/// @param {Real} y
+	/// @param {Real} z
+	/// @param {Asset.GMObject|String} type
+	/// @return {Id.Instance}
+	/// @context Area
 	static nearest = function (_x, _y, _z, _type) {
 		var _result = noone
 		var _distance = infinity
@@ -232,6 +253,12 @@ function Area() constructor {
 	
 	/// @func furthest(x, y, z, type)
 	/// @desc Returns the specified Thing or its children farthest from the given point.
+	/// @param {Real} x
+	/// @param {Real} y
+	/// @param {Real} z
+	/// @param {Asset.GMObject|String} type
+	/// @return {Id.Instance}
+	/// @context Area
 	static furthest = function (_x, _y, _z, _type) {
 		var _result = noone
 		var _distance = -infinity
@@ -254,6 +281,11 @@ function Area() constructor {
 		return _result
 	}
 	
+	/// @func find(type)
+	/// @desc Finds a Thing of a specific type.
+	/// @param {Asset.GMObject|String} type
+	/// @return {Id.Instance} First result.
+	/// @context Area
 	static find = function (_type) {
 		var i = ds_list_size(active_things)
 		
@@ -268,6 +300,11 @@ function Area() constructor {
 		return noone
 	}
 	
+	/// @func find_tag(tag)
+	/// @desc Finds all Things with a specific tag.
+	/// @param {Real|Enum.ThingTags} tag
+	/// @return {Array<Id.Instance>} Array of all tagged Things.
+	/// @context Area
 	static find_tag = function (_tag) {
 		static things = []
 		
@@ -321,6 +358,11 @@ function Area() constructor {
 		return things
 	}
 	
+	/// @func find_tag_first(tag)
+	/// @desc Finds a Thing with a specific tag.
+	/// @param {Real|Enum.ThingTags} tag
+	/// @return {Id.Instance} First result.
+	/// @context Area
 	static find_tag_first = function (_tag) {
 		var i = 0
 		
@@ -362,6 +404,11 @@ function Area() constructor {
 		return noone
 	}
 	
+	/// @func exists(thing)
+	/// @desc Checks if a Thing or type exists in the area.
+	/// @param {Id.Instance|Asset.GMObject|String} thing
+	/// @return {Bool}
+	/// @context Area
 	static exists = function (_thing) {
 		if is_string(_thing) {
 			var i = 0
@@ -384,12 +431,21 @@ function Area() constructor {
 		return thing_exists(_thing)
 	}
 	
+	/// @func player_count()
+	/// @desc Returns the amount of players in the area.
+	/// @return {Real}
+	/// @context Area
 	static player_count = function () {
 		gml_pragma("forceinline")
 		
 		return ds_list_size(players)
 	}
 	
+	/// @func get_player(index)
+	/// @desc Gets a player in the area.
+	/// @param {Real} index
+	/// @return {Struct.Player|Undefined}
+	/// @context Area
 	static get_player = function (_index) {
 		gml_pragma("forceinline")
 		

@@ -1,3 +1,7 @@
+/// @func screenshot_canvas([canvas])
+/// @desc Renders the screen (without the GUI) to a Canvas.
+/// @param {Struct.Canvas} [canvas] Target Canvas.
+/// @return {Struct.Canvas}
 function screenshot_canvas(_canvas = new Canvas(1, 1)) {
 	var _width = window_get_width()
 	var _height = window_get_height()

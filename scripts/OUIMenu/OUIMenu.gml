@@ -1,3 +1,6 @@
+/// @param {String} name
+/// @param {Array<Any>} contents
+/// @param {Function|Undefined} disabled
 function OUIMenu(_name, _contents = [], _disabled = undefined) : OUIElement(_name, undefined, _disabled) constructor {
 	option = 0
 	contents = _contents

@@ -1,3 +1,8 @@
+/// @func lengthdir_3d(length, yaw, pitch)
+/// @param {Real} length
+/// @param {Real} yaw
+/// @param {Real} pitch
+/// @return {Array<Real>}
 function lengthdir_3d(_len, _yaw, _pitch) {
 	gml_pragma("forceinline")
 	

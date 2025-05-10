@@ -13,6 +13,7 @@ enum MShadow {
 }
 
 enum HitscanFlags {
+	NONE = 0,
 	IGNORE_HOLDER = 1 << 0,
 	IGNORE_MASTER = 1 << 1,
 }
@@ -83,9 +84,6 @@ wall_ray = raycast_data_create()
 ceiling_ray = raycast_data_create()
 bump_cells = undefined
 
-/*shadow_x = x
-shadow_y = y
-shadow_matrix = matrix_build_identity()*/
 shadow_z = 0
 shadow_ray = raycast_data_create()
 shadow_radius = undefined
@@ -125,6 +123,9 @@ m_shadow = MShadow.NONE
 #endregion
 
 #region Functions
+/// @func get_name()
+/// @return {String}
+/// @context Thing
 get_name = function () {
 	if thing_script != undefined {
 		return thing_script.name
@@ -133,6 +134,10 @@ get_name = function () {
 	return object_get_name(object_index)
 }
 
+/// @func is_ancestor(type)
+/// @param {Bool} type
+/// @return {Bool}
+/// @context Thing
 is_ancestor = function (_type) {
 	if is_string(_type) {
 		if thing_script != undefined and thing_script.is_ancestor(_type) {
@@ -149,6 +154,9 @@ is_ancestor = function (_type) {
 	return object_index == _type or object_is_ancestor(object_index, _type)
 }
 
+/// @func destroy([natural])
+/// @param {Bool} [natural]
+/// @context Thing
 destroy = function (_natural = true) {
 	gml_pragma("forceinline")
 	
@@ -172,18 +180,49 @@ destroy = function (_natural = true) {
 	f_destroyed = true
 }
 
+/// @func play_sound(sound, [loop], [offset], [pitch], [gain])
+/// @param {Struct.Sound|Array<Struct.Sound>} sound
+/// @param {Bool} [loop]
+/// @param {Real} [offset]
+/// @param {Real} [pitch]
+/// @param {Real} [gain]
+/// @return {Real|Undefined}
+/// @context Thing
 play_sound = function (_sound, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 	gml_pragma("forceinline")
 	
 	return area.sounds.play(_sound, _loop, _offset, _pitch, _gain)
 }
 
+/// @func play_sound_at(sound, x, y, z, [falloff_min], [falloff_max], [loop], [offset], [pitch], [gain])
+/// @param {Struct.Sound|Array<Struct.Sound>} sound
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real|Undefined} [falloff_min]
+/// @param {Real|Undefined} [falloff_max]
+/// @param {Bool} [loop]
+/// @param {Real} [offset]
+/// @param {Real} [pitch]
+/// @param {Real} [gain]
+/// @return {Real|Undefined}
+/// @context Thing
 play_sound_at = function (_sound, _x, _y, _z, _falloff_min = undefined, _falloff_max = undefined, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 	gml_pragma("forceinline")
 	
 	return area.sounds.play_at(_sound, _x, _y, _z, _falloff_min, _falloff_max, _loop, _offset, _pitch, _gain)
 }
 
+/// @func play_sound_local(sound, [falloff_min], [falloff_max], [loop], [offset], [pitch], [gain])
+/// @param {Struct.Sound|Array<Struct.Sound>} sound
+/// @param {Real|Undefined} [falloff_min]
+/// @param {Real|Undefined} [falloff_max]
+/// @param {Bool} [loop]
+/// @param {Real} [offset]
+/// @param {Real} [pitch]
+/// @param {Real} [gain]
+/// @return {Real|Undefined}
+/// @context Thing
 play_sound_local = function (_sound, _falloff_min = undefined, _falloff_max = undefined, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 	if emitter == undefined {
 		emitter = ds_list_create()
@@ -203,12 +242,23 @@ play_sound_local = function (_sound, _falloff_min = undefined, _falloff_max = un
 	return _result
 }
 
+/// @func play_sound_ui(sound, x, y, z, [loop], [offset], [pitch], [gain])
+/// @param {Struct.Sound|Array<Struct.Sound>} sound
+/// @param {Bool} [loop]
+/// @param {Real} [offset]
+/// @param {Real} [pitch]
+/// @param {Real} [gain]
+/// @return {Real|Undefined}
+/// @context Thing
 play_sound_ui = function (_sound, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 	gml_pragma("forceinline")
 	
 	return global.ui_sounds.play(_sound, _loop, _offset, _pitch, _gain)
 }
 
+/// @func play_voice(sound)
+/// @param {Real} sound
+/// @context Thing
 play_voice = function (_sound) {
 	if _sound == undefined {
 		exit
@@ -221,6 +271,12 @@ play_voice = function (_sound) {
 	voice = _sound
 }
 
+/// @func set_position(x, [y], [z], [no_interp])
+/// @param {Real} x
+/// @param {Real} [y]
+/// @param {Real} [z]
+/// @param {Bool} [no_interp]
+/// @context Thing
 set_position = function (_x, _y = y, _z = z, _no_interp = false) {
 	var _moved = x != _x or y != _y
 	
@@ -249,6 +305,12 @@ set_position = function (_x, _y = y, _z = z, _no_interp = false) {
 	}
 }
 
+/// @func set_size(radius, [height], [test])
+/// @param {Real} radius
+/// @param {Real} [height]
+/// @param {Bool} [test]
+/// @return {Bool}
+/// @context Thing
 set_size = function (_radius, _height = height, _test = false) {
 	var _resized = radius != _radius or height != _height
 	
@@ -259,6 +321,10 @@ set_size = function (_radius, _height = height, _test = false) {
 	return _resized
 }
 
+/// @func set_bump(bump)
+/// @param {Bool} bump
+/// @return {Bool}
+/// @context Thing
 set_bump = function (_bump) {
 	if _bump {
 		if bump_cells == undefined {
@@ -283,6 +349,10 @@ set_bump = function (_bump) {
 	return false
 }
 
+/// @func set_bump_size(radius)
+/// @param {Real} radius
+/// @return {Bool}
+/// @context Thing
 set_bump_size = function (_radius) {
 	if bump_radius != _radius {
 		bump_radius = _radius
@@ -297,12 +367,17 @@ set_bump_size = function (_radius) {
 	return false
 }
 
+/// @func get_bump_radius()
+/// @return {Real}
+/// @context Thing
 get_bump_radius = function () {
 	gml_pragma("forceinline")
 	
 	return bump_radius ?? radius
 }
 
+/// @func update_bump()
+/// @context Thing
 update_bump = function () {
 	repeat ds_stack_size(bump_cells) {
 		var _cell = ds_stack_pop(bump_cells)
@@ -343,6 +418,10 @@ update_bump = function () {
 	}
 }
 
+/// @func jump(speed)
+/// @desc Ungrounds the thing and makes it jump.
+/// @param {Real} speed
+/// @context Thing
 jump = function (_spd) {
 	gml_pragma("forceinline")
 	
@@ -351,6 +430,9 @@ jump = function (_spd) {
 	f_grounded = false
 }
 
+/// @func set_speed(speed)
+/// @param {Real} speed
+/// @context Thing
 set_speed = function (_spd) {
 	// Source: https://github.com/YoYoGames/GameMaker-HTML5/blob/37ebef72db6b238b892bb0ccc60184d4c4ba5d12/scripts/yyInstance.js#L1402
 	if vector_speed != _spd {
@@ -372,6 +454,9 @@ set_speed = function (_spd) {
 	}
 }
 
+/// @func set_move_angle(dir)
+/// @param {Real} angle
+/// @context Thing
 set_move_angle = function (_dir) {
 	// Source: https://github.com/YoYoGames/GameMaker-HTML5/blob/37ebef72db6b238b892bb0ccc60184d4c4ba5d12/scripts/yyInstance.js#L218
 	while _dir > 360 {
@@ -399,6 +484,10 @@ set_move_angle = function (_dir) {
 	}
 }
 
+/// @func add_motion(dir, speed)
+/// @param {Real} dir
+/// @param {Real} speed
+/// @context Thing
 add_motion = function (_dir, _spd) {
 	x_speed += lengthdir_x(_spd, _dir)
 	y_speed += lengthdir_y(_spd, _dir)
@@ -428,6 +517,19 @@ add_motion = function (_dir, _spd) {
 	}
 }
 
+/// @func raycast(x1, y1, z1, x2, y2, z2, [flags], [layers], [out])
+/// @desc Casts a ray on the area.
+/// @param {Real} x1 Starting X.
+/// @param {Real} y1 Starting Y.
+/// @param {Real} z1 Starting Z.
+/// @param {Real} x2 Target X.
+/// @param {Real} y2 Target Y.
+/// @param {Real} z2 Target Z.
+/// @param {Real|Enum.CollisionFlags} [flags] Filter for triangles with specific flags.
+/// @param {Real|Enum.CollisionLayers} [layers] Filter for triangles in specific layers.
+/// @param {Array<Any>} [out] Raycast data array.
+/// @return {Array<Any>} Raycast data array. Use "RaycastData" enum or "RAY_*" constants for indices.
+/// @context Thing
 raycast = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _layers = CollisionLayers.ALL, _out = undefined) {
 	static result = raycast_data_create()
 	
@@ -471,7 +573,21 @@ raycast = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 	return _out
 }
 
-hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _layers = CollisionLayers.ALL, _out = undefined, _hflags = 0) {
+/// @func hitscan(x1, y1, z1, x2, y2, z2, [flags], [layers], [out], [hitscan_flags])
+/// @desc Casts a ray on the area including bumpable things.
+/// @param {Real} x1 Starting X.
+/// @param {Real} y1 Starting Y.
+/// @param {Real} z1 Starting Z.
+/// @param {Real} x2 Target X.
+/// @param {Real} y2 Target Y.
+/// @param {Real} z2 Target Z.
+/// @param {Real|Enum.CollisionFlags} [flags] Filter for triangles with specific flags.
+/// @param {Real|Enum.CollisionLayers} [layers] Filter for triangles in specific layers.
+/// @param {Array<Any>} [out] Raycast data array.
+/// @param {Real|Enum.HitscanFlags} [hitscan_flags] Filter out Things with specific flags.
+/// @return {Array<Any>} Raycast data array. Use "RaycastData" enum or "RAY_*" constants for indices.
+/// @context Thing
+hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _layers = CollisionLayers.ALL, _out = undefined, _hflags = HitscanFlags.NONE) {
 	var _result = raycast(_x1, _y1, _z1, _x2, _y2, _z2, _flags, _layers, _out)
 	
 	_x2 = _result[RaycastData.X]
@@ -658,12 +774,22 @@ hitscan = function (_x1, _y1, _z1, _x2, _y2, _z2, _flags = CollisionFlags.ALL, _
 	return _result
 }
 
+/// @func do_sequence(sequence)
+/// @param {Any} sequence
+/// @context Thing
 do_sequence = function (_sequence) {
 	gml_pragma("forceinline")
 	
 	catspeak_execute(thing_sequenced, _sequence)
 }
 
+/// @func receive_damage(amount, [type], [from], [source])
+/// @param {Real} amount
+/// @param {String} [type]
+/// @param {Id.Instance} [from]
+/// @param {Id.Instance} [source]
+/// @return {Real|Enum.DamageResults}
+/// @context Thing
 receive_damage = function (_amount, _type = "Normal", _from = noone, _source = _from) {
 	var _result = catspeak_execute(damage_received, _from, _source, _amount, _type)
 	
@@ -676,6 +802,11 @@ receive_damage = function (_amount, _type = "Normal", _from = noone, _source = _
 	return _result
 }
 
+/// @func bump_avoid(from, [amount])
+/// @param {Id.Instance} from
+/// @param {Real} [amount]
+/// @return {Bool}
+/// @context Thing
 bump_avoid = function (_from, _amount = 1) {
 	var _px, _py, _pr
 	
@@ -746,12 +877,26 @@ bump_avoid = function (_from, _amount = 1) {
 	return abs(_lx) != 0 or abs(_ly) != 0
 }
 
+/// @func grid_iterate(type, distance, [include_self])
+/// @param {Asset.GMObject|String} type
+/// @param {Real} distance
+/// @param {Bool} [include_self]
+/// @return {Array<Id.Instance>}
+/// @context Thing
 grid_iterate = function (_type, _distance, _include_self = false) {
 	gml_pragma("forceinline")
 	
 	return grid_iterate_at(_type, x, y, _distance, _include_self)
 }
 
+/// @func grid_iterate_at(type, x, y, distance, [include_self])
+/// @param {Asset.GMObject|String} type
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} distance
+/// @param {Bool} [include_self]
+/// @return {Array<Id.Instance>}
+/// @context Thing
 grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 	static results = []
 	
@@ -810,6 +955,14 @@ grid_iterate_at = function (_type, _x, _y, _distance, _include_self = false) {
 	return results
 }
 
+/// @func check_sight(thing, yaw, pitch, fov, [raycast])
+/// @param {Id.Instance} thing
+/// @param {Real} yaw
+/// @param {Real} pitch
+/// @param {Real} fov
+/// @param {Bool} [raycast]
+/// @return {Bool}
+/// @context Thing
 check_sight = function (_thing, _yaw, _pitch, _fov, _raycast = false) {
 	var _tx, _ty, _tz
 	
@@ -838,6 +991,13 @@ check_sight = function (_thing, _yaw, _pitch, _fov, _raycast = false) {
 	return false
 }
 
+/// @func check_sight_2d(thing, yaw, fov, [raycast])
+/// @param {Id.Instance} thing
+/// @param {Real} yaw
+/// @param {Real} fov
+/// @param {Bool} [raycast]
+/// @return {Bool}
+/// @context Thing
 check_sight_2d = function (_thing, _yaw, _fov, _raycast = false) {
 	var _tx, _ty
 	
@@ -861,6 +1021,11 @@ check_sight_2d = function (_thing, _yaw, _fov, _raycast = false) {
 	return false
 }
 
+/// @func do_hold(thing, [forced])
+/// @param {Id.Instance} thing
+/// @param {Bool} [forced]
+/// @return {Bool}
+/// @context Thing
 do_hold = function (_thing, _forced = false) {
 	if not thing_exists(_thing) {
 		return false
@@ -895,6 +1060,11 @@ do_hold = function (_thing, _forced = false) {
 	return false
 }
 
+/// @func do_unhold([tossed], [forced])
+/// @param {Bool} [tossed]
+/// @param {Bool} [forced]
+/// @return {Bool}
+/// @context Thing
 do_unhold = function (_tossed = false, _forced = false) {
 	if not thing_exists(holding) {
 		return true
@@ -921,6 +1091,10 @@ do_unhold = function (_tossed = false, _forced = false) {
 	return true
 }
 
+/// @func do_interact(thing)
+/// @param {Id.Instance} thing
+/// @return {Bool}
+/// @context Thing
 do_interact = function (_thing) {
 	if not thing_exists(_thing) {
 		return false
@@ -935,6 +1109,9 @@ do_interact = function (_thing) {
 	return _exres and catspeak_execute(interactor_triggered, _thing)
 }
 
+/// @func enter_from(thing)
+/// @param {Id.Instance} thing
+/// @context Thing
 enter_from = function (_thing) {
 	set_position(_thing.x, _thing.y, _thing.z, true)
 	angle = _thing.angle
@@ -950,52 +1127,134 @@ enter_from = function (_thing) {
 #endregion
 
 #region Virtual Functions
+/// @func player_entered(player)
+/// @param {Struct.Player} player
+/// @context Thing
 player_entered = function (_player) {}
+
+/// @func player_left(player)
+/// @param {Struct.Player} player
+/// @context Thing
 player_left = function (_player) {}
+
+/// @func thing_intro(from)
+/// @param {Id.Instance} from
+/// @context Thing
 thing_intro = function (_from) {}
+
+/// @func thing_sequenced(sequence)
+/// @param {Any} sequence
+/// @context Thing
 thing_sequenced = function (_sequence) {}
+
+/// @func damage_dealt(to, source, amount, type, result)
+/// @param {Id.Instance} to
+/// @param {Id.Instance} source
+/// @param {Real} amount
+/// @param {String} type
+/// @param {Real|Enum.DamageResults} result
+/// @context Thing
 damage_dealt = function (_to, _source, _amount, _type, _result) {}
 
+/// @func damage_received(from, source, amount, type)
+/// @param {Id.Instance} from
+/// @param {Id.Instance} source
+/// @param {Real} amount
+/// @param {String} type
+/// @return {Real|Enum.DamageResults}
+/// @context Thing
 damage_received = function (_from, _source, _amount, _type) {
 	return DamageResults.NONE
 }
 
+/// @func bump_check(from, passive)
+/// @param {Id.Instance} from
+/// @param {Bool} passive
+/// @return {Real}
+/// @context Thing
 bump_check = function (_from, _passive) {
 	return 1
 }
 
+/// @func holder_held(to, forced)
+/// @param {Id.Instance} to
+/// @param {Bool} forced
+/// @return {Bool}
+/// @context Thing
 holder_held = function (_to, _forced) {
 	return true
 }
 
+/// @func holder_unheld(to, tossed, forced)
+/// @param {Id.Instance} to
+/// @param {Bool} tossed
+/// @param {Bool} forced
+/// @return {Bool}
+/// @context Thing
 holder_unheld = function (_to, _tossed, _forced) {
 	return true
 }
 
+/// @func holder_attach_holdable(holding)
+/// @param {Id.Instance} holding
+/// @context Thing
 holder_attach_holdable = function (_holding) {
 	_holding.set_position(x, y, z - height)
 }
 
+/// @func holdable_held(from, forced)
+/// @param {Id.Instance} from
+/// @param {Bool} forced
+/// @return {Bool}
+/// @context Thing
 holdable_held = function (_from, _forced) {
 	return true
 }
 
+/// @func holdable_unheld(from, tossed, forced)
+/// @param {Id.Instance} from
+/// @param {Bool} tossed
+/// @param {Bool} forced
+/// @return {Bool}
+/// @context Thing
 holdable_unheld = function (_from, _tossed, _forced) {
 	return true
 }
 
+/// @func interactor_triggered(to)
+/// @param {Id.Instance} to
+/// @return {Bool}
+/// @context Thing
 interactor_triggered = function (_to) {
 	return true
 }
 
+/// @func interactive_triggered(from)
+/// @param {Id.Instance} from
+/// @return {Bool}
+/// @context Thing
 interactive_triggered = function (_from) {
 	return true
 }
 
+/// @func hitscan_intercept(from, x1, y1, z1, x2, y2, z2, flags)
+/// @param {Id.Instance} from
+/// @param {Real} x1
+/// @param {Real} y1
+/// @param {Real} z1
+/// @param {Real} x2
+/// @param {Real} y2
+/// @param {Real} z2
+/// @param {Real} x1
+/// @return {Bool}
+/// @context Thing
 hitscan_intercept = function (_from, _x1, _y1, _z1, _x2, _y2, _z2, _flags) {
 	return true
 }
 
+/// @func thing_on_prop(from)
+/// @param {Id.Instance} from
+/// @context Thing
 thing_on_prop = function (_from) {}
 #endregion
 

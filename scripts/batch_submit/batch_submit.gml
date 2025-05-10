@@ -1,4 +1,3 @@
-/// @desc Submits the current batch, creating a new one.
 function batch_submit() {
 	var _batch_texture = global.batch_texture
 	

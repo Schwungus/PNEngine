@@ -1,3 +1,5 @@
+/// @param {Id.Buffer} buffer
+/// @param {Any} value
 function buffer_write_dynamic(_buffer, _value) {
 	var _type = net_typeof(_value)
 	

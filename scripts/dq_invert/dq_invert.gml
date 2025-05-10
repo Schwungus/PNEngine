@@ -1,3 +1,7 @@
+/// @func dq_invert(dq, [out])
+/// @param {Array<Real>} dq
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_invert(_dq1, _dq = dq_build_identity()) {
 	gml_pragma("forceinline")
 	

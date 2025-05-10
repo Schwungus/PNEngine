@@ -1,3 +1,9 @@
+/// @func quat_build_euler(x, y, z, [q])
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Array<Real>} [q]
+/// @return {Array<Real>}
 function quat_build_euler(_x, _y, _z, _q = quat_build()) {
 	gml_pragma("forceinline")
 	

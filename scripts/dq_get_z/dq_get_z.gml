@@ -1,3 +1,7 @@
+/// @func dq_get_z(dq)
+/// @desc Returns the Z position of a dual quaternion.
+/// @param {Array<Real>} dq
+/// @return {Real}
 function dq_get_z(_dq) {
 	gml_pragma("forceinline")
 	

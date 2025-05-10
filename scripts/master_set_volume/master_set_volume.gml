@@ -1,3 +1,4 @@
+/// @param {Real} volume
 function master_set_volume(_volume) {
 	gml_pragma("forceinline")
 	

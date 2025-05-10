@@ -1,6 +1,7 @@
 /// @func json_load(filename)
-/// @desc Parses the specified JSON file.
-/// @return A struct with the JSON's elements if successful, undefined otherwise.
+/// @desc Parses the specified JSON file and returns its data.
+/// @param {String} filename JSON file name.
+/// @return {Any}
 function json_load(_filename) {
 	if not file_exists(_filename) {
 		return undefined

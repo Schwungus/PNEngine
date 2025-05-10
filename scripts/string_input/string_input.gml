@@ -1,3 +1,7 @@
+/// @func string_input(verb, [player_index])
+/// @param {Enum.INPUT_VERB} verb
+/// @param {Real} player_index
+/// @return {String}
 function string_input(_verb, _player_index = 0) {
 	var _binding1 = InputIconGet(_verb, 0, _player_index)
 	var _binding2 = InputIconGet(_verb, 1, _player_index)

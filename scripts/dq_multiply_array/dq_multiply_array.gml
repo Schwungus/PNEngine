@@ -1,3 +1,10 @@
+/// @func dq_multiply_array(dq1, dq1_index, dq2, dq2_index, dest, dest_index)
+/// @param {Array<Real>} dq1
+/// @param {Real} dq1_index
+/// @param {Array<Real>} dq2
+/// @param {Real} dq2_index
+/// @param {Array<Real>} dest
+/// @param {Real} dest_index
 function dq_multiply_array(_dq1, _dq1_index, _dq2, _dq2_index, _dest, _dest_index) {
 	gml_pragma("forceinline")
 

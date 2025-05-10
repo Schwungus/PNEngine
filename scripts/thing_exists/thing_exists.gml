@@ -1,3 +1,6 @@
+/// @func thing_exists(thing)
+/// @param {Id.Instance} thing
+/// @return {Bool}
 function thing_exists(_thing) {
 	gml_pragma("forceinline")
 	

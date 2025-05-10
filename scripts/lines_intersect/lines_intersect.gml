@@ -1,3 +1,12 @@
+/// @param {Real} x1
+/// @param {Real} y1
+/// @param {Real} x2
+/// @param {Real} y2
+/// @param {Real} x3
+/// @param {Real} y3
+/// @param {Real} x4
+/// @param {Real} y4
+/// @return {Bool}
 function lines_intersect(_x1, _y1, _x2, _y2, _x3, _y3, _x4, _y4) {
 	// https://www.gmlscripts.com/script/lines_intersect
 	var _ux = _x2 - _x1

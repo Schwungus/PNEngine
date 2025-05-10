@@ -13,6 +13,13 @@ function SoundPool() constructor {
 	
 	ds_list_add(global.sound_pools, self)
 	
+	/// @param {Struct.Sound|Array<Struct.Sound>} sound
+	/// @param {Bool} [loop]
+	/// @param {Real} [offset]
+	/// @param {Real} [pitch]
+	/// @param {Real} [gain]
+	/// @return {Real|Undefined}
+	/// @context SoundPool
 	static play = function (_sound, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 		if _sound == undefined {
 			return undefined
@@ -51,6 +58,18 @@ function SoundPool() constructor {
 		return _instance
 	}
 	
+	/// @param {Struct.Sound|Array<Struct.Sound>} sound
+	/// @param {Real} x
+	/// @param {Real} y
+	/// @param {Real} z
+	/// @param {Real|Undefined} [falloff_min]
+	/// @param {Real|Undefined} [falloff_max]
+	/// @param {Bool} [loop]
+	/// @param {Real} [offset]
+	/// @param {Real} [pitch]
+	/// @param {Real} [gain]
+	/// @return {Real|Undefined}
+	/// @context SoundPool
 	static play_at = function (_sound, _x, _y, _z, _falloff_min = undefined, _falloff_max = undefined, _loop = false, _offset = 0, _pitch = 1, _gain = 1) {
 		static _dummy_vel = new FmodVector()
 		
@@ -100,6 +119,11 @@ function SoundPool() constructor {
 		return _instance
 	}
 	
+	/// @param {Real} slot
+	/// @param {Real} gain
+	/// @param {Real} [time]
+	/// @return {Real|Undefined}
+	/// @context SoundPool
 	static set_gain = function (_slot, _gain, _time = 0) {
 		gain_time[_slot] = 0
 		gain_duration[_slot] = _time

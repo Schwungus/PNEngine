@@ -1,4 +1,9 @@
 function AnimationMap() : AssetMap() constructor {
+	/// @func load(name)
+	/// @desc Loads an Animation from "animations/".
+	///       Extensions: .bbanim
+	/// @param {String} name Animation file name.
+	/// @context AnimationMap
 	static load = function (_name) {
 		if ds_map_exists(assets, _name) {
 			exit

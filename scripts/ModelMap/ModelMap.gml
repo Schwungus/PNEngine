@@ -1,6 +1,11 @@
 function ModelMap() : AssetMap() constructor {
 	queue = ds_map_create()
 	
+	/// @func load(name)
+	/// @desc Loads a Model from "models/" and its properties if a JSON file is found.
+	///       Extensions: .bbmod
+	/// @param {String} name Model file name.
+	/// @context ModelMap
 	static load = function (_name) {
 		if ds_map_exists(assets, _name) {
 			exit

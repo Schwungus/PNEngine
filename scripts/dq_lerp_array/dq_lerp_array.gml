@@ -1,3 +1,9 @@
+/// @func dq_lerp_array(dq1, dq2, amount, [out])
+/// @param {Array<Real>} dq1
+/// @param {Array<Real>} dq2
+/// @param {Real} amount
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_lerp_array(_dq1, _dq2, _amount, _dq = dq_build_identity()) {
 	gml_pragma("forceinline")
 	

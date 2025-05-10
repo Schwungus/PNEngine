@@ -1,4 +1,8 @@
 function MusicMap() : AssetMap() constructor {
+	/// @func load(name)
+	/// @desc Loads Music from "music/" and its properties if a JSON file is found.
+	/// @param {String} name Music file name.
+	/// @context MusicMap
 	static load = function (_name) {
 		static _no_metadata = {}
 		

@@ -1,3 +1,5 @@
+/// @func ui_top()
+/// @return {Struct.UI|Undefined}
 function ui_top() {
 	var _top = global.ui
 			

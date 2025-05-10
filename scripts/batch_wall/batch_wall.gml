@@ -1,3 +1,15 @@
+/// @func batch_wall(image, frame, width, height, x, y, z, angle, [color], [alpha])
+/// @desc Adds a wall to the batch.
+/// @param {Struct.__CollageImageClass|Undefined} image
+/// @param {Real} frame
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real} angle
+/// @param {Constant.Color} [color]
+/// @param {Real} [alpha]
 function batch_wall(_image, _frame, _width, _height, _x, _y, _z, _angle, _color = c_white, _alpha = 1) {
 	var _texture = _image.GetTexture(_frame)
 	

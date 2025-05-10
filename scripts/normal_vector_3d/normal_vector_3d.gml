@@ -1,3 +1,7 @@
+/// @func normal_vector_3d(yaw, pitch)
+/// @param {Real} yaw
+/// @param {Real} pitch
+/// @return {Array<Real>}
 function normal_vector_3d(_yaw, _pitch) {
 	gml_pragma("forceinline")
 	

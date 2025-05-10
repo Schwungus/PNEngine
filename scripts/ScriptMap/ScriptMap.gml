@@ -1,4 +1,7 @@
 function ScriptMap() : AssetMap() constructor {
+	/// @param {String} name
+	/// @param {Any} [special]
+	/// @context ScriptMap
 	static load = function (_name, _special = undefined) {
 		if ds_map_exists(assets, _name) {
 			with assets[? _name] {

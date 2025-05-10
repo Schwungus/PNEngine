@@ -1,3 +1,7 @@
+/// @func quat_dot(q1, q2)
+/// @param {Array<Real>} q1
+/// @param {Array<Real>} q2
+/// @return {Real}
 function quat_dot(_q1, _q2) {
 	gml_pragma("forceinline")
 	

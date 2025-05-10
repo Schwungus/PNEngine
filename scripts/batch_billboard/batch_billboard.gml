@@ -1,4 +1,15 @@
+/// @func batch_billboard(image, frame, width, height, x, y, z, [angle], [color], [alpha])
 /// @desc Adds a X/Y billboard image that faces the camera to the batch.
+/// @param {Struct.__CollageImageClass|Real} image
+/// @param {Real} frame
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real} [angle]
+/// @param {Constant.Color} [color]
+/// @param {Real} [alpha]
 function batch_billboard(_image, _frame, _width, _height, _x, _y, _z, _angle = 0, _color = c_white, _alpha = 1) {
 	var _blank = _image == -1
 	var _texture = _blank ? -1 : _image.GetTexture(_frame)

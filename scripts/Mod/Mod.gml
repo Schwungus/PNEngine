@@ -7,6 +7,10 @@ function Mod(_name) constructor {
 		show_error($"!!! Mod: '{_name}' not found", true)
 	}
 	
+	/// @param {String} [path]
+	/// @param {Id.Buffer|Undefined} [buffer]
+	/// @return {String}
+	/// @context Mod
 	static create_md5 = function (_path = path, _buffer = undefined) {
 		var _temp_buffer = _buffer == undefined
 		

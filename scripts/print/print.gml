@@ -2,7 +2,9 @@
 #macro show_debug_message print
 
 /// @func print(str, [values...])
-/// @desc Shows a debug message and prints it to the console log.
+/// @desc Prints a message to the console.
+/// @param {String|Any} str Value or string format to use for printing.
+/// @param {Any} [values...] Values to apply to a string format.
 function print(_str) {
 	static _values = []
 	static _init = false

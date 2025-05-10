@@ -1,3 +1,7 @@
+/// @func quat_multiply(q, [out])
+/// @param {Array<Real>} q
+/// @param {Array<Real>|Undefined} [out]
+/// @return {Array<Real>}
 function quat_up(_q1, _out = undefined) {
 	gml_pragma("forceinline")
 	

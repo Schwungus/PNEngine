@@ -1,3 +1,7 @@
+/// @func dq_get_x(dq)
+/// @desc Returns the X position of a dual quaternion.
+/// @param {Array<Real>} dq
+/// @return {Real}
 function dq_get_x(_dq) {
 	gml_pragma("forceinline")
 	

@@ -36,6 +36,10 @@ playcam_target = undefined
 #endregion
 
 #region Functions
+/// @func jump(speed)
+/// @desc Ungrounds the pawn and makes it jump.
+/// @param {Real} speed
+/// @context PlayerPawn
 jump = function (_spd) {
 	// GROSS HACK: Override the jump function so player input doesn't
 	//			   affect the specified speed
@@ -45,6 +49,8 @@ jump = function (_spd) {
 	jumped = false
 }
 
+/// @func do_jump()
+/// @context PlayerPawn
 do_jump = function () {
 	z_speed = jump_speed
 	floor_ray[RaycastData.HIT] = false
@@ -54,10 +60,14 @@ do_jump = function () {
 	catspeak_execute(player_jumped)
 }
 
+/// @func do_maneuver()
+/// @context PlayerPawn
 do_maneuver = function () {
 	catspeak_execute(player_maneuvered)
 }
 
+/// @func do_attack()
+/// @context PlayerPawn
 do_attack = function () {
 	if thing_exists(holding) and not holding.f_holdable_in_hand {
 		do_unhold(true)
@@ -68,6 +78,10 @@ do_attack = function () {
 	catspeak_execute(player_attacked)
 }
 
+/// @func get_state(key)
+/// @param {String} key
+/// @return {Any}
+/// @context PlayerPawn
 get_state = function (_key) {
 	gml_pragma("forceinline")
 	
@@ -78,6 +92,11 @@ get_state = function (_key) {
 	return player.get_state(_key)
 }
 
+/// @func get_state(key, value)
+/// @param {String} key
+/// @param {Any} value
+/// @return {Bool}
+/// @context PlayerPawn
 set_state = function (_key, _value) {
 	gml_pragma("forceinline")
 	
@@ -88,6 +107,10 @@ set_state = function (_key, _value) {
 	return player.set_state(_key, _value)
 }
 
+/// @func reset_state(key)
+/// @param {String} key
+/// @return {Any}
+/// @context PlayerPawn
 reset_state = function (_key) {
 	gml_pragma("forceinline")
 	
@@ -98,6 +121,9 @@ reset_state = function (_key) {
 	return player.reset_state(_key)
 }
 
+/// @func respawn()
+/// @return {Id.Instance}
+/// @context PlayerPawn
 respawn = function () {
 	gml_pragma("forceinline")
 	
@@ -110,6 +136,9 @@ respawn = function () {
 	return player.respawn()
 }
 
+/// @func is_local()
+/// @return {Bool}
+/// @context PlayerPawn
 is_local = function () {
 	gml_pragma("forceinline")
 	
@@ -122,27 +151,58 @@ is_local = function () {
 #endregion
 
 #region Virtual Functions
+/// @func try_jump()
+/// @return {Bool}
+/// @context PlayerPawn
 try_jump = function () {
 	return true
 }
 
+/// @func player_jumped()
+/// @context PlayerPawn
 player_jumped = function () {}
 
+/// @func try_maneuver()
+/// @return {Bool}
+/// @context PlayerPawn
 try_maneuver = function () {
 	return true
 }
 
+/// @func player_maneuvered()
+/// @context PlayerPawn
 player_maneuvered = function () {}
 
+/// @func try_attack()
+/// @return {Bool}
+/// @context PlayerPawn
 try_attack = function () {
 	return true
 }
 
+/// @func player_attacked()
+/// @context PlayerPawn
 player_attacked = function () {}
+
+/// @func player_aimed(target)
+/// @param {Id.Instance} target
+/// @context PlayerPawn
 player_aimed = function (_target) {}
+
+/// @func player_respawned()
+/// @context PlayerPawn
 player_respawned = function () {}
+
+/// @func player_create()
+/// @context PlayerPawn
 player_create = function () {}
+
+/// @func player_update()
+/// @context PlayerPawn
 player_update = function () {}
+
+/// @func player_update_camera()
+/// @context PlayerPawn
 player_update_camera = function () {}
 #endregion
 

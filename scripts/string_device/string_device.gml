@@ -1,3 +1,5 @@
+/// @param {Real} player_index
+/// @return {String}
 function string_device(_player_index) {
 	var _device = InputPlayerGetDevice(_player_index)
 	

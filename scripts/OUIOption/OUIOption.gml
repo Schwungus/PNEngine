@@ -1,8 +1,16 @@
+/// @param {String} name
+/// @param {Enum.OUIValues} values
+/// @param {Real} current
+/// @param {Function|Undefined} changed
+/// @param {Function|Undefined} disabled
 function OUIOption(_name, _values = OUIValues.UNDEFINED, _current = 0, _changed = undefined, _disabled = undefined) : OUIElement(_name, undefined, _disabled) constructor {
 	values = global.oui_values[_values]
 	current_value = _current
 	changed = _changed
 	
+	/// @param {Real} dir
+	/// @return {Bool}
+	/// @context OUIElement
 	static selected = function (_dir) {
 		if _dir != 0 {
 			var n = array_length(values)

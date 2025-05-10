@@ -10,6 +10,8 @@ enum NetDataTypes {
 	STRUCT,
 }
 
+/// @param {Any} value
+/// @return {Enum.NetDataTypes}
 function net_typeof(_value) {
 	switch typeof(_value) {
 		default:

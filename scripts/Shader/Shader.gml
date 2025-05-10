@@ -6,6 +6,9 @@ function Shader(_shader) constructor {
 	shader = _shader
 	uniforms = ds_list_create()
 	
+	/// @func set()
+	/// @desc Sets as the current shader.
+	/// @context Shader
 	static set = function () {
 		shader_set(shader)
 		global.current_shader = self

@@ -1,4 +1,3 @@
-/// @desc Applies the user config's values to the game.
 function config_update() {
 	gml_pragma("forceinline")
 	

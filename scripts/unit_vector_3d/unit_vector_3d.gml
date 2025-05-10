@@ -1,3 +1,8 @@
+/// @func unit_vector_3d(x, y, z)
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @return {Array<Real>}
 function unit_vector_3d(_x, _y, _z) {
 	gml_pragma("forceinline")
 	

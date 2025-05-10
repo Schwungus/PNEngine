@@ -1,3 +1,7 @@
+/// @func dq_normalize(dq, [out])
+/// @param {Array<Real>} dq
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_normalize(_dq1, _dq = dq_build_identity()) {
 	gml_pragma("forceinline")
 	

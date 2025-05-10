@@ -16,6 +16,10 @@ function Player() constructor {
 	input = array_create(PlayerInputs.__SIZE, 0)
 	input_previous = array_create(PlayerInputs.__SIZE, 0)
 	
+	/// @func respawn()
+	/// @desc Spawns or respawns a player in their current area.
+	/// @return {Id.Instance} Player pawn instance (noone if unsuccessful).
+	/// @context Player
 	static respawn = function () {
 		if status != PlayerStatus.ACTIVE or area == undefined {
 			return noone
@@ -124,6 +128,12 @@ function Player() constructor {
 		return noone
 	}
 	
+	/// @func set_area(id, [tag])
+	/// @desc Moves the player to the specified area.
+	/// @param {Real|Undefined} area Area ID.
+	/// @param {Real|Enum.ThingTags} [tag] Thing tag to use for entrance points.
+	/// @return {Bool} Successful or not.
+	/// @context Player
 	static set_area = function (_id, _tag = ThingTags.NONE) {
 		/* Move away from the current area.
 		
@@ -220,16 +230,33 @@ function Player() constructor {
 		return true
 	}
 	
+	/// @func get_state(key)
+	/// @desc Gets a player's state.
+	/// @param {String} key
+	/// @return {Any}
+	/// @context Player
 	static get_state = function (_key) {
 		return states[? _key]
 	}
 	
+	/// @func set_state(key, value)
+	/// @desc Sets a player's state.
+	/// @param {String} key
+	/// @param {Any} value
+	/// @return {Bool} Successful or not.
+	/// @context Player
 	static set_state = function (_key, _value) {
 		states[? _key] = _value
 		
 		return true
 	}
 	
+	/// @func reset_state(key)
+	/// @desc Resets a player's state.
+	///       If specified by mod properties, some states will be set back to their default value.
+	/// @param {String} key
+	/// @return {Any} The default value (undefined if none).
+	/// @context Player
 	static reset_state = function (_key) {
 		var _default = global.default_states[? _key]
 		
@@ -238,6 +265,11 @@ function Player() constructor {
 		return _default
 	}
 	
+	/// @func clear_states()
+	/// @desc Clears all of the player's states.
+	///       If specified by mod properties, some states will be set back to their default value.
+	/// @return {Bool} Successful or not.
+	/// @context Player
 	static clear_states = function () {
 		ds_map_clear(states)
 		states[? "invincible"] = false
@@ -255,6 +287,8 @@ function Player() constructor {
 		return true
 	}
 	
+	/// @param {Id.Buffer} buffer
+	/// @context Player
 	static write_states = function (_buffer) {
 		var n = ds_map_size(states)
 		
@@ -269,6 +303,8 @@ function Player() constructor {
 		}
 	}
 	
+	/// @param {Id.Buffer} buffer
+	/// @context Player
 	static read_states = function (_buffer) {
 		clear_states()
 		
@@ -282,12 +318,20 @@ function Player() constructor {
 		}
 	}
 	
+	/// @func is_local()
+	/// @desc Checks if the player is occupied by the local client.
+	/// @return {Bool}
+	/// @context Player
 	static is_local = function () {
 		gml_pragma("forceinline")
 		
 		return true
 	}
 	
+	/// @func get_name()
+	/// @desc Gets the name of the player.
+	/// @return {String} The player's name ("Player #" if not online).
+	/// @context Player
 	static get_name = function () {
 		gml_pragma("forceinline")
 		

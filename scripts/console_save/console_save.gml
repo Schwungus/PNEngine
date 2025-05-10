@@ -1,6 +1,6 @@
-/// @func console_save(prefix, [context])
-/// @desc Saves the console log to a text file with a prefix and optional context.
-/// @return {String} The filename.
+/// @desc {String} prefix
+/// @desc {String} [context]
+/// @return {String}
 function console_save(_prefix, _context = "") {
 	var _filename = $"{_prefix}_{date_datetime_string(date_current_datetime())}.txt"
 	

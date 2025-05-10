@@ -133,7 +133,7 @@ switch load_state {
 				if is_string(_music_tracks) {
 					_level.music = [_music_tracks]
 				} else if is_array(_music_tracks) {
-					i = 0
+					var i = 0
 					
 					repeat array_length(_music_tracks) {
 						var _track = _music_tracks[i]
@@ -475,8 +475,7 @@ switch load_state {
 								
 								switch force_type(_dsp[$ "type"], "string") {
 									case "echo": {
-										var _dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.ECHO)
-										
+										_dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.ECHO)
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.DELAY, force_type_fallback(_dsp[$ "delay"], "number", 500))
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.FEEDBACK, force_type_fallback(_dsp[$ "feedback"], "number", 50))
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_ECHO.WETLEVEL, force_type_fallback(_dsp[$ "wet"], "number", 0))
@@ -486,8 +485,7 @@ switch load_state {
 									}
 									
 									case "reverb": {
-										var _dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.SFXREVERB)
-										
+										_dref = fmod_system_create_dsp_by_type(FMOD_DSP_TYPE.SFXREVERB)
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.DECAYTIME, force_type_fallback(_dsp[$ "decay"], "number", 1500))
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.EARLYDELAY, force_type_fallback(_dsp[$ "early_delay"], "number", 20))
 										fmod_dsp_set_parameter_float(_dref, FMOD_DSP_SFXREVERB.LATEDELAY, force_type_fallback(_dsp[$ "late_delay"], "number", 40))
@@ -538,7 +536,7 @@ switch load_state {
 		
 		_images.end_batch()
 		
-		var _mdlShadow = _models.get("mdlShadow")
+		var _mdlShadow = global.models.get("mdlShadow")
 		
 		global.shadow_vbo = _mdlShadow != undefined ? _mdlShadow.submodels[0].vbo : undefined
 		load_state = LoadStates.FINISH
@@ -639,8 +637,7 @@ switch load_state {
 			var n = ds_map_size(_mods)
 			
 			buffer_write(_demo_buffer, buffer_u32, n)
-			
-			var _key = ds_map_find_first(_mods)
+			_key = ds_map_find_first(_mods)
 			
 			repeat n {
 				buffer_write(_demo_buffer, buffer_string, _key)
@@ -876,7 +873,7 @@ if _tick >= 1 {
 	
 	// Handle player activations by injecting into the tick buffer
 	if not _playing_demo and InputPartyGetJoin() {
-		var i = 0
+		i = 0
 		
 		repeat MAX_PLAYERS {
 			var _status = InputPlayerGetStatus(i)
@@ -884,8 +881,7 @@ if _tick >= 1 {
 			if (_status == INPUT_PLAYER_STATUS.NEWLY_CONNECTED or _status == INPUT_PLAYER_STATUS.CONNECTED) {
 				with _players[i] {
 					if not input_active {
-						var _tick_buffer = inject_tick_packet()
-						
+						inject_tick_packet()
 						buffer_write(_tick_buffer, buffer_u8, TickPackets.ACTIVATE)
 						buffer_write(_tick_buffer, buffer_u8, i)
 						input_active = true
@@ -894,8 +890,7 @@ if _tick >= 1 {
 			} else if (_status == INPUT_PLAYER_STATUS.NEWLY_DISCONNECTED or _status == INPUT_PLAYER_STATUS.DISCONNECTED) {
 				with _players[i] {
 					if input_active {
-						var _tick_buffer = inject_tick_packet()
-						
+						inject_tick_packet()
 						buffer_write(_tick_buffer, buffer_u8, TickPackets.DEACTIVATE)
 						buffer_write(_tick_buffer, buffer_u8, i)
 						input_active = false
@@ -1140,7 +1135,7 @@ if _tick >= 1 {
 			
 			InputManualUpdate()
 			mouse_dx = 0
-			mouse_dy = 0
+			mouse_dy = 0;
 			--_game_tick
 			
 			continue
@@ -1250,7 +1245,9 @@ if _tick >= 1 {
 						var _checksum = 0
 						
 						with Thing {
-							_checksum += 1 + floor(x) + floor(y) + floor(z)
+							if not f_desync {
+								_checksum += 1 + floor(x) + floor(y) + floor(z)
+							}
 						}
 						
 						buffer_write(_tick_buffer, buffer_u8, TickPackets.CHECKSUM)
@@ -1509,7 +1506,7 @@ if _tick >= 1 {
 		
 		InputManualUpdate()
 		mouse_dx = 0
-		mouse_dy = 0
+		mouse_dy = 0;
 		--_game_tick
 	}
 #endregion

@@ -1,6 +1,8 @@
-/// @func thing_load(type)
-/// @desc Loads a type of Thing for use in the current level.
-/// @param {(Asset.GMObject|string)} type The type of Thing to load.
+/// @func thing_load(type, [special])
+/// @desc Loads a type of Thing.
+/// @param {Asset.GMObject|String} type Thing type.
+/// @param {Any} [special] Custom properties to specify while loading.
+/// @return {Bool} Whether or not the Thing was successfully loaded.
 function thing_load(_type, _special = undefined) {
 	if is_string(_type) {
 		var _scripts = global.scripts

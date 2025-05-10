@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_md5(_args) {
 	var _parse_args = string_split(_args, " ", true)
 	var n = array_length(_parse_args)

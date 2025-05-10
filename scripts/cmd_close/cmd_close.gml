@@ -1,3 +1,4 @@
+/// @param {String} args
 function cmd_close(_args) {
 	InputSetHotswap(not InputPartyGetJoin())
 	global.console = false

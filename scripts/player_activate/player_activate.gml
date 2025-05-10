@@ -1,3 +1,6 @@
+/// @param {Struct.Player} player
+/// @param {Bool} [loud]
+/// @return {Bool}
 function player_activate(_scope, _loud = true) {
 	with _scope {
 		if status == PlayerStatus.INACTIVE {

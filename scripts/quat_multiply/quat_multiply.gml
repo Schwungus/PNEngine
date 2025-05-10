@@ -1,3 +1,8 @@
+/// @func quat_multiply(q1, q2, [q])
+/// @param {Array<Real>} q1
+/// @param {Array<Real>} q2
+/// @param {Array<Real>} [q]
+/// @return {Array<Real>}
 function quat_multiply(_q1, _q2, _q = quat_build()) {
 	var _ax = _q1[0]
 	var _ay = _q1[1]

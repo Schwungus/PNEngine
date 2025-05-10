@@ -1,3 +1,8 @@
+/// @func dq_build_matrix(matrix, [dq])
+/// @desc Creates a dual quaternion from a matrix.
+/// @param {Array<Real>} matrix
+/// @param {Array<Real>} [dq]
+/// @return {Array<Real>}
 function dq_build_matrix(_matrix, _dq = dq_build_identity()) {	
 	// Source: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 	var t = 1 + _matrix[0] + _matrix[5] + _matrix[10]

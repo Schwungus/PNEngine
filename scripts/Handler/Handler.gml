@@ -2,6 +2,11 @@ function Handler(_handler_script) constructor {
 	handler_script = _handler_script
 	
 #region Functions
+	/// @func find(name)
+	/// @desc Finds a Handler.
+	/// @param {String} name Handler name.
+	/// @return {Struct.Handler|Undefined}
+	/// @context Handler
 	static find = function (_name) {
 		gml_pragma("forceinline")
 		

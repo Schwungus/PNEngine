@@ -1,6 +1,18 @@
+/// @func batch_trail(points, [image], [frame], [color1], [color2], [alpha1], [alpha2])
+/// @desc Adds a trail to the batch.
+///       
+///       Each point in the points array consists of the following data:
+///       x, y, z, nx, ny, nz, thickness, alpha
+///       
+///       If the array is not divisible by 8, this function will exit.
+/// @param {Array<Real>} points
+/// @param {Struct.__CollageImageClass|Real} [image]
+/// @param {Real} [frame]
+/// @param {Constant.Color} [color1]
+/// @param {Constant.Color} [color2]
+/// @param {Real} [alpha1]
+/// @param {Real} [alpha2]
 function batch_trail(_points, _image = -1, _frame = 0, _color1 = c_white, _color2 = c_white, _alpha1 = 1, _alpha2 = 0) {
-	// Each point in the given array consists of the following array elements:
-	// x, y, z, nx, ny, nz, thickness, alpha
 	var n = array_length(_points) div 8
 	
 	if n <= 1 {

@@ -1,4 +1,6 @@
-// @desc Creates a dual quaternion without any transformations.
+/// @func dq_build_identity()
+/// @desc Creates a dual quaternion without any transformations.
+/// @return {Array<Real>}
 function dq_build_identity() {
 	gml_pragma("forceinline")
 	

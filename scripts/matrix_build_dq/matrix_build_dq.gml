@@ -1,4 +1,8 @@
-function matrix_build_dq(_dq, _matrix = matrix_build_identity())  {
+/// @func matrix_build_dq(dq, [matrix])
+/// @param {Array<Real>} dq
+/// @param {Array<Real>} [matrix]
+/// @return {Array<Real>}
+function matrix_build_dq(_dq, _matrix = matrix_build_identity()) {
 	gml_pragma("forceinline")
 	
 	var q0 = _dq[0]

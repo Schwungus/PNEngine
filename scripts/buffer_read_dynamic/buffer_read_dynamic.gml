@@ -1,3 +1,5 @@
+/// @param {Id.Buffer} buffer
+/// @return {Any}
 function buffer_read_dynamic(_buffer) {
 	switch buffer_read(_buffer, buffer_u8) {
 		default:

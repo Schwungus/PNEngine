@@ -1,4 +1,16 @@
-/// @desc Adds a line that faces the camera to the batch.
+/// @func batch_line(image, frame, x1, y1, z1, x2, y2, z2, radius, [color], [alpha])
+/// @desc Adds a textured line to the batch.
+/// @param {Struct.__CollageImageClass|Real} image
+/// @param {Real} frame
+/// @param {Real} x1
+/// @param {Real} y1
+/// @param {Real} z1
+/// @param {Real} x2
+/// @param {Real} y2
+/// @param {Real} z2
+/// @param {Real} radius
+/// @param {Constant.Color} [color]
+/// @param {Real} [alpha]
 function batch_line(_image, _frame, _x1, _y1, _z1, _x2, _y2, _z2, _radius, _color = c_white, _alpha = 1) {
 	var _blank = _image == -1
 	var _texture = _blank ? -1 : _image.GetTexture(_frame)

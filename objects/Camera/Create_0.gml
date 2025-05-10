@@ -106,6 +106,9 @@ with listener_up {
 #endregion
 
 #region Functions
+/// @func resolve()
+/// @return {Id.Instance}
+/// @context Camera
 resolve = function () {
 	var _camera_active = global.camera_active
 	
@@ -120,6 +123,14 @@ resolve = function () {
 	return self
 }
 
+/// @func add_target(target, [range], [x_offset], [y_offset], [z_offset])
+/// @param {Id.Instance|Array<Real>} target
+/// @param {Real} range
+/// @param {Real} x_offset
+/// @param {Real} y_offset
+/// @param {Real} z_offset
+/// @return {Array<Real>}
+/// @context Camera
 add_target = function (_target, _range = 100, _x_offset = 0, _y_offset = 0, _z_offset = 0) {
 	var _target_data = [_range, _x_offset, _y_offset, _z_offset]
 		
@@ -128,6 +139,10 @@ add_target = function (_target, _range = 100, _x_offset = 0, _y_offset = 0, _z_o
 	return _target_data
 }
 
+/// @func delete_target(target)
+/// @param {Id.Instance|Array<Real>} target
+/// @return {Array<Real>}
+/// @context Camera
 delete_target = function (_target) {
 	if _target == all {
 		ds_map_clear(targets)
@@ -136,6 +151,8 @@ delete_target = function (_target) {
 	}
 }
 
+/// @func update_targets()
+/// @context Camera
 update_targets = function () {
 	var _targets = ds_map_size(targets)
 	
@@ -219,6 +236,8 @@ update_targets = function () {
 	}
 }
 
+/// @func update_pois()
+/// @context Camera
 update_pois = function () {
 	var _pois = ds_map_size(pois)
 	
@@ -268,6 +287,14 @@ update_pois = function () {
 	}
 }
 
+/// @func add_poi(target, [lerp], [x_offset], [y_offset], [z_offset])
+/// @param {Id.Instance|Array<Real>} target
+/// @param {Real} lerp
+/// @param {Real} x_offset
+/// @param {Real} y_offset
+/// @param {Real} z_offset
+/// @return {Array<Real>}
+/// @context Camera
 add_poi = function (_target, _lerp = 1, _x_offset = 0, _y_offset = 0, _z_offset = 0) {
 	var _poi_data = [_lerp, _x_offset, _y_offset, _z_offset]
 	
@@ -276,6 +303,9 @@ add_poi = function (_target, _lerp = 1, _x_offset = 0, _y_offset = 0, _z_offset 
 	return _poi_data
 }
 
+/// @func delete_poi(target)
+/// @param {Id.Instance|Array<Real>} target
+/// @context Camera
 delete_poi = function (_target) {
 	if _target == all {
 		ds_map_clear(pois)
@@ -284,6 +314,17 @@ delete_poi = function (_target) {
 	}
 }
 
+/// @func add_path(time, x, y, z, yaw, pitch, roll, fov)
+/// @param {Id.Instance|Array<Real>} target
+/// @param {Real} time
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @param {Real} yaw
+/// @param {Real} pitch
+/// @param {Real} roll
+/// @param {Real} fov
+/// @context Camera
 add_path = function (_time, _x, _y, _z, _yaw, _pitch, _roll, _fov) {
 	gml_pragma("forceinline")
 	
@@ -300,11 +341,19 @@ add_path = function (_time, _x, _y, _z, _yaw, _pitch, _roll, _fov) {
 	path[# i, CameraPathData.FOV] = _fov
 }
 
+/// @func clear_path()
+/// @context Camera
 clear_path = function () {
 	ds_grid_resize(path, 0, CameraPathData.__SIZE)
 	stop_path()
 }
 
+/// @func start_path(time, [quadratic], [loop])
+/// @param {Real} time
+/// @param {Bool} quadratic
+/// @param {Bool} loop
+/// @return {Bool}
+/// @context Camera
 start_path = function (_time, _quadratic = false, _loop = false) {
 	if ds_grid_width(path) == 0 {
 		return false
@@ -329,10 +378,16 @@ start_path = function (_time, _quadratic = false, _loop = false) {
 	return true
 }
 
+/// @func stop_path()
+/// @context Camera
 stop_path = function () {
 	path_active = false
 }
 
+/// @func lerp_from_self(time, [type])
+/// @param {Real} time
+/// @param {Enum.CameraLerpTypes} type
+/// @context Camera
 lerp_from_self = function (_time, _type = CameraLerpTypes.LINEAR) {
 	lerp_x = sx
 	lerp_y = sy
@@ -346,6 +401,11 @@ lerp_from_self = function (_time, _type = CameraLerpTypes.LINEAR) {
 	lerp_type = _type
 }
 
+/// @func lerp_from(camera, time, [type])
+/// @param {Id.Instance} camera
+/// @param {Real} time
+/// @param {Enum.CameraLerpTypes} type
+/// @context Camera
 lerp_from = function (_camera, _time, _type = CameraLerpTypes.LINEAR) {
 	lerp_x = _camera.sx
 	lerp_y = _camera.sy
@@ -358,7 +418,10 @@ lerp_from = function (_camera, _time, _type = CameraLerpTypes.LINEAR) {
 	lerp_duration = _time
 	lerp_type = _type
 }
-	
+
+/// @func set_child(camera)
+/// @param {Id.Instance} camera
+/// @context Camera
 set_child = function (_camera) {
 	if thing_exists(child) {
 		child.parent = noone
@@ -371,6 +434,10 @@ set_child = function (_camera) {
 	}
 }
 
+/// @func set_active(active)
+/// @param {Bool} active
+/// @return {Bool}
+/// @context Camera
 set_active = function (_bool) {
 	if _bool {
 		global.camera_active = self
@@ -387,6 +454,11 @@ set_active = function (_bool) {
 	return false
 }
 
+/// @func update_matrices([width], [height], [update_listener])
+/// @param {Real} [width]
+/// @param {Real} [height]
+/// @param {Bool} [update_listener]
+/// @context Camera
 update_matrices = function (_width = window_get_width(), _height = window_get_height(), _update_listener = false) {
 	var _matrix = matrix_build(0, 0, 0, sroll, spitch, syaw, 1, 1, 1)
 	
@@ -425,6 +497,12 @@ update_matrices = function (_width = window_get_width(), _height = window_get_he
 	}
 }
 
+/// @func world_to_screen(x, y, z)
+/// @param {Real} x
+/// @param {Real} y
+/// @param {Real} z
+/// @return {Array<Real>|Undefined}
+/// @context Camera
 world_to_screen = function (_x, _y, _z) {
 	static _pos = array_create(2)
 	
@@ -444,6 +522,11 @@ world_to_screen = function (_x, _y, _z) {
 	return _pos
 }
 
+/// @func depth_from_world(x, y)
+/// @param {Real} x
+/// @param {Real} y
+/// @return {Constant.Color}
+/// @context Camera
 depth_from_world = function (_x, _y) {
 	var _canvases = global.canvases
 	var _surface = _canvases[Canvases.WORLD].GetSurfaceID()
@@ -472,6 +555,15 @@ depth_from_world = function (_x, _y) {
 	return _depth_canvas.GetPixel(floor(_x), floor(_y))
 }
 
+/// @func render(width, height, [update_listener], [allow_sky], [allow_screen], [world_shader])
+/// @param {Real} width
+/// @param {Real} height
+/// @param {Bool} [update_listener]
+/// @param {Bool} [allow_sky]
+/// @param {Bool} [allow_screen]
+/// @param {Struct.Shader|Undefined} [world_shader]
+/// @return {Struct.Canvas}
+/// @context Camera
 render = function (_width, _height, _update_listener = false, _allow_sky = true, _allow_screen = true, _world_shader = undefined) {
 	++global.camera_layer
 	

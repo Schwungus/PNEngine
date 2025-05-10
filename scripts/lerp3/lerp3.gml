@@ -1,3 +1,10 @@
+/// @func lerp3(a, b, c, amount)
+/// @desc Lerps through 3 points.
+/// @param {Real} a
+/// @param {Real} b
+/// @param {Real} c
+/// @param {Real} amount
+/// @return {Real}
 function lerp3(_val1, _val2, _val3, _amount) {
 	gml_pragma("forceinline")
 	

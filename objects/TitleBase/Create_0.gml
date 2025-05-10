@@ -13,6 +13,11 @@ locked = false
 save_data = []
 
 #region Constructors
+/// @func TitleMenu(name, options, select_disabled)
+/// @param {String} name
+/// @param {Array<Any>} options
+/// @param {Bool} select_disabled
+/// @context TitleBase
 function TitleMenu(_name, _options, _select_disabled) constructor {
 	name = _name
 	options = _options
@@ -21,12 +26,20 @@ function TitleMenu(_name, _options, _select_disabled) constructor {
 	select_disabled = _select_disabled
 }
 
+/// @func TitleOption(name, function, disabled)
+/// @param {String} name
+/// @param {Function|Undefined} function
+/// @param {Bool} disabled
+/// @context TitleBase
 function TitleOption(_name, _function, _disabled) constructor {
 	name = _name
 	func = _function
 	disabled = _disabled
 }
 
+/// @func TitleSave(save)
+/// @param {Struct.Save} save
+/// @context TitleBase
 function TitleSave(_save) constructor {
 	name = _save.name
 	code = _save.code
@@ -38,10 +51,22 @@ function TitleSave(_save) constructor {
 #endregion
 
 #region Functions
+/// @func add_menu(name, [options], [select_disabled])
+/// @param {String} name
+/// @param {Array<Any>} [options]
+/// @param {bool} [select_disabled]
+/// @return {Struct.TitleMenu}
+/// @context TitleBase
 add_menu = function (_name, _options = [], _select_disabled = false) {
 	return new TitleMenu(_name, _options, _select_disabled)
 }
 
+/// @func add_option(name, [function], [disabled])
+/// @param {String} name
+/// @param {Function|Enum.TitleOptions|Undefined} [function]
+/// @param {bool} [disabled]
+/// @return {Struct.TitleOption}
+/// @context TitleBase
 add_option = function (_name, _function = undefined, _disabled = false) {
 	if _function == TitleOptions.DELETE_FILE {
 		_disabled = not array_length(save_data)
@@ -50,6 +75,11 @@ add_option = function (_name, _function = undefined, _disabled = false) {
 	return new TitleOption(_name, _function, _disabled)
 }
 
+/// @func set_menu(menu, [allow_return])
+/// @param {Struct.TitleMenu} menu
+/// @param {Bool} [allow_return]
+/// @return {Bool}
+/// @context TitleBase
 set_menu = function (_menu, _allow_return = true) {
 	if _menu != undefined and not global.title_delete_state {
 		with _menu {
@@ -80,6 +110,12 @@ set_menu = function (_menu, _allow_return = true) {
 	return false
 }
 
+/// @func goto(level, area, tag, transition)
+/// @param {String} level
+/// @param {Real} area
+/// @param {Real} tag
+/// @param {Asset.GMObject|String} transition
+/// @context TitleBase
 goto = function (_level, _area, _tag, _transition) {
 	// This is a safe method for entering a level through the title.
 	global.level.goto(_level, _area, _tag, _transition)
@@ -88,8 +124,20 @@ goto = function (_level, _area, _tag, _transition) {
 
 #region Virtual Functions
 change_menu = function (_previous) {}
+
+/// @func change_option(previous)
+/// @param {Real} previous
+/// @context TitleBase
 change_option = function (_previous) {}
+
+/// @func change_delete_state(state)
+/// @param {Real} state
+/// @context TitleBase
 change_delete_state = function (_state) {}
+
+/// @func exit_title(option)
+/// @param {Real} option
+/// @context TitleBase
 exit_title = function (_option) {}
 #endregion
 

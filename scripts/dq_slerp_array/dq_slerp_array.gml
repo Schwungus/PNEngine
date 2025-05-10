@@ -1,3 +1,9 @@
+/// @func dq_slerp_array(dq1, dq2, amount, [out])
+/// @param {Array<Real>} dq1
+/// @param {Array<Real>} dq2
+/// @param {Real} amount
+/// @param {Array<Real>} [out]
+/// @return {Array<Real>}
 function dq_slerp_array(_dq1, _dq2, _amount, _dq = dq_build_identity()) {
 	var i = 0
 	

@@ -1,3 +1,9 @@
+/// @func ui_create(type, [special], [replace])
+/// @desc Creates a new UI.
+/// @param {Function.UI|String} type UI type.
+/// @param {Any} [special] Custom properties for special behaviour.
+/// @param {Bool} [replace] Whether or not this UI replaces the current root UI.
+/// @return {Struct.UI|Undefined} New UI (undefined if unsuccessful).
 function ui_create(_type, _special = undefined, _replace = true) {
 	if _replace {
 		var _ui = global.ui
