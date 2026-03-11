@@ -32,7 +32,7 @@ The curve shader is from **[Mors](https://mors-games.com/)**' [Super Mario 64 Pl
 ### Special Thanks
 
 - **[Alynne Keith](https://offalynne.neocities.org)**, **[Juju Adams](https://www.jujuadams.com)** and **[Co](https://offalynne.github.io/Input/#/6.0/Credits)** for [Input](https://github.com/offalynne/Input)
-- **Jaydex**, **[NiK0](https://github.com/NiKled)**, **[nonk](https://nonk.dev)**, **[Sable](https://github.com/circuitsable)**, **Soh** and **[TabularElf](https://tabularelf.com)** for beta testing
+- **Jaydex**, **[Lucky](https://github.com/hluky)**, **[nonk](https://nonk.dev)**, **[Sable](https://github.com/circuitsable)**, **Soh** and **[TabularElf](https://tabularelf.com)** for beta testing
 - **[Juju Adams](https://www.jujuadams.com)** for [Scribble](https://github.com/JujuAdams/Scribble)
 - **[katsaii](https://www.katsaii.com)** for [Catspeak](https://www.katsaii.com/catspeak-lang)
 - **[Nikita Krapivin](https://github.com/nkrapivin)** for [NekoPresence](https://github.com/nkrapivin/NekoPresence)
